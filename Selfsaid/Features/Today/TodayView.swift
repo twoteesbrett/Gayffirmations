@@ -1,10 +1,14 @@
 import SwiftUI
 
 struct TodayView: View {
+    let store: AffirmationStore
     @State private var deck: AffirmationDeck
 
-    init(affirmations: [Affirmation] = Affirmation.samples) {
-        _deck = State(initialValue: AffirmationDeck(affirmations: affirmations))
+    init(store: AffirmationStore) {
+        self.store = store
+        _deck = State(
+            initialValue: AffirmationDeck(affirmations: store.affirmations)
+        )
     }
 
     var body: some View {
@@ -33,6 +37,9 @@ struct TodayView: View {
             navigationControls
         }
         .padding()
+        .onChange(of: store.affirmations) { _, updatedAffirmations in
+            deck.replaceAffirmations(with: updatedAffirmations)
+        }
     }
 
     private var navigationControls: some View {
@@ -52,9 +59,9 @@ struct TodayView: View {
 }
 
 #Preview("With affirmations") {
-    TodayView()
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
 }
 
 #Preview("Empty") {
-    TodayView(affirmations: [])
+    TodayView(store: AffirmationStore())
 }

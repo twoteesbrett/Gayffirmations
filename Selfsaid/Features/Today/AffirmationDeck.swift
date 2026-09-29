@@ -31,4 +31,21 @@ struct AffirmationDeck {
 
         currentIndex = (currentIndex - 1 + affirmations.count) % affirmations.count
     }
+
+    mutating func replaceAffirmations(with updatedAffirmations: [Affirmation]) {
+        let currentID = currentAffirmation?.id
+        affirmations = updatedAffirmations
+
+        guard !affirmations.isEmpty else {
+            currentIndex = 0
+            return
+        }
+
+        if let currentID,
+           let updatedIndex = affirmations.firstIndex(where: { $0.id == currentID }) {
+            currentIndex = updatedIndex
+        } else {
+            currentIndex = min(currentIndex, affirmations.count - 1)
+        }
+    }
 }

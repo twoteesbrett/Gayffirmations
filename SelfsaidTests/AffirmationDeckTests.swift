@@ -62,4 +62,27 @@ struct AffirmationDeckTests {
         #expect(!singleAffirmationDeck.canNavigate)
         #expect(multipleAffirmationDeck.canNavigate)
     }
+
+    @Test("Replacing affirmations keeps the current selection when possible")
+    func replaceAffirmationsKeepsSelection() {
+        var deck = AffirmationDeck(affirmations: affirmations)
+        deck.showNext()
+
+        var updatedAffirmations = affirmations
+        updatedAffirmations[1].text = "Updated second"
+        deck.replaceAffirmations(with: updatedAffirmations)
+
+        #expect(deck.currentAffirmation?.id == affirmations[1].id)
+        #expect(deck.currentAffirmation?.text == "Updated second")
+    }
+
+    @Test("Replacing affirmations chooses a safe selection after deletion")
+    func replaceAffirmationsAfterDeletion() {
+        var deck = AffirmationDeck(affirmations: affirmations)
+        deck.showPrevious()
+
+        deck.replaceAffirmations(with: Array(affirmations.prefix(2)))
+
+        #expect(deck.currentAffirmation?.id == affirmations[1].id)
+    }
 }

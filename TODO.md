@@ -12,13 +12,13 @@ Work from top to bottom, keeping the app runnable after each milestone.
 
 ## 2. Affirmation library
 
-- [ ] Display all affirmations in a library screen.
-- [ ] Add an affirmation.
-- [ ] Edit an affirmation.
-- [ ] Delete an affirmation.
-- [ ] Toggle favorite status.
-- [ ] Reject blank affirmation text.
-- [ ] Test add, edit, delete, favorite, and validation behavior.
+- [x] Display all affirmations in a library screen.
+- [x] Add an affirmation.
+- [x] Edit an affirmation.
+- [x] Delete an affirmation.
+- [x] Toggle favorite status.
+- [x] Reject blank affirmation text.
+- [x] Test add, edit, delete, favorite, and validation behavior.
 
 ## 3. Daily schedule logic
 
