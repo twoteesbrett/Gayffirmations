@@ -4,6 +4,7 @@ struct LibraryView: View {
     let store: AffirmationStore
 
     @State private var editorDestination: EditorDestination?
+    @State private var persistenceErrorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -29,6 +30,14 @@ struct LibraryView: View {
             .sheet(item: $editorDestination) { destination in
                 editor(for: destination)
             }
+            .alert(
+                "Unable to Save",
+                isPresented: persistenceErrorIsPresented
+            ) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(persistenceErrorMessage ?? "Please try again.")
+            }
         }
     }
 
@@ -43,7 +52,9 @@ struct LibraryView: View {
                     }
 
                 Button {
-                    store.toggleFavorite(id: affirmation.id)
+                    performPersistedChange {
+                        try store.toggleFavorite(id: affirmation.id)
+                    }
                 } label: {
                     Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
                         .foregroundStyle(affirmation.isFavorite ? .red : .secondary)
@@ -61,9 +72,30 @@ struct LibraryView: View {
             }
             .swipeActions(edge: .trailing) {
                 Button("Delete", systemImage: "trash", role: .destructive) {
-                    store.delete(id: affirmation.id)
+                    performPersistedChange {
+                        try store.delete(id: affirmation.id)
+                    }
                 }
             }
+        }
+    }
+
+    private var persistenceErrorIsPresented: Binding<Bool> {
+        Binding(
+            get: { persistenceErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    persistenceErrorMessage = nil
+                }
+            }
+        )
+    }
+
+    private func performPersistedChange(_ change: () throws -> Void) {
+        do {
+            try change()
+        } catch {
+            persistenceErrorMessage = error.localizedDescription
         }
     }
 

@@ -29,7 +29,14 @@ Work from top to bottom, keeping the app runnable after each milestone.
 - [x] Test common schedules and edge cases.
 - [x] Show a plain-text preview of the calculated times.
 
-## 4. Local notifications
+## 4. Persistence
+
+- [x] Save user-created affirmations and favorite status.
+- [ ] Save the notification schedule.
+- [ ] Load saved data when the app starts.
+- [ ] Confirm edits and schedule changes survive an app restart.
+
+## 5. Local notifications
 
 - [ ] Add a notification-scheduling protocol.
 - [ ] Request notification permission only when the user enables notifications.
@@ -37,13 +44,6 @@ Work from top to bottom, keeping the app runnable after each milestone.
 - [ ] Replace old pending notifications when the schedule changes.
 - [ ] Remove pending notifications when the schedule is disabled.
 - [ ] Explain how to enable notifications when permission has been denied.
-
-## 5. Persistence
-
-- [ ] Save user-created affirmations and favorite status.
-- [ ] Save the notification schedule.
-- [ ] Load saved data when the app starts.
-- [ ] Confirm edits and schedule changes survive an app restart.
 
 ## 6. Functional first-release interface
 

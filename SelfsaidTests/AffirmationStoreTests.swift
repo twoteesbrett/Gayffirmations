@@ -24,24 +24,24 @@ struct AffirmationStoreTests {
     }
 
     @Test("An affirmation can be deleted")
-    func delete() {
+    func delete() throws {
         let affirmation = Affirmation(text: "Temporary")
         let store = AffirmationStore(affirmations: [affirmation])
 
-        store.delete(id: affirmation.id)
+        try store.delete(id: affirmation.id)
 
         #expect(store.affirmations.isEmpty)
     }
 
     @Test("An affirmation can be favorited and unfavorited")
-    func toggleFavorite() {
+    func toggleFavorite() throws {
         let affirmation = Affirmation(text: "Favorite")
         let store = AffirmationStore(affirmations: [affirmation])
 
-        store.toggleFavorite(id: affirmation.id)
+        try store.toggleFavorite(id: affirmation.id)
         #expect(store.affirmations.first?.isFavorite == true)
 
-        store.toggleFavorite(id: affirmation.id)
+        try store.toggleFavorite(id: affirmation.id)
         #expect(store.affirmations.first?.isFavorite == false)
     }
 
@@ -64,5 +64,69 @@ struct AffirmationStoreTests {
             try store.update(id: affirmation.id, text: "   ")
         }
         #expect(store.affirmations.first?.text == "Keep me")
+    }
+
+    @Test("Saved affirmations are loaded when a store is created")
+    func loadsSavedAffirmations() {
+        let savedAffirmations = [Affirmation(text: "Saved", isFavorite: true)]
+        let repository = InMemoryAffirmationRepository(
+            affirmations: savedAffirmations
+        )
+
+        let store = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: Affirmation.samples
+        )
+
+        #expect(store.affirmations == savedAffirmations)
+    }
+
+    @Test("Default affirmations are saved on first launch")
+    func savesDefaultAffirmations() {
+        let repository = InMemoryAffirmationRepository()
+
+        let store = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: Affirmation.samples
+        )
+
+        #expect(store.affirmations == Affirmation.samples)
+        #expect(repository.affirmations == Affirmation.samples)
+    }
+
+    @Test("A favorite survives recreating the store")
+    func favoriteSurvivesRestart() throws {
+        let affirmation = Affirmation(text: "Remember me")
+        let repository = InMemoryAffirmationRepository(
+            affirmations: [affirmation]
+        )
+        let firstStore = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: []
+        )
+
+        try firstStore.toggleFavorite(id: affirmation.id)
+        let restartedStore = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: []
+        )
+
+        #expect(restartedStore.affirmations.first?.isFavorite == true)
+    }
+}
+
+private final class InMemoryAffirmationRepository: AffirmationRepository {
+    var affirmations: [Affirmation]?
+
+    init(affirmations: [Affirmation]? = nil) {
+        self.affirmations = affirmations
+    }
+
+    func loadAffirmations() throws -> [Affirmation]? {
+        affirmations
+    }
+
+    func saveAffirmations(_ affirmations: [Affirmation]) throws {
+        self.affirmations = affirmations
     }
 }

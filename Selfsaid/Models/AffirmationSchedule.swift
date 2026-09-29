@@ -1,6 +1,6 @@
 import Foundation
 
-struct AffirmationSchedule: Equatable {
+struct AffirmationSchedule: Codable, Equatable {
     var isEnabled: Bool
     var startTime: TimeOfDay
     var endTime: TimeOfDay
@@ -19,7 +19,7 @@ struct AffirmationSchedule: Equatable {
     }
 }
 
-struct TimeOfDay: Equatable, Comparable {
+struct TimeOfDay: Codable, Equatable, Comparable {
     let hour: Int
     let minute: Int
 

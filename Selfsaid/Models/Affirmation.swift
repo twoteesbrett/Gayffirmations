@@ -1,6 +1,6 @@
 import Foundation
 
-struct Affirmation: Identifiable, Equatable {
+struct Affirmation: Codable, Identifiable, Equatable {
     let id: UUID
     var text: String
     var isFavorite: Bool
