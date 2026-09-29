@@ -21,6 +21,10 @@ struct ContentView: View {
             Tab("Library", systemImage: "books.vertical") {
                 LibraryView(store: store)
             }
+
+            Tab("Schedule", systemImage: "clock") {
+                ScheduleView()
+            }
         }
     }
 }

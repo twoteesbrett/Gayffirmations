@@ -22,12 +22,12 @@ Work from top to bottom, keeping the app runnable after each milestone.
 
 ## 3. Daily schedule logic
 
-- [ ] Define `AffirmationSchedule` with enabled state, start time, end time, and
+- [x] Define `AffirmationSchedule` with enabled state, start time, end time, and
       notifications per day.
-- [ ] Implement `ScheduleCalculator` for evenly spaced notification times.
-- [ ] Handle invalid time ranges and zero notifications.
-- [ ] Test common schedules and edge cases.
-- [ ] Show a plain-text preview of the calculated times.
+- [x] Implement `ScheduleCalculator` for evenly spaced notification times.
+- [x] Handle invalid time ranges and zero notifications.
+- [x] Test common schedules and edge cases.
+- [x] Show a plain-text preview of the calculated times.
 
 ## 4. Local notifications
 
@@ -47,10 +47,10 @@ Work from top to bottom, keeping the app runnable after each milestone.
 
 ## 6. Functional first-release interface
 
-- [ ] Create a Today screen.
-- [ ] Create a Library screen.
-- [ ] Create an affirmation editor.
-- [ ] Create a Schedule screen.
+- [x] Create a Today screen.
+- [x] Create a Library screen.
+- [x] Create an affirmation editor.
+- [x] Create a Schedule screen.
 - [ ] Check empty, loading, error, and permission-denied states.
 - [ ] Verify Dynamic Type and VoiceOver basics.
 
