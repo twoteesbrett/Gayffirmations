@@ -113,6 +113,59 @@ struct AffirmationStoreTests {
 
         #expect(restartedStore.affirmations.first?.isFavorite == true)
     }
+
+    @Test("An edited affirmation survives recreating the store")
+    func editSurvivesRestart() throws {
+        let affirmation = Affirmation(text: "Before")
+        let repository = InMemoryAffirmationRepository(
+            affirmations: [affirmation]
+        )
+        let firstStore = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: []
+        )
+
+        try firstStore.update(id: affirmation.id, text: "After")
+        let restartedStore = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: []
+        )
+
+        #expect(restartedStore.affirmations.first?.text == "After")
+    }
+
+    @Test("A load failure prevents saved data from being overwritten")
+    func loadFailurePreventsOverwrite() {
+        let repository = FailingAffirmationRepository()
+        let store = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: Affirmation.samples
+        )
+        let affirmation = store.affirmations[0]
+
+        #expect(store.persistenceErrorMessage != nil)
+        #expect(throws: PersistenceUnavailableError.self) {
+            try store.toggleFavorite(id: affirmation.id)
+        }
+        #expect(store.affirmations[0].isFavorite == false)
+        #expect(repository.saveCallCount == 0)
+    }
+}
+
+private enum RepositoryTestError: Error {
+    case loadFailed
+}
+
+private final class FailingAffirmationRepository: AffirmationRepository {
+    private(set) var saveCallCount = 0
+
+    func loadAffirmations() throws -> [Affirmation]? {
+        throw RepositoryTestError.loadFailed
+    }
+
+    func saveAffirmations(_ affirmations: [Affirmation]) throws {
+        saveCallCount += 1
+    }
 }
 
 private final class InMemoryAffirmationRepository: AffirmationRepository {

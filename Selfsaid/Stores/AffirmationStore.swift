@@ -81,9 +81,12 @@ final class AffirmationStore {
     }
 
     private func persist(_ updatedAffirmations: [Affirmation]) throws {
+        if let persistenceErrorMessage {
+            throw PersistenceUnavailableError(reason: persistenceErrorMessage)
+        }
+
         try repository?.saveAffirmations(updatedAffirmations)
         affirmations = updatedAffirmations
-        persistenceErrorMessage = nil
     }
 
     private func validatedText(_ text: String) throws -> String {

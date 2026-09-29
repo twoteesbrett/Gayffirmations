@@ -8,34 +8,81 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var store: AffirmationStore
+    let affirmationStore: AffirmationStore
+    let scheduleStore: ScheduleStore
 
-    init(store: AffirmationStore) {
-        _store = State(initialValue: store)
+    @State private var startupPersistenceErrorMessage: String?
+
+    init(
+        affirmationStore: AffirmationStore,
+        scheduleStore: ScheduleStore
+    ) {
+        self.affirmationStore = affirmationStore
+        self.scheduleStore = scheduleStore
+
+        let failures = [
+            affirmationStore.persistenceErrorMessage.map {
+                "Affirmations: \($0)"
+            },
+            scheduleStore.persistenceErrorMessage.map {
+                "Schedule: \($0)"
+            }
+        ].compactMap { $0 }
+
+        _startupPersistenceErrorMessage = State(
+            initialValue: failures.isEmpty
+                ? nil
+                : failures.joined(separator: "\n\n")
+        )
     }
 
     var body: some View {
         TabView {
-            TodayView(store: store)
+            TodayView(store: affirmationStore)
                 .tabItem {
                     Label("Today", systemImage: "sun.max")
                 }
 
-            LibraryView(store: store)
+            LibraryView(store: affirmationStore)
                 .tabItem {
                     Label("Library", systemImage: "books.vertical")
                 }
 
-            ScheduleView()
+            ScheduleView(store: scheduleStore)
                 .tabItem {
                     Label("Schedule", systemImage: "clock")
                 }
         }
+        .alert(
+            "Unable to Load Saved Data",
+            isPresented: startupPersistenceErrorIsPresented
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(
+                "Selfsaid is showing default data and will not save changes "
+                    + "to the affected section during this session. Your existing "
+                    + "saved data has not been overwritten.\n\n"
+                    + (startupPersistenceErrorMessage ?? "")
+            )
+        }
+    }
+
+    private var startupPersistenceErrorIsPresented: Binding<Bool> {
+        Binding(
+            get: { startupPersistenceErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    startupPersistenceErrorMessage = nil
+                }
+            }
+        )
     }
 }
 
 #Preview {
     ContentView(
-        store: AffirmationStore(affirmations: Affirmation.samples)
+        affirmationStore: AffirmationStore(affirmations: Affirmation.samples),
+        scheduleStore: ScheduleStore()
     )
 }

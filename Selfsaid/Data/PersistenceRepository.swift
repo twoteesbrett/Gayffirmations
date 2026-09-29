@@ -1,5 +1,13 @@
 import Foundation
 
+struct PersistenceUnavailableError: LocalizedError {
+    let reason: String
+
+    var errorDescription: String? {
+        "Saved data is unavailable. \(reason)"
+    }
+}
+
 protocol AffirmationRepository {
     func loadAffirmations() throws -> [Affirmation]?
     func saveAffirmations(_ affirmations: [Affirmation]) throws

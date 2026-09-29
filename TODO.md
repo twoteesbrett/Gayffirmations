@@ -32,9 +32,9 @@ Work from top to bottom, keeping the app runnable after each milestone.
 ## 4. Persistence
 
 - [x] Save user-created affirmations and favorite status.
-- [ ] Save the notification schedule.
-- [ ] Load saved data when the app starts.
-- [ ] Confirm edits and schedule changes survive an app restart.
+- [x] Save the notification schedule.
+- [x] Load saved data when the app starts.
+- [x] Confirm edits and schedule changes survive an app restart.
 
 ## 5. Local notifications
 

@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct ScheduleView: View {
-    @State private var schedule = AffirmationSchedule()
+    let store: ScheduleStore
+
+    @State private var persistenceErrorMessage: String?
 
     private let calculator = ScheduleCalculator()
 
@@ -9,7 +11,7 @@ struct ScheduleView: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Daily reminders", isOn: $schedule.isEnabled)
+                    Toggle("Daily reminders", isOn: enabledBinding)
                 } footer: {
                     Text("Notification delivery will be connected in the next milestone.")
                 }
@@ -17,21 +19,21 @@ struct ScheduleView: View {
                 Section("Daily period") {
                     DatePicker(
                         "Start",
-                        selection: timeBinding(for: \AffirmationSchedule.startTime),
+                        selection: startTimeBinding,
                         displayedComponents: .hourAndMinute
                     )
 
                     DatePicker(
                         "End",
-                        selection: timeBinding(for: \AffirmationSchedule.endTime),
+                        selection: endTimeBinding,
                         displayedComponents: .hourAndMinute
                     )
                 }
 
                 Section("Frequency") {
                     Stepper(
-                        "\(schedule.notificationsPerDay) per day",
-                        value: $schedule.notificationsPerDay,
+                        "\(store.schedule.notificationsPerDay) per day",
+                        value: notificationsPerDayBinding,
                         in: 0...12
                     )
                 }
@@ -41,12 +43,20 @@ struct ScheduleView: View {
                 }
             }
             .navigationTitle("Schedule")
+            .alert(
+                "Unable to Save",
+                isPresented: persistenceErrorIsPresented
+            ) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(persistenceErrorMessage ?? "Please try again.")
+            }
         }
     }
 
     @ViewBuilder
     private var preview: some View {
-        if let times = try? calculator.notificationTimes(for: schedule) {
+        if let times = try? calculator.notificationTimes(for: store.schedule) {
             if times.isEmpty {
                 Text("No reminders are scheduled.")
                     .foregroundStyle(.secondary)
@@ -66,20 +76,70 @@ struct ScheduleView: View {
         }
     }
 
-    private func timeBinding(
-        for keyPath: WritableKeyPath<AffirmationSchedule, TimeOfDay>
-    ) -> Binding<Date> {
+    private var enabledBinding: Binding<Bool> {
         Binding(
-            get: {
-                schedule[keyPath: keyPath].date()
-            },
-            set: { date in
-                schedule[keyPath: keyPath] = TimeOfDay(date: date)
+            get: { store.schedule.isEnabled },
+            set: { isEnabled in
+                performPersistedChange {
+                    try store.setEnabled(isEnabled)
+                }
             }
         )
+    }
+
+    private var startTimeBinding: Binding<Date> {
+        Binding(
+            get: { store.schedule.startTime.date() },
+            set: { date in
+                performPersistedChange {
+                    try store.setStartTime(TimeOfDay(date: date))
+                }
+            }
+        )
+    }
+
+    private var endTimeBinding: Binding<Date> {
+        Binding(
+            get: { store.schedule.endTime.date() },
+            set: { date in
+                performPersistedChange {
+                    try store.setEndTime(TimeOfDay(date: date))
+                }
+            }
+        )
+    }
+
+    private var notificationsPerDayBinding: Binding<Int> {
+        Binding(
+            get: { store.schedule.notificationsPerDay },
+            set: { notificationsPerDay in
+                performPersistedChange {
+                    try store.setNotificationsPerDay(notificationsPerDay)
+                }
+            }
+        )
+    }
+
+    private var persistenceErrorIsPresented: Binding<Bool> {
+        Binding(
+            get: { persistenceErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    persistenceErrorMessage = nil
+                }
+            }
+        )
+    }
+
+    private func performPersistedChange(_ change: () throws -> Void) {
+        do {
+            try change()
+        } catch {
+            persistenceErrorMessage = error.localizedDescription
+        }
     }
 }
 
 #Preview {
-    ScheduleView()
+    ScheduleView(store: ScheduleStore())
 }
