@@ -18,10 +18,16 @@ protocol ScheduleRepository {
     func saveSchedule(_ schedule: AffirmationSchedule) throws
 }
 
-final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository {
+protocol ThemeRepository {
+    func loadTheme() throws -> AppTheme?
+    func saveTheme(_ theme: AppTheme) throws
+}
+
+final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, ThemeRepository {
     private enum Key {
         static let affirmations = "Selfsaid.affirmations"
         static let schedule = "Selfsaid.schedule"
+        static let theme = "Selfsaid.theme"
     }
 
     private let userDefaults: UserDefaults
@@ -52,6 +58,14 @@ final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository {
 
     func saveSchedule(_ schedule: AffirmationSchedule) throws {
         try save(schedule, forKey: Key.schedule)
+    }
+
+    func loadTheme() throws -> AppTheme? {
+        try load(AppTheme.self, forKey: Key.theme)
+    }
+
+    func saveTheme(_ theme: AppTheme) throws {
+        try save(theme, forKey: Key.theme)
     }
 
     private func load<Value: Decodable>(

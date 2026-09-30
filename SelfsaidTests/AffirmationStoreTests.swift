@@ -151,6 +151,23 @@ struct AffirmationStoreTests {
         #expect(restartedStore.affirmations.first?.isFavorite == true)
     }
 
+    @Test("Restoring defaults replaces custom affirmations and favorites")
+    func restoreDefaults() throws {
+        let defaults = [Affirmation(text: "Default")]
+        let repository = InMemoryAffirmationRepository()
+        let store = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: defaults
+        )
+
+        _ = try store.add(text: "Custom")
+        try store.toggleFavorite(id: defaults[0].id)
+        try store.restoreDefaults()
+
+        #expect(store.affirmations == defaults)
+        #expect(repository.affirmations == defaults)
+    }
+
     @Test("An edited affirmation survives recreating the store")
     func editSurvivesRestart() throws {
         let affirmation = Affirmation(text: "Before")

@@ -54,10 +54,27 @@ Work from top to bottom, keeping the app runnable after each milestone.
 - [x] Check empty, loading, error, and permission-denied states.
 - [x] Verify Dynamic Type and VoiceOver basics.
 
-## 7. Visual polish
+## 7. Settings and personalization
 
-- [ ] Establish typography and colors.
-- [ ] Refine light and dark appearances.
+- [x] Replace the Schedule tab with a Settings tab.
+- [x] Move the existing notification schedule into Settings.
+- [x] Define a theme model that shares one layout and varies visual tokens such
+      as color, typography, backgrounds, and imagery.
+- [x] Add a theme picker with previews for three or four themes.
+- [x] Save and restore the selected theme across app launches.
+- [x] Add separate actions to restore the default affirmations and reset the
+      notification schedule.
+- [x] Add a confirmed reset-all action that restores affirmations, schedule,
+      and theme defaults and removes pending notifications.
+- [x] Test theme persistence and each reset path, including failure handling.
+- [x] Verify that Settings and its confirmation dialogs work with Dynamic Type
+      and VoiceOver.
+
+## 8. Visual polish
+
+- [ ] Finalize the identity, typography, colors, and imagery for each theme.
+- [ ] Refine each theme's light and dark appearance.
+- [ ] Replace temporary theme previews with final artwork.
 - [ ] Add restrained transitions and haptics.
 - [ ] Create an app icon and launch presentation.
 - [ ] Perform a final accessibility and usability pass.

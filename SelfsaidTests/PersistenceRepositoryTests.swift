@@ -10,6 +10,7 @@ struct PersistenceRepositoryTests {
 
         #expect(try fixture.repository.loadAffirmations() == nil)
         #expect(try fixture.repository.loadSchedule() == nil)
+        #expect(try fixture.repository.loadTheme() == nil)
     }
 
     @Test("Affirmations retain their identity, text, and favorite state")
@@ -40,6 +41,16 @@ struct PersistenceRepositoryTests {
         try fixture.repository.saveSchedule(schedule)
 
         #expect(try fixture.repository.loadSchedule() == schedule)
+    }
+
+    @Test("A theme can be saved and loaded")
+    func themeRoundTrip() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+
+        try fixture.repository.saveTheme(.midnight)
+
+        #expect(try fixture.repository.loadTheme() == .midnight)
     }
 }
 

@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
+    let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
 
     @State private var startupPersistenceErrorMessage: String?
@@ -17,10 +18,12 @@ struct ContentView: View {
     init(
         affirmationStore: AffirmationStore,
         scheduleStore: ScheduleStore,
+        themeStore: ThemeStore,
         notificationCoordinator: NotificationCoordinator
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
+        self.themeStore = themeStore
         self.notificationCoordinator = notificationCoordinator
 
         let failures = [
@@ -29,6 +32,9 @@ struct ContentView: View {
             },
             scheduleStore.persistenceErrorMessage.map {
                 "Schedule: \($0)"
+            },
+            themeStore.persistenceErrorMessage.map {
+                "Theme: \($0)"
             }
         ].compactMap { $0 }
 
@@ -53,13 +59,15 @@ struct ContentView: View {
                     Label("Library", systemImage: "books.vertical")
                 }
 
-            ScheduleView(
-                store: scheduleStore,
+            SettingsView(
+                affirmationStore: affirmationStore,
+                scheduleStore: scheduleStore,
+                themeStore: themeStore,
                 notificationCoordinator: notificationCoordinator
             )
                 .floatingTabBarClearance()
                 .tabItem {
-                    Label("Schedule", systemImage: "clock")
+                    Label("Settings", systemImage: "gearshape")
                 }
         }
         .alert(
@@ -111,6 +119,7 @@ private extension View {
     ContentView(
         affirmationStore: affirmationStore,
         scheduleStore: scheduleStore,
+        themeStore: ThemeStore(),
         notificationCoordinator: NotificationCoordinator(
             affirmationStore: affirmationStore,
             scheduleStore: scheduleStore,

@@ -11,6 +11,7 @@ import SwiftUI
 struct SelfsaidApp: App {
     @State private var affirmationStore: AffirmationStore
     @State private var scheduleStore: ScheduleStore
+    @State private var themeStore: ThemeStore
     private let notificationCoordinator: NotificationCoordinator
 
     init() {
@@ -35,9 +36,14 @@ struct SelfsaidApp: App {
             repository: repository,
             defaultSchedule: AffirmationSchedule()
         )
+        let themeStore = ThemeStore(
+            repository: repository,
+            defaultTheme: .warm
+        )
 
         _affirmationStore = State(initialValue: affirmationStore)
         _scheduleStore = State(initialValue: scheduleStore)
+        _themeStore = State(initialValue: themeStore)
         notificationCoordinator = NotificationCoordinator(
             affirmationStore: affirmationStore,
             scheduleStore: scheduleStore,
@@ -50,8 +56,12 @@ struct SelfsaidApp: App {
             ContentView(
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
+                themeStore: themeStore,
                 notificationCoordinator: notificationCoordinator
             )
+            .environment(\.appTheme, themeStore.selectedTheme)
+            .tint(themeStore.selectedTheme.accentColor)
+            .preferredColorScheme(themeStore.selectedTheme.preferredColorScheme)
         }
     }
 }

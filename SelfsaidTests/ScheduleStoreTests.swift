@@ -56,6 +56,23 @@ struct ScheduleStoreTests {
         #expect(restartedStore.schedule == firstStore.schedule)
     }
 
+    @Test("Reset restores and saves the default schedule")
+    func reset() throws {
+        let defaultSchedule = AffirmationSchedule()
+        let repository = InMemoryScheduleRepository()
+        let store = ScheduleStore(
+            repository: repository,
+            defaultSchedule: defaultSchedule
+        )
+
+        try store.setEnabled(true)
+        try store.setNotificationsPerDay(8)
+        try store.reset()
+
+        #expect(store.schedule == defaultSchedule)
+        #expect(repository.schedule == defaultSchedule)
+    }
+
     @Test("A load failure prevents the schedule from being overwritten")
     func loadFailurePreventsOverwrite() {
         let repository = FailingScheduleRepository()

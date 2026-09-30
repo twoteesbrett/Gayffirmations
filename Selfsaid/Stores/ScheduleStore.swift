@@ -8,12 +8,14 @@ final class ScheduleStore {
     private(set) var persistenceErrorMessage: String?
 
     private let repository: (any ScheduleRepository)?
+    private let defaultSchedule: AffirmationSchedule
 
     init(
         schedule: AffirmationSchedule,
         repository: (any ScheduleRepository)? = nil
     ) {
         self.schedule = schedule
+        self.defaultSchedule = schedule
         self.repository = repository
     }
 
@@ -26,6 +28,7 @@ final class ScheduleStore {
         defaultSchedule: AffirmationSchedule
     ) {
         self.repository = repository
+        self.defaultSchedule = defaultSchedule
 
         do {
             if let savedSchedule = try repository.loadSchedule() {
@@ -58,6 +61,10 @@ final class ScheduleStore {
 
     func replace(with schedule: AffirmationSchedule) throws {
         try update { $0 = schedule }
+    }
+
+    func reset() throws {
+        try replace(with: defaultSchedule)
     }
 
     private func update(

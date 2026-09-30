@@ -55,6 +55,11 @@ final class NotificationCoordinator {
         try await apply(updatedSchedule)
     }
 
+    func resetSchedule() throws {
+        try scheduleStore.reset()
+        scheduler.removePendingNotifications()
+    }
+
     private func enableNotifications() async throws {
         let reminders = try planner.reminders(
             for: scheduleStore.schedule,

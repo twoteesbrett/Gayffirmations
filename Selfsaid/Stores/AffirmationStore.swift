@@ -22,12 +22,14 @@ final class AffirmationStore {
     private(set) var persistenceErrorMessage: String?
 
     private let repository: (any AffirmationRepository)?
+    private let defaultAffirmations: [Affirmation]
 
     init(
         affirmations: [Affirmation] = [],
         repository: (any AffirmationRepository)? = nil
     ) {
         self.affirmations = affirmations
+        self.defaultAffirmations = affirmations
         self.repository = repository
     }
 
@@ -36,6 +38,7 @@ final class AffirmationStore {
         defaultAffirmations: [Affirmation]
     ) {
         self.repository = repository
+        self.defaultAffirmations = defaultAffirmations
 
         do {
             if let savedAffirmations = try repository.loadAffirmations() {
@@ -81,6 +84,10 @@ final class AffirmationStore {
         var updatedAffirmations = affirmations
         updatedAffirmations[index].isFavorite.toggle()
         try persist(updatedAffirmations)
+    }
+
+    func restoreDefaults() throws {
+        try persist(defaultAffirmations)
     }
 
     private func persist(_ updatedAffirmations: [Affirmation]) throws {

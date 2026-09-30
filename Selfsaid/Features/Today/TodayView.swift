@@ -4,6 +4,7 @@ struct TodayView: View {
     let store: AffirmationStore
     @State private var deck: AffirmationDeck
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.appTheme) private var appTheme
 
     init(store: AffirmationStore) {
         self.store = store
@@ -43,6 +44,7 @@ struct TodayView: View {
                 .padding()
             }
         }
+        .background(appTheme.backgroundGradient.ignoresSafeArea())
         .onChange(of: store.affirmations) { _, updatedAffirmations in
             deck.replaceAffirmations(with: updatedAffirmations)
         }

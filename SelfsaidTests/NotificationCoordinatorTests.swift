@@ -80,6 +80,34 @@ struct NotificationCoordinatorTests {
         #expect(scheduler.removeCallCount == 1)
     }
 
+    @Test("Resetting restores the default schedule and removes reminders")
+    func resettingScheduleRemovesPendingReminders() throws {
+        let scheduler = NotificationSchedulerSpy(
+            authorizationStatus: .authorized
+        )
+        let affirmationStore = AffirmationStore(
+            affirmations: [Affirmation(text: "One")]
+        )
+        let defaultSchedule = AffirmationSchedule()
+        let repository = NotificationTestScheduleRepository()
+        let scheduleStore = ScheduleStore(
+            repository: repository,
+            defaultSchedule: defaultSchedule
+        )
+        try scheduleStore.setEnabled(true)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: affirmationStore,
+            scheduleStore: scheduleStore,
+            scheduler: scheduler
+        )
+
+        try coordinator.resetSchedule()
+
+        #expect(scheduleStore.schedule == defaultSchedule)
+        #expect(repository.schedule == defaultSchedule)
+        #expect(scheduler.removeCallCount == 1)
+    }
+
     @Test("Changing an enabled schedule replaces pending reminders")
     func enabledScheduleChangeReplacesReminders() async throws {
         let scheduler = NotificationSchedulerSpy(
@@ -209,4 +237,16 @@ private final class NotificationSchedulerSpy: NotificationScheduling {
 
 private enum NotificationSchedulerTestError: Error {
     case failed
+}
+
+private final class NotificationTestScheduleRepository: ScheduleRepository {
+    var schedule: AffirmationSchedule?
+
+    func loadSchedule() throws -> AffirmationSchedule? {
+        schedule
+    }
+
+    func saveSchedule(_ schedule: AffirmationSchedule) throws {
+        self.schedule = schedule
+    }
 }

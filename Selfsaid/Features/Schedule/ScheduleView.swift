@@ -12,49 +12,47 @@ struct ScheduleView: View {
     private let calculator = ScheduleCalculator()
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    Toggle("Daily reminders", isOn: enabledBinding)
-                } footer: {
-                    if isUpdatingSchedule {
-                        ProgressView("Updating schedule…")
-                    } else {
-                        Text("Selfsaid will ask for permission when you enable reminders.")
-                    }
-                }
-
-                Section("Daily period") {
-                    DatePicker(
-                        "Start",
-                        selection: startTimeBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-
-                    DatePicker(
-                        "End",
-                        selection: endTimeBinding,
-                        displayedComponents: .hourAndMinute
-                    )
-                }
-
-                Section("Frequency") {
-                    Stepper(
-                        "\(store.schedule.notificationsPerDay) per day",
-                        value: notificationsPerDayBinding,
-                        in: 0...12
-                    )
-                }
-
-                Section("Preview") {
-                    preview
+        Form {
+            Section {
+                Toggle("Daily reminders", isOn: enabledBinding)
+            } footer: {
+                if isUpdatingSchedule {
+                    ProgressView("Updating schedule…")
+                } else {
+                    Text("Selfsaid will ask for permission when you enable reminders.")
                 }
             }
-            .disabled(isUpdatingSchedule)
-            .navigationTitle("Schedule")
-            .alert(item: $presentedError) { presentedError in
-                alert(for: presentedError)
+
+            Section("Daily period") {
+                DatePicker(
+                    "Start",
+                    selection: startTimeBinding,
+                    displayedComponents: .hourAndMinute
+                )
+
+                DatePicker(
+                    "End",
+                    selection: endTimeBinding,
+                    displayedComponents: .hourAndMinute
+                )
             }
+
+            Section("Frequency") {
+                Stepper(
+                    "\(store.schedule.notificationsPerDay) per day",
+                    value: notificationsPerDayBinding,
+                    in: 0...12
+                )
+            }
+
+            Section("Preview") {
+                preview
+            }
+        }
+        .disabled(isUpdatingSchedule)
+        .navigationTitle("Notification Schedule")
+        .alert(item: $presentedError) { presentedError in
+            alert(for: presentedError)
         }
     }
 
@@ -191,29 +189,33 @@ struct ScheduleView: View {
     let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
     let scheduleStore = ScheduleStore()
 
-    ScheduleView(
-        store: scheduleStore,
-        notificationCoordinator: NotificationCoordinator(
-            affirmationStore: affirmationStore,
-            scheduleStore: scheduleStore,
-            scheduler: LocalNotificationService()
+    NavigationStack {
+        ScheduleView(
+            store: scheduleStore,
+            notificationCoordinator: NotificationCoordinator(
+                affirmationStore: affirmationStore,
+                scheduleStore: scheduleStore,
+                scheduler: LocalNotificationService()
+            )
         )
-    )
+    }
 }
 
 #Preview("Accessibility text size") {
     let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
     let scheduleStore = ScheduleStore()
 
-    ScheduleView(
-        store: scheduleStore,
-        notificationCoordinator: NotificationCoordinator(
-            affirmationStore: affirmationStore,
-            scheduleStore: scheduleStore,
-            scheduler: LocalNotificationService()
+    NavigationStack {
+        ScheduleView(
+            store: scheduleStore,
+            notificationCoordinator: NotificationCoordinator(
+                affirmationStore: affirmationStore,
+                scheduleStore: scheduleStore,
+                scheduler: LocalNotificationService()
+            )
         )
-    )
-    .environment(\.dynamicTypeSize, .accessibility5)
+        .environment(\.dynamicTypeSize, .accessibility5)
+    }
 }
 
 private struct PresentedError: Identifiable {
