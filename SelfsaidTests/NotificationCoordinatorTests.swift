@@ -4,6 +4,61 @@ import Testing
 
 @MainActor
 struct NotificationCoordinatorTests {
+    @Test("An unreadable schedule does not block saving a healthy Today selection")
+    func corruptScheduleAllowsSelectionChanges() async throws {
+        let suiteName = "DeliveryRecoveryTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let corruptData = Data("invalid".utf8)
+        defaults.set(corruptData, forKey: "Selfsaid.schedule")
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let selection = AffirmationSelectionStore(repository: repository)
+        let favourite = Affirmation(text: "Favourite", isFavorite: true)
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: AffirmationStore(affirmations: [favourite, Affirmation(text: "Other")]),
+            scheduleStore: ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule()),
+            scheduler: scheduler, selectionStore: selection
+        )
+
+        try await coordinator.setSelection(.favourites)
+
+        #expect(selection.selection == .favourites)
+        #expect(coordinator.selectedAffirmations == [favourite])
+        #expect(try repository.loadAffirmationSelection() == .favourites)
+        #expect(defaults.data(forKey: "Selfsaid.schedule") == corruptData)
+        #expect(scheduler.replaceCallCount == 0)
+    }
+
+    @Test("Library edits after a failed selection load preserve the saved schedule")
+    func corruptSelectionPreservesScheduleDuringLibraryEdit() async throws {
+        let suiteName = "DeliveryRecoveryTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let corruptData = Data("invalid".utf8)
+        defaults.set(corruptData, forKey: "Selfsaid.affirmationSelection")
+        let originalSchedule = AffirmationSchedule(isEnabled: true)
+        try repository.saveSchedule(originalSchedule)
+        let schedule = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        let library = AffirmationStore(affirmations: [Affirmation(text: "One")])
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: schedule, scheduler: scheduler,
+            selectionStore: AffirmationSelectionStore(repository: repository)
+        )
+        await coordinator.reconcileOnLaunch()
+        try library.add(text: "Two")
+        await coordinator.waitForLibraryRefresh()
+
+        #expect(schedule.schedule == originalSchedule)
+        #expect(try repository.loadSchedule() == originalSchedule)
+        #expect(defaults.data(forKey: "Selfsaid.affirmationSelection") == corruptData)
+        #expect(scheduler.scheduledReminders.isEmpty)
+        #expect(scheduler.replaceCallCount == 0)
+        #expect(coordinator.errorMessage != nil)
+    }
+
     @Test("Combined delivery uses both sources and removing one preserves the other")
     func combinedDelivery() async throws {
         let favourite = Affirmation(text: "Favourite", isFavorite: true)

@@ -157,6 +157,13 @@ final class NotificationCoordinator {
     private func refreshRemindersOrDisable() async throws {
         do {
             try checkDeliveryData()
+        } catch {
+            // Unreadable data pauses delivery without changing healthy settings.
+            scheduler.removePendingNotifications()
+            throw error
+        }
+
+        do {
             let reminders = try plannedReminders(
                 for: scheduleStore.schedule,
                 affirmations: selectedAffirmations
@@ -185,16 +192,20 @@ final class NotificationCoordinator {
 
     func setSelection(_ selection: AffirmationSelection) async throws {
         try checkIdle()
-        try checkDeliveryData()
         guard selection != selectionStore.selection else { return }
         isUpdating = true
         defer { isUpdating = false }
 
-        guard scheduleStore.schedule.isEnabled else {
+        // Today can use a healthy selection even when delivery data is unavailable.
+        guard scheduleStore.schedule.isEnabled,
+              scheduleStore.persistenceErrorMessage == nil,
+              affirmationStore.persistenceErrorMessage == nil else {
             try selectionStore.select(selection)
+            scheduler.removePendingNotifications()
             return
         }
 
+        try checkDeliveryData()
         let entries = selection.matchingAffirmations(in: affirmationStore.affirmations)
         let reminders = try plannedReminders(for: scheduleStore.schedule, affirmations: entries)
         do {
