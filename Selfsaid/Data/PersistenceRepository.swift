@@ -23,7 +23,12 @@ protocol ThemeRepository {
     func saveTheme(_ theme: AppTheme) throws
 }
 
-final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, ThemeRepository {
+protocol AppDataRepository {
+    // A throwing save must leave all three sections unchanged.
+    func saveAppData(affirmations: [Affirmation], schedule: AffirmationSchedule, theme: AppTheme) throws
+}
+
+final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, ThemeRepository, AppDataRepository {
     private enum Key {
         static let affirmations = "Selfsaid.affirmations"
         static let schedule = "Selfsaid.schedule"
@@ -66,6 +71,20 @@ final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, T
 
     func saveTheme(_ theme: AppTheme) throws {
         try save(theme, forKey: Key.theme)
+    }
+
+    func saveAppData(
+        affirmations: [Affirmation],
+        schedule: AffirmationSchedule,
+        theme: AppTheme
+    ) throws {
+        // Complete every throwing operation before changing any saved data.
+        let affirmationData = try encoder.encode(affirmations)
+        let scheduleData = try encoder.encode(schedule)
+        let themeData = try encoder.encode(theme)
+        userDefaults.set(affirmationData, forKey: Key.affirmations)
+        userDefaults.set(scheduleData, forKey: Key.schedule)
+        userDefaults.set(themeData, forKey: Key.theme)
     }
 
     private func load<Value: Decodable>(

@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Selfsaid
 
@@ -141,15 +142,17 @@ struct NotificationCoordinatorTests {
     }
 
     @Test("A scheduling failure does not save the changed schedule")
-    func schedulingFailureDoesNotPersist() async {
+    func schedulingFailureDoesNotPersist() async throws {
         let scheduler = NotificationSchedulerSpy(
-            authorizationStatus: .authorized,
-            replacementError: NotificationSchedulerTestError.failed
+            authorizationStatus: .authorized
         )
         let (coordinator, scheduleStore) = makeCoordinator(
             scheduler: scheduler,
             isEnabled: true
         )
+        try await coordinator.setEnabled(true)
+        let originalReminders = scheduler.scheduledReminders
+        scheduler.failuresRemaining = 1
         let originalSchedule = scheduleStore.schedule
 
         await #expect(throws: NotificationSchedulerTestError.failed) {
@@ -157,6 +160,83 @@ struct NotificationCoordinatorTests {
         }
 
         #expect(scheduleStore.schedule == originalSchedule)
+        #expect(scheduler.scheduledReminders == originalReminders)
+    }
+
+    @Test("Library edits, deletions, and restores refresh reminder text")
+    func libraryChangesRefreshReminders() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let defaults = [Affirmation(text: "Default")]
+        let library = AffirmationStore(affirmations: defaults)
+        let schedule = ScheduleStore()
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
+        )
+        try await coordinator.setEnabled(true)
+        try library.update(id: defaults[0].id, text: "Edited")
+        #expect(scheduler.scheduledReminders.isEmpty)
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Edited" })
+        try library.add(text: "Added")
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.scheduledReminders.contains { $0.affirmationText == "Added" })
+        try library.restoreDefaults()
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Default" })
+        try library.delete(id: defaults[0].id)
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.scheduledReminders.isEmpty)
+        #expect(!schedule.schedule.isEnabled)
+    }
+
+    @Test("Failed recovery stops reminders and disables the saved schedule")
+    func failedRecoveryDisablesReminders() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let (coordinator, schedule) = makeCoordinator(scheduler: scheduler)
+        try await coordinator.setEnabled(true)
+        scheduler.replacementError = NotificationSchedulerTestError.failed
+        await #expect(throws: NotificationCoordinatorError.self) {
+            try await coordinator.setNotificationsPerDay(6)
+        }
+        #expect(!schedule.schedule.isEnabled)
+        #expect(scheduler.scheduledReminders.isEmpty)
+    }
+
+    @Test("A library refresh failure is visible and stops reminders")
+    func libraryRefreshFailureIsVisible() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let library = AffirmationStore(affirmations: [Affirmation(text: "Original")])
+        let schedule = ScheduleStore()
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
+        )
+        try await coordinator.setEnabled(true)
+        scheduler.replacementError = NotificationSchedulerTestError.failed
+        try library.update(id: library.affirmations[0].id, text: "Edited")
+        await coordinator.waitForLibraryRefresh()
+        #expect(coordinator.errorMessage != nil)
+        #expect(!schedule.schedule.isEnabled)
+        #expect(scheduler.scheduledReminders.isEmpty)
+    }
+
+    @Test("Overlapping library and reset changes are rejected during a refresh")
+    func overlappingChangesAreRejected() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let library = AffirmationStore(affirmations: [Affirmation(text: "Original")])
+        let schedule = ScheduleStore()
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
+        )
+        try await coordinator.setEnabled(true)
+        try library.add(text: "Added")
+        #expect(throws: NotificationCoordinatorError.updateInProgress) {
+            try library.restoreDefaults()
+        }
+        #expect(throws: NotificationCoordinatorError.updateInProgress) {
+            try coordinator.resetSchedule()
+        }
+        await coordinator.waitForLibraryRefresh()
+        #expect(!coordinator.isUpdating)
     }
 
     private func makeCoordinator(
@@ -189,13 +269,14 @@ struct NotificationCoordinatorTests {
 }
 
 @MainActor
-private final class NotificationSchedulerSpy: NotificationScheduling {
+final class NotificationSchedulerSpy: NotificationScheduling {
     var authorizationStatusValue: NotificationAuthorizationStatus
     var authorizationRequestResult: Bool
     private(set) var authorizationRequestCount = 0
     private(set) var scheduledReminders: [NotificationReminder] = []
     private(set) var removeCallCount = 0
     private(set) var replaceCallCount = 0
+    var failuresRemaining = 0
     var replacementError: (any Error)?
 
     init(
@@ -222,6 +303,11 @@ private final class NotificationSchedulerSpy: NotificationScheduling {
     ) async throws {
         replaceCallCount += 1
 
+        scheduledReminders = []
+        if failuresRemaining > 0 {
+            failuresRemaining -= 1
+            throw NotificationSchedulerTestError.failed
+        }
         if let replacementError {
             throw replacementError
         }
@@ -235,7 +321,7 @@ private final class NotificationSchedulerSpy: NotificationScheduling {
     }
 }
 
-private enum NotificationSchedulerTestError: Error {
+enum NotificationSchedulerTestError: Error {
     case failed
 }
 

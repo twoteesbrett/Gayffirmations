@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import Selfsaid
 
+@MainActor
 struct PersistenceRepositoryTests {
     @Test("Missing saved data is reported as absent")
     func missingData() throws {
@@ -41,6 +42,18 @@ struct PersistenceRepositoryTests {
         try fixture.repository.saveSchedule(schedule)
 
         #expect(try fixture.repository.loadSchedule() == schedule)
+    }
+
+    @Test("Saving all app data persists every section together")
+    func appDataRoundTrip() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let affirmations = [Affirmation(text: "Reset")]
+        let schedule = AffirmationSchedule()
+        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .warm)
+        #expect(try fixture.repository.loadAffirmations() == affirmations)
+        #expect(try fixture.repository.loadSchedule() == schedule)
+        #expect(try fixture.repository.loadTheme() == .warm)
     }
 
     @Test("A theme can be saved and loaded")

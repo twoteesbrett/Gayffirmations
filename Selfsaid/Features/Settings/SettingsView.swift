@@ -5,6 +5,7 @@ struct SettingsView: View {
     let scheduleStore: ScheduleStore
     let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
+    let resetCoordinator: AppDataResetCoordinator
 
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
@@ -39,6 +40,7 @@ struct SettingsView: View {
                     resetButton(.all)
                 }
             }
+            .disabled(notificationCoordinator.isUpdating)
             .navigationTitle("Settings")
             .confirmationDialog(
                 pendingReset?.title ?? "Reset",
@@ -94,9 +96,7 @@ struct SettingsView: View {
             case .schedule:
                 try notificationCoordinator.resetSchedule()
             case .all:
-                try affirmationStore.restoreDefaults()
-                try notificationCoordinator.resetSchedule()
-                try themeStore.reset()
+                try resetCoordinator.resetAll()
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -159,15 +159,27 @@ private enum ResetAction: String, Identifiable {
 #Preview {
     let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
     let scheduleStore = ScheduleStore()
+    let themeStore = ThemeStore()
+    let notificationCoordinator = NotificationCoordinator(
+        affirmationStore: affirmationStore,
+        scheduleStore: scheduleStore,
+        scheduler: LocalNotificationService()
+    )
+    let resetCoordinator = AppDataResetCoordinator(
+        affirmationStore: affirmationStore,
+        scheduleStore: scheduleStore,
+        themeStore: themeStore,
+        notificationCoordinator: notificationCoordinator,
+        repository: UserDefaultsRepository(
+            userDefaults: UserDefaults(suiteName: "Selfsaid.previews")!
+        )
+    )
 
     SettingsView(
         affirmationStore: affirmationStore,
         scheduleStore: scheduleStore,
-        themeStore: ThemeStore(),
-        notificationCoordinator: NotificationCoordinator(
-            affirmationStore: affirmationStore,
-            scheduleStore: scheduleStore,
-            scheduler: LocalNotificationService()
-        )
+        themeStore: themeStore,
+        notificationCoordinator: notificationCoordinator,
+        resetCoordinator: resetCoordinator
     )
 }

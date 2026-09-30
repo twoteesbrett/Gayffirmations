@@ -21,8 +21,14 @@ final class AffirmationStore {
     private(set) var affirmations: [Affirmation]
     private(set) var persistenceErrorMessage: String?
 
+    // The coordinator can reject a text edit before it is saved (for example,
+    // while reminders are updating), then refresh reminders after a saved edit.
+    // Favorite changes bypass both hooks.
+    var willChangeReminderText: (() throws -> Void)?
+    var didChangeReminderText: (() -> Void)?
+
     private let repository: (any AffirmationRepository)?
-    private let defaultAffirmations: [Affirmation]
+    let defaultAffirmations: [Affirmation]
 
     init(
         affirmations: [Affirmation] = [],
@@ -90,13 +96,24 @@ final class AffirmationStore {
         try persist(defaultAffirmations)
     }
 
+    func applyPersistedDefaults() {
+        affirmations = defaultAffirmations
+    }
+
     private func persist(_ updatedAffirmations: [Affirmation]) throws {
         if let persistenceErrorMessage {
             throw PersistenceUnavailableError(reason: persistenceErrorMessage)
         }
 
+        let reminderTextChanged = affirmations.map(\.text) != updatedAffirmations.map(\.text)
+        if reminderTextChanged {
+            try willChangeReminderText?()
+        }
         try repository?.saveAffirmations(updatedAffirmations)
         affirmations = updatedAffirmations
+        if reminderTextChanged {
+            didChangeReminderText?()
+        }
     }
 
     private func validatedText(

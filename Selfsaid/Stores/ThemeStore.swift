@@ -8,7 +8,7 @@ final class ThemeStore {
     private(set) var persistenceErrorMessage: String?
 
     private let repository: (any ThemeRepository)?
-    private let defaultTheme: AppTheme
+    let defaultTheme: AppTheme
 
     init(
         selectedTheme: AppTheme = .warm,
@@ -45,6 +45,10 @@ final class ThemeStore {
 
     func reset() throws {
         try persist(defaultTheme)
+    }
+
+    func applyPersistedDefaults() {
+        selectedTheme = defaultTheme
     }
 
     private func persist(_ theme: AppTheme) throws {

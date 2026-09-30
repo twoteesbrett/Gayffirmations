@@ -8,7 +8,7 @@ final class ScheduleStore {
     private(set) var persistenceErrorMessage: String?
 
     private let repository: (any ScheduleRepository)?
-    private let defaultSchedule: AffirmationSchedule
+    let defaultSchedule: AffirmationSchedule
 
     init(
         schedule: AffirmationSchedule,
@@ -65,6 +65,10 @@ final class ScheduleStore {
 
     func reset() throws {
         try replace(with: defaultSchedule)
+    }
+
+    func applyPersistedDefaults() {
+        schedule = defaultSchedule
     }
 
     private func update(

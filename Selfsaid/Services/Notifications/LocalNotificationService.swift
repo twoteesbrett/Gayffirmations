@@ -9,10 +9,10 @@ final class LocalNotificationService: NotificationScheduling {
             prefix + String(index)
         }
 
-    static var allReminders: [String] {
-        (0..<maximumReminderCount).map { prefix + String($0) }
+        static var allReminders: [String] {
+            (0..<maximumReminderCount).map { prefix + String($0) }
+        }
     }
-}
 
     private let center: UNUserNotificationCenter
 

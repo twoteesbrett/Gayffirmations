@@ -12,6 +12,7 @@ struct ContentView: View {
     let scheduleStore: ScheduleStore
     let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
+    let resetCoordinator: AppDataResetCoordinator
 
     @State private var startupPersistenceErrorMessage: String?
 
@@ -19,12 +20,14 @@ struct ContentView: View {
         affirmationStore: AffirmationStore,
         scheduleStore: ScheduleStore,
         themeStore: ThemeStore,
-        notificationCoordinator: NotificationCoordinator
+        notificationCoordinator: NotificationCoordinator,
+        resetCoordinator: AppDataResetCoordinator
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
         self.themeStore = themeStore
         self.notificationCoordinator = notificationCoordinator
+        self.resetCoordinator = resetCoordinator
 
         let failures = [
             affirmationStore.persistenceErrorMessage.map {
@@ -63,12 +66,21 @@ struct ContentView: View {
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
                 themeStore: themeStore,
-                notificationCoordinator: notificationCoordinator
+                notificationCoordinator: notificationCoordinator,
+                resetCoordinator: resetCoordinator
             )
                 .floatingTabBarClearance()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
+        }
+        .alert("Unable to Update Reminders", isPresented: Binding(
+            get: { notificationCoordinator.errorMessage != nil },
+            set: { if !$0 { notificationCoordinator.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(notificationCoordinator.errorMessage ?? "Please try again.")
         }
         .alert(
             "Unable to Load Saved Data",
@@ -115,15 +127,27 @@ private extension View {
 #Preview {
     let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
     let scheduleStore = ScheduleStore()
+    let themeStore = ThemeStore()
+    let notificationCoordinator = NotificationCoordinator(
+        affirmationStore: affirmationStore,
+        scheduleStore: scheduleStore,
+        scheduler: LocalNotificationService()
+    )
+    let resetCoordinator = AppDataResetCoordinator(
+        affirmationStore: affirmationStore,
+        scheduleStore: scheduleStore,
+        themeStore: themeStore,
+        notificationCoordinator: notificationCoordinator,
+        repository: UserDefaultsRepository(
+            userDefaults: UserDefaults(suiteName: "Selfsaid.previews")!
+        )
+    )
 
     ContentView(
         affirmationStore: affirmationStore,
         scheduleStore: scheduleStore,
-        themeStore: ThemeStore(),
-        notificationCoordinator: NotificationCoordinator(
-            affirmationStore: affirmationStore,
-            scheduleStore: scheduleStore,
-            scheduler: LocalNotificationService()
-        )
+        themeStore: themeStore,
+        notificationCoordinator: notificationCoordinator,
+        resetCoordinator: resetCoordinator
     )
 }

@@ -13,20 +13,9 @@ struct SelfsaidApp: App {
     @State private var scheduleStore: ScheduleStore
     @State private var themeStore: ThemeStore
     private let notificationCoordinator: NotificationCoordinator
+    private let resetCoordinator: AppDataResetCoordinator
 
     init() {
-//  For testing startup failure of a corrupted store
-//  Step 1. Uncomment these lines to cause the error
-//        UserDefaults.standard.set(
-//            Data("invalid JSON".utf8),
-//            forKey: "Selfsaid.schedule"
-//        )
-        
-//  Step 2. Uncomment these lines to remove the error
-//        UserDefaults.standard.removeObject(
-//            forKey: "Selfsaid.schedule"
-//        )
-        
         let repository = UserDefaultsRepository()
         let affirmationStore = AffirmationStore(
             repository: repository,
@@ -44,10 +33,18 @@ struct SelfsaidApp: App {
         _affirmationStore = State(initialValue: affirmationStore)
         _scheduleStore = State(initialValue: scheduleStore)
         _themeStore = State(initialValue: themeStore)
-        notificationCoordinator = NotificationCoordinator(
+        let notificationCoordinator = NotificationCoordinator(
             affirmationStore: affirmationStore,
             scheduleStore: scheduleStore,
             scheduler: LocalNotificationService()
+        )
+        self.notificationCoordinator = notificationCoordinator
+        resetCoordinator = AppDataResetCoordinator(
+            affirmationStore: affirmationStore,
+            scheduleStore: scheduleStore,
+            themeStore: themeStore,
+            notificationCoordinator: notificationCoordinator,
+            repository: repository
         )
     }
 
@@ -57,7 +54,8 @@ struct SelfsaidApp: App {
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
                 themeStore: themeStore,
-                notificationCoordinator: notificationCoordinator
+                notificationCoordinator: notificationCoordinator,
+                resetCoordinator: resetCoordinator
             )
             .environment(\.appTheme, themeStore.selectedTheme)
             .tint(themeStore.selectedTheme.accentColor)
