@@ -20,7 +20,7 @@ struct SelfsaidApp: App {
 //            forKey: "Selfsaid.schedule"
 //        )
         
-// Step 2. Uncomment these lines to remove the error
+//  Step 2. Uncomment these lines to remove the error
 //        UserDefaults.standard.removeObject(
 //            forKey: "Selfsaid.schedule"
 //        )

@@ -38,7 +38,7 @@ Work from top to bottom, keeping the app runnable after each milestone.
 
 ## 5. Local notifications
 
-- [ ] Add a notification-scheduling protocol.
+- [x] Add a notification-scheduling protocol.
 - [ ] Request notification permission only when the user enables notifications.
 - [ ] Schedule local notifications using affirmations from the library.
 - [ ] Replace old pending notifications when the schedule changes.
