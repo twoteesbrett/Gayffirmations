@@ -2,8 +2,10 @@ import SwiftUI
 
 struct ScheduleView: View {
     let store: ScheduleStore
+    let notificationCoordinator: NotificationCoordinator
 
-    @State private var persistenceErrorMessage: String?
+    @State private var presentedError: PresentedError?
+    @State private var isUpdatingNotifications = false
 
     private let calculator = ScheduleCalculator()
 
@@ -12,8 +14,13 @@ struct ScheduleView: View {
             Form {
                 Section {
                     Toggle("Daily reminders", isOn: enabledBinding)
+                        .disabled(isUpdatingNotifications)
                 } footer: {
-                    Text("Notification delivery will be connected in the next milestone.")
+                    if isUpdatingNotifications {
+                        ProgressView("Updating reminders…")
+                    } else {
+                        Text("Selfsaid will ask for permission when you enable reminders.")
+                    }
                 }
 
                 Section("Daily period") {
@@ -43,13 +50,12 @@ struct ScheduleView: View {
                 }
             }
             .navigationTitle("Schedule")
-            .alert(
-                "Unable to Save",
-                isPresented: persistenceErrorIsPresented
-            ) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(persistenceErrorMessage ?? "Please try again.")
+            .alert(item: $presentedError) { presentedError in
+                Alert(
+                    title: Text(presentedError.title),
+                    message: Text(presentedError.message),
+                    dismissButton: .cancel(Text("OK"))
+                )
             }
         }
     }
@@ -80,9 +86,7 @@ struct ScheduleView: View {
         Binding(
             get: { store.schedule.isEnabled },
             set: { isEnabled in
-                performPersistedChange {
-                    try store.setEnabled(isEnabled)
-                }
+                updateNotifications(isEnabled: isEnabled)
             }
         )
     }
@@ -120,26 +124,55 @@ struct ScheduleView: View {
         )
     }
 
-    private var persistenceErrorIsPresented: Binding<Bool> {
-        Binding(
-            get: { persistenceErrorMessage != nil },
-            set: { isPresented in
-                if !isPresented {
-                    persistenceErrorMessage = nil
-                }
-            }
-        )
-    }
-
     private func performPersistedChange(_ change: () throws -> Void) {
         do {
             try change()
         } catch {
-            persistenceErrorMessage = error.localizedDescription
+            presentedError = PresentedError(
+                title: "Unable to Save",
+                message: error.localizedDescription
+            )
+        }
+    }
+
+    private func updateNotifications(isEnabled: Bool) {
+        guard !isUpdatingNotifications else {
+            return
+        }
+
+        isUpdatingNotifications = true
+
+        Task {
+            defer { isUpdatingNotifications = false }
+
+            do {
+                try await notificationCoordinator.setEnabled(isEnabled)
+            } catch {
+                presentedError = PresentedError(
+                    title: "Unable to Update Reminders",
+                    message: error.localizedDescription
+                )
+            }
         }
     }
 }
 
 #Preview {
-    ScheduleView(store: ScheduleStore())
+    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let scheduleStore = ScheduleStore()
+
+    ScheduleView(
+        store: scheduleStore,
+        notificationCoordinator: NotificationCoordinator(
+            affirmationStore: affirmationStore,
+            scheduleStore: scheduleStore,
+            scheduler: LocalNotificationService()
+        )
+    )
+}
+
+private struct PresentedError: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }

@@ -10,15 +10,18 @@ import SwiftUI
 struct ContentView: View {
     let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
+    let notificationCoordinator: NotificationCoordinator
 
     @State private var startupPersistenceErrorMessage: String?
 
     init(
         affirmationStore: AffirmationStore,
-        scheduleStore: ScheduleStore
+        scheduleStore: ScheduleStore,
+        notificationCoordinator: NotificationCoordinator
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
+        self.notificationCoordinator = notificationCoordinator
 
         let failures = [
             affirmationStore.persistenceErrorMessage.map {
@@ -48,7 +51,10 @@ struct ContentView: View {
                     Label("Library", systemImage: "books.vertical")
                 }
 
-            ScheduleView(store: scheduleStore)
+            ScheduleView(
+                store: scheduleStore,
+                notificationCoordinator: notificationCoordinator
+            )
                 .tabItem {
                     Label("Schedule", systemImage: "clock")
                 }
@@ -81,8 +87,16 @@ struct ContentView: View {
 }
 
 #Preview {
+    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let scheduleStore = ScheduleStore()
+
     ContentView(
-        affirmationStore: AffirmationStore(affirmations: Affirmation.samples),
-        scheduleStore: ScheduleStore()
+        affirmationStore: affirmationStore,
+        scheduleStore: scheduleStore,
+        notificationCoordinator: NotificationCoordinator(
+            affirmationStore: affirmationStore,
+            scheduleStore: scheduleStore,
+            scheduler: LocalNotificationService()
+        )
     )
 }

@@ -39,10 +39,10 @@ Work from top to bottom, keeping the app runnable after each milestone.
 ## 5. Local notifications
 
 - [x] Add a notification-scheduling protocol.
-- [ ] Request notification permission only when the user enables notifications.
-- [ ] Schedule local notifications using affirmations from the library.
+- [x] Request notification permission only when the user enables notifications.
+- [x] Schedule local notifications using affirmations from the library.
 - [ ] Replace old pending notifications when the schedule changes.
-- [ ] Remove pending notifications when the schedule is disabled.
+- [x] Remove pending notifications when the schedule is disabled.
 - [ ] Explain how to enable notifications when permission has been denied.
 
 ## 6. Functional first-release interface

@@ -11,6 +11,7 @@ import SwiftUI
 struct SelfsaidApp: App {
     @State private var affirmationStore: AffirmationStore
     @State private var scheduleStore: ScheduleStore
+    private let notificationCoordinator: NotificationCoordinator
 
     init() {
 //  For testing startup failure of a corrupted store
@@ -26,17 +27,21 @@ struct SelfsaidApp: App {
 //        )
         
         let repository = UserDefaultsRepository()
-        _affirmationStore = State(
-            initialValue: AffirmationStore(
-                repository: repository,
-                defaultAffirmations: Affirmation.samples
-            )
+        let affirmationStore = AffirmationStore(
+            repository: repository,
+            defaultAffirmations: Affirmation.samples
         )
-        _scheduleStore = State(
-            initialValue: ScheduleStore(
-                repository: repository,
-                defaultSchedule: AffirmationSchedule()
-            )
+        let scheduleStore = ScheduleStore(
+            repository: repository,
+            defaultSchedule: AffirmationSchedule()
+        )
+
+        _affirmationStore = State(initialValue: affirmationStore)
+        _scheduleStore = State(initialValue: scheduleStore)
+        notificationCoordinator = NotificationCoordinator(
+            affirmationStore: affirmationStore,
+            scheduleStore: scheduleStore,
+            scheduler: LocalNotificationService()
         )
     }
 
@@ -44,7 +49,8 @@ struct SelfsaidApp: App {
         WindowGroup {
             ContentView(
                 affirmationStore: affirmationStore,
-                scheduleStore: scheduleStore
+                scheduleStore: scheduleStore,
+                notificationCoordinator: notificationCoordinator
             )
         }
     }
