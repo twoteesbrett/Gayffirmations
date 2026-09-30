@@ -8,6 +8,7 @@ struct AffirmationEditorView: View {
 
     @State private var text: String
     @State private var validationMessage: String?
+    @FocusState private var textFieldIsFocused: Bool
 
     init(
         affirmation: Affirmation? = nil,
@@ -28,6 +29,7 @@ struct AffirmationEditorView: View {
                         axis: .vertical
                     )
                     .lineLimit(3...8)
+                    .focused($textFieldIsFocused)
 
                     if let validationMessage {
                         Text(validationMessage)
@@ -49,6 +51,9 @@ struct AffirmationEditorView: View {
                         save()
                     }
                 }
+            }
+            .onAppear {
+                textFieldIsFocused = true
             }
         }
     }

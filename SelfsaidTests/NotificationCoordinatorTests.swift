@@ -46,6 +46,24 @@ struct NotificationCoordinatorTests {
         #expect(!scheduleStore.schedule.isEnabled)
     }
 
+    @Test("An empty affirmation library cannot enable reminders")
+    func emptyLibraryLeavesRemindersDisabled() async {
+        let scheduler = NotificationSchedulerSpy(
+            authorizationStatus: .authorized
+        )
+        let (coordinator, scheduleStore) = makeCoordinator(
+            scheduler: scheduler,
+            affirmations: []
+        )
+
+        await #expect(throws: NotificationPlannerError.noAffirmations) {
+            try await coordinator.setEnabled(true)
+        }
+
+        #expect(scheduler.replaceCallCount == 0)
+        #expect(!scheduleStore.schedule.isEnabled)
+    }
+
     @Test("Disabling removes pending reminders")
     func disablingRemovesPendingReminders() async throws {
         let scheduler = NotificationSchedulerSpy(
@@ -115,14 +133,13 @@ struct NotificationCoordinatorTests {
 
     private func makeCoordinator(
         scheduler: NotificationSchedulerSpy,
-        isEnabled: Bool = false
+        isEnabled: Bool = false,
+        affirmations: [Affirmation] = [
+            Affirmation(text: "One"),
+            Affirmation(text: "Two")
+        ]
     ) -> (NotificationCoordinator, ScheduleStore) {
-        let affirmationStore = AffirmationStore(
-            affirmations: [
-                Affirmation(text: "One"),
-                Affirmation(text: "Two")
-            ]
-        )
+        let affirmationStore = AffirmationStore(affirmations: affirmations)
         let scheduleStore = ScheduleStore(
             schedule: AffirmationSchedule(
                 isEnabled: isEnabled,

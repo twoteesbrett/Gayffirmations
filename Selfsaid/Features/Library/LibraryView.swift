@@ -10,11 +10,16 @@ struct LibraryView: View {
         NavigationStack {
             Group {
                 if store.affirmations.isEmpty {
-                    ContentUnavailableView(
-                        "No Affirmations",
-                        systemImage: "text.quote",
-                        description: Text("Add an affirmation to begin.")
-                    )
+                    ContentUnavailableView {
+                        Label("No Affirmations", systemImage: "text.quote")
+                    } description: {
+                        Text("Add an affirmation to begin.")
+                    } actions: {
+                        Button("Add Affirmation", systemImage: "plus") {
+                            editorDestination = .new
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
                 } else {
                     affirmationList
                 }
@@ -128,6 +133,10 @@ private enum EditorDestination: Identifiable {
     }
 }
 
-#Preview {
+#Preview("With affirmations") {
     LibraryView(store: AffirmationStore(affirmations: Affirmation.samples))
+}
+
+#Preview("Empty") {
+    LibraryView(store: AffirmationStore())
 }

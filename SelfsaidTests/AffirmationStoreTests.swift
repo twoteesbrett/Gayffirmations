@@ -55,6 +55,18 @@ struct AffirmationStoreTests {
         #expect(store.affirmations.isEmpty)
     }
 
+    @Test("Duplicate affirmation text is rejected regardless of case or whitespace")
+    func rejectDuplicateText() {
+        let existingAffirmation = Affirmation(text: "I am capable.")
+        let store = AffirmationStore(affirmations: [existingAffirmation])
+
+        #expect(throws: AffirmationStoreError.duplicateText) {
+            try store.add(text: "  i AM capable.  ")
+        }
+
+        #expect(store.affirmations == [existingAffirmation])
+    }
+
     @Test("A blank edit leaves the original affirmation unchanged")
     func rejectBlankEdit() {
         let affirmation = Affirmation(text: "Keep me")
@@ -64,6 +76,31 @@ struct AffirmationStoreTests {
             try store.update(id: affirmation.id, text: "   ")
         }
         #expect(store.affirmations.first?.text == "Keep me")
+    }
+
+    @Test("An affirmation cannot be edited to duplicate another affirmation")
+    func rejectDuplicateEdit() throws {
+        let firstAffirmation = Affirmation(text: "First")
+        let secondAffirmation = Affirmation(text: "Second")
+        let store = AffirmationStore(
+            affirmations: [firstAffirmation, secondAffirmation]
+        )
+
+        #expect(throws: AffirmationStoreError.duplicateText) {
+            try store.update(id: secondAffirmation.id, text: " first ")
+        }
+
+        #expect(store.affirmations == [firstAffirmation, secondAffirmation])
+    }
+
+    @Test("An unchanged affirmation is valid when editing")
+    func unchangedEditIsValid() throws {
+        let affirmation = Affirmation(text: "I am capable.")
+        let store = AffirmationStore(affirmations: [affirmation])
+
+        try store.update(id: affirmation.id, text: affirmation.text)
+
+        #expect(store.affirmations == [affirmation])
     }
 
     @Test("Saved affirmations are loaded when a store is created")

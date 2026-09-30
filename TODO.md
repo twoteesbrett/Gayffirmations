@@ -51,7 +51,7 @@ Work from top to bottom, keeping the app runnable after each milestone.
 - [x] Create a Library screen.
 - [x] Create an affirmation editor.
 - [x] Create a Schedule screen.
-- [ ] Check empty, loading, error, and permission-denied states.
+- [x] Check empty, loading, error, and permission-denied states.
 - [ ] Verify Dynamic Type and VoiceOver basics.
 
 ## 7. Visual polish

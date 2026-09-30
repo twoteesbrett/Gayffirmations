@@ -3,11 +3,14 @@ import Observation
 
 enum AffirmationStoreError: LocalizedError, Equatable {
     case blankText
+    case duplicateText
 
     var errorDescription: String? {
         switch self {
         case .blankText:
             "An affirmation needs some text."
+        case .duplicateText:
+            "This affirmation is already in your library."
         }
     }
 }
@@ -55,7 +58,7 @@ final class AffirmationStore {
     }
 
     func update(id: Affirmation.ID, text: String) throws {
-        let text = try validatedText(text)
+        let text = try validatedText(text, excluding: id)
 
         guard let index = affirmations.firstIndex(where: { $0.id == id }) else {
             return
@@ -89,11 +92,24 @@ final class AffirmationStore {
         affirmations = updatedAffirmations
     }
 
-    private func validatedText(_ text: String) throws -> String {
+    private func validatedText(
+        _ text: String,
+        excluding excludedID: Affirmation.ID? = nil
+    ) throws -> String {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedText.isEmpty else {
             throw AffirmationStoreError.blankText
+        }
+
+        let isDuplicate = affirmations.contains { affirmation in
+            affirmation.id != excludedID
+                && affirmation.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    .compare(trimmedText, options: .caseInsensitive) == .orderedSame
+        }
+
+        guard !isDuplicate else {
+            throw AffirmationStoreError.duplicateText
         }
 
         return trimmedText
