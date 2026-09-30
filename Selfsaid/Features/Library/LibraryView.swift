@@ -10,12 +10,27 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("Show affirmations", selection: $filter) {
-                    Text("All").tag(LibraryFilter.all)
-                    Text("Favourites").tag(LibraryFilter.favourites)
+                if !store.availableTags.isEmpty || isTagFilter {
+                    Picker("Show affirmations", selection: $filter) {
+                        Text("All").tag(LibraryFilter.all)
+                        Text("Favourites").tag(LibraryFilter.favourites)
+                        ForEach(store.availableTags, id: \.self) { tag in
+                            Text(tag).tag(LibraryFilter.tag(tag))
+                        }
+                        if case .tag(let tag) = filter, !store.availableTags.contains(tag) {
+                            Text(tag).tag(filter)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .padding()
+                } else {
+                    Picker("Show affirmations", selection: $filter) {
+                        Text("All").tag(LibraryFilter.all)
+                        Text("Favourites").tag(LibraryFilter.favourites)
+                    }
+                    .pickerStyle(.segmented)
+                    .padding()
                 }
-                .pickerStyle(.segmented)
-                .padding()
 
                 if store.affirmations.isEmpty {
                     ContentUnavailableView {
@@ -30,9 +45,14 @@ struct LibraryView: View {
                     }
                 } else if filteredAffirmations.isEmpty {
                     ContentUnavailableView {
-                        Label("No Favourites", systemImage: "heart")
+                        Label(isTagFilter ? "No Matching Affirmations" : "No Favourites",
+                              systemImage: isTagFilter ? "tag" : "heart")
                     } description: {
-                        Text("Tap the heart beside an affirmation to find it here.")
+                        if case .tag(let tag) = filter {
+                            Text("No affirmations currently use the tag “\(tag)”.")
+                        } else {
+                            Text("Tap the heart beside an affirmation to find it here.")
+                        }
                     } actions: {
                         Button("Show All Affirmations") {
                             filter = .all
@@ -65,12 +85,19 @@ struct LibraryView: View {
         }
     }
 
+    private var isTagFilter: Bool {
+        if case .tag = filter { return true }
+        return false
+    }
+
     private var filteredAffirmations: [Affirmation] {
         switch filter {
         case .all:
             store.affirmations
         case .favourites:
             store.affirmations.filter(\.isFavorite)
+        case .tag(let tag):
+            store.affirmations(tagged: tag)
         }
     }
 
@@ -80,7 +107,14 @@ struct LibraryView: View {
                 Button {
                     editorDestination = .edit(affirmation)
                 } label: {
-                    Text(affirmation.text)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(affirmation.text)
+                        if !affirmation.tags.isEmpty {
+                            Text(affirmation.tags.joined(separator: " · "))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -139,12 +173,12 @@ struct LibraryView: View {
     private func editor(for destination: EditorDestination) -> some View {
         switch destination {
         case .new:
-            AffirmationEditorView { text in
-                try store.add(text: text)
+            AffirmationEditorView(availableTags: store.availableTags) { text, tags in
+                try store.add(text: text, tags: tags)
             }
         case .edit(let affirmation):
-            AffirmationEditorView(affirmation: affirmation) { text in
-                try store.update(id: affirmation.id, text: text)
+            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags) { text, tags in
+                try store.update(id: affirmation.id, text: text, tags: tags)
             }
         }
     }
@@ -153,6 +187,7 @@ struct LibraryView: View {
 private enum LibraryFilter: Hashable {
     case all
     case favourites
+    case tag(String)
 }
 
 private enum EditorDestination: Identifiable {
@@ -181,6 +216,13 @@ private enum EditorDestination: Identifiable {
     LibraryView(store: AffirmationStore(affirmations: [
         Affirmation(text: "I can take this one step at a time.", isFavorite: true),
         Affirmation(text: "My effort matters.")
+    ]))
+}
+
+#Preview("With tags") {
+    LibraryView(store: AffirmationStore(affirmations: [
+        Affirmation(text: "I can take this one step at a time.", tags: ["Calm", "Work"]),
+        Affirmation(text: "My effort matters.", isFavorite: true, tags: ["Confidence"])
     ]))
 }
 

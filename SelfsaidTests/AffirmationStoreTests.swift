@@ -3,6 +3,55 @@ import Testing
 
 @MainActor
 struct AffirmationStoreTests {
+    @Test("Tags share spelling across entries and filtering ignores case")
+    func sharedTagsAndFiltering() throws {
+        let store = AffirmationStore()
+        let first = try store.add(text: "First", tags: ["Work", "Calm"])
+        let second = try store.add(text: "Second", tags: ["work"])
+        let untagged = try store.add(text: "Third")
+
+        #expect(second.tags == ["Work"])
+        #expect(store.availableTags == ["Calm", "Work"])
+        #expect(store.affirmations(tagged: "WORK") == [first, second])
+        #expect(store.affirmations(tagged: "Missing").isEmpty)
+        #expect(store.affirmations == [first, second, untagged])
+
+        try store.update(id: first.id, text: first.text, tags: [])
+        try store.delete(id: second.id)
+        #expect(store.availableTags.isEmpty)
+        #expect(store.affirmations(tagged: "Work").isEmpty)
+    }
+
+    @Test("Tags are trimmed and blanks and case-insensitive duplicates are removed")
+    func normalizesTags() throws {
+        let store = AffirmationStore()
+        let affirmation = try store.add(
+            text: "Tagged", tags: [" Work ", "", "work", "\nConfidence\n"]
+        )
+        #expect(affirmation.tags == ["Work", "Confidence"])
+    }
+
+    @Test("Tag edits persist without changing favourites or refreshing reminders")
+    func editsTags() throws {
+        let original = Affirmation(text: "Keep me", isFavorite: true, tags: ["Work"])
+        let repository = InMemoryAffirmationRepository(affirmations: [original])
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [])
+        var reminderChanges = 0
+        store.willChangeReminderText = { reminderChanges += 1 }
+        store.didChangeReminderText = { reminderChanges += 1 }
+
+        try store.update(id: original.id, text: original.text, tags: [" Calm ", "calm"])
+        let restarted = AffirmationStore(repository: repository, defaultAffirmations: [])
+        #expect(restarted.affirmations.first?.tags == ["Calm"])
+        #expect(restarted.affirmations.first?.isFavorite == true)
+        #expect(reminderChanges == 0)
+
+        try store.update(id: original.id, text: "New text")
+        #expect(store.affirmations.first?.tags == ["Calm"])
+        try store.update(id: original.id, text: "New text", tags: [])
+        #expect(store.affirmations.first?.tags == [])
+    }
+
     @Test("An affirmation can be added")
     func add() throws {
         let store = AffirmationStore()

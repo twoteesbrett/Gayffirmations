@@ -14,18 +14,34 @@ struct PersistenceRepositoryTests {
         #expect(try fixture.repository.loadTheme() == nil)
     }
 
-    @Test("Affirmations retain their identity, text, and favorite state")
+    @Test("Affirmations retain their identity, text, favorite state, and tags")
     func affirmationRoundTrip() throws {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
         let affirmations = [
-            Affirmation(text: "First", isFavorite: true),
+            Affirmation(text: "First", isFavorite: true, tags: ["Work", "Confidence"]),
             Affirmation(text: "Second")
         ]
 
         try fixture.repository.saveAffirmations(affirmations)
 
         #expect(try fixture.repository.loadAffirmations() == affirmations)
+    }
+
+    @Test("Saved entries from before tags load without losing existing data")
+    func loadsLegacyAffirmations() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let id = UUID()
+        let data = Data("""
+        [{"id":"\(id.uuidString)","text":"Keep me","isFavorite":true}]
+        """.utf8)
+        fixture.userDefaults.set(data, forKey: "Selfsaid.affirmations")
+
+        let loaded = try fixture.repository.loadAffirmations()
+        #expect(loaded == [Affirmation(id: id, text: "Keep me", isFavorite: true)])
+        try fixture.repository.saveAffirmations(loaded!)
+        #expect(try fixture.repository.loadAffirmations() == loaded)
     }
 
     @Test("A schedule can be saved and loaded")

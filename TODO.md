@@ -72,14 +72,15 @@ Work from top to bottom, keeping the app runnable after each milestone.
 
 ## 8. Library organisation
 
-- [ ] Add optional tags to affirmations, allowing more than one tag per entry.
-- [ ] Add tag selection and creation to the affirmation editor.
-- [ ] Add Library filters for all affirmations, favourites, and individual tags.
-- [ ] Show a useful empty state when a filter has no matching affirmations.
-- [ ] Save and restore tags while keeping existing saved affirmations and
+- [x] Add optional tags to affirmations, allowing more than one tag per entry.
+- [x] Add tag selection and creation to the affirmation editor.
+- [x] Add Library filters for all affirmations, favourites, and individual tags.
+- [x] Show a useful empty state when a filter has no matching affirmations.
+- [x] Save and restore tags while keeping existing saved affirmations and
       favourite status compatible.
-- [ ] Test tag editing, filtering, and loading existing saved data.
-- [ ] Keep the initial scope simple: no tag colours, nested categories, or
+- [x] Test tag editing and loading existing saved data.
+- [x] Test tag filtering.
+- [x] Keep the initial scope simple: no tag colours, nested categories, or
       separate tag-management screen.
 
 ## 9. Visual polish

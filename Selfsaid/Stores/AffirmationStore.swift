@@ -30,6 +30,22 @@ final class AffirmationStore {
     private let repository: (any AffirmationRepository)?
     let defaultAffirmations: [Affirmation]
 
+    var availableTags: [String] {
+        var names: [String] = []
+        for tag in affirmations.flatMap(\.tags) {
+            if !names.contains(where: { tagsMatch($0, tag) }) {
+                names.append(tag)
+            }
+        }
+        return names.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+
+    func affirmations(tagged tag: String) -> [Affirmation] {
+        affirmations.filter { affirmation in
+            affirmation.tags.contains { tagsMatch($0, tag) }
+        }
+    }
+
     init(
         affirmations: [Affirmation] = [],
         repository: (any AffirmationRepository)? = nil
@@ -60,13 +76,17 @@ final class AffirmationStore {
     }
 
     @discardableResult
-    func add(text: String) throws -> Affirmation {
-        let affirmation = Affirmation(text: try validatedText(text))
+    func add(text: String, tags: [String] = []) throws -> Affirmation {
+        let affirmation = Affirmation(
+            text: try validatedText(text),
+            tags: normalizedTags(tags)
+        )
         try persist(affirmations + [affirmation])
         return affirmation
     }
 
-    func update(id: Affirmation.ID, text: String) throws {
+    // Omitting tags preserves them for callers that only edit text.
+    func update(id: Affirmation.ID, text: String, tags: [String]? = nil) throws {
         let text = try validatedText(text, excluding: id)
 
         guard let index = affirmations.firstIndex(where: { $0.id == id }) else {
@@ -75,6 +95,9 @@ final class AffirmationStore {
 
         var updatedAffirmations = affirmations
         updatedAffirmations[index].text = text
+        if let tags {
+            updatedAffirmations[index].tags = normalizedTags(tags)
+        }
         try persist(updatedAffirmations)
     }
 
@@ -114,6 +137,24 @@ final class AffirmationStore {
         if reminderTextChanged {
             didChangeReminderText?()
         }
+    }
+
+    private func normalizedTags(_ tags: [String]) -> [String] {
+        var result: [String] = []
+        for tag in tags {
+            let name = tag.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { continue }
+            let isDuplicate = result.contains { tagsMatch($0, name) }
+            if !isDuplicate {
+                // Reuse the spelling already used elsewhere in the library.
+                result.append(availableTags.first { tagsMatch($0, name) } ?? name)
+            }
+        }
+        return result
+    }
+
+    private func tagsMatch(_ first: String, _ second: String) -> Bool {
+        first.compare(second, options: .caseInsensitive) == .orderedSame
     }
 
     private func validatedText(
