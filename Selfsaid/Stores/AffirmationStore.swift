@@ -41,9 +41,7 @@ final class AffirmationStore {
     }
 
     func affirmations(tagged tag: String) -> [Affirmation] {
-        affirmations.filter { affirmation in
-            affirmation.tags.contains { tagsMatch($0, tag) }
-        }
+        AffirmationSelection.tag(tag).matchingAffirmations(in: affirmations)
     }
 
     init(

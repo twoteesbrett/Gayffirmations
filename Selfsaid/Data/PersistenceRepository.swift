@@ -23,16 +23,22 @@ protocol ThemeRepository {
     func saveTheme(_ theme: AppTheme) throws
 }
 
+protocol AffirmationSelectionRepository {
+    func loadAffirmationSelection() throws -> AffirmationSelection?
+    func saveAffirmationSelection(_ selection: AffirmationSelection) throws
+}
+
 protocol AppDataRepository {
     // A throwing save must leave all three sections unchanged.
     func saveAppData(affirmations: [Affirmation], schedule: AffirmationSchedule, theme: AppTheme) throws
 }
 
-final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, ThemeRepository, AppDataRepository {
+final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, ThemeRepository, AffirmationSelectionRepository, AppDataRepository {
     private enum Key {
         static let affirmations = "Selfsaid.affirmations"
         static let schedule = "Selfsaid.schedule"
         static let theme = "Selfsaid.theme"
+        static let affirmationSelection = "Selfsaid.affirmationSelection"
     }
 
     private let userDefaults: UserDefaults
@@ -71,6 +77,14 @@ final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, T
 
     func saveTheme(_ theme: AppTheme) throws {
         try save(theme, forKey: Key.theme)
+    }
+
+    func loadAffirmationSelection() throws -> AffirmationSelection? {
+        try load(AffirmationSelection.self, forKey: Key.affirmationSelection)
+    }
+
+    func saveAffirmationSelection(_ selection: AffirmationSelection) throws {
+        try save(selection, forKey: Key.affirmationSelection)
     }
 
     func saveAppData(

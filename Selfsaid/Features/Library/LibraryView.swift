@@ -95,7 +95,7 @@ struct LibraryView: View {
         case .all:
             store.affirmations
         case .favourites:
-            store.affirmations.filter(\.isFavorite)
+            AffirmationSelection.favourites.matchingAffirmations(in: store.affirmations)
         case .tag(let tag):
             store.affirmations(tagged: tag)
         }
