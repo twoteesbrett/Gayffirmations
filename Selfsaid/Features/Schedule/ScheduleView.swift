@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ScheduleView: View {
     let store: ScheduleStore
@@ -6,6 +7,7 @@ struct ScheduleView: View {
 
     @State private var presentedError: PresentedError?
     @State private var isUpdatingSchedule = false
+    @Environment(\.openURL) private var openURL
 
     private let calculator = ScheduleCalculator()
 
@@ -51,11 +53,7 @@ struct ScheduleView: View {
             .disabled(isUpdatingSchedule)
             .navigationTitle("Schedule")
             .alert(item: $presentedError) { presentedError in
-                Alert(
-                    title: Text(presentedError.title),
-                    message: Text(presentedError.message),
-                    dismissButton: .cancel(Text("OK"))
-                )
+                alert(for: presentedError)
             }
         }
     }
@@ -153,10 +151,39 @@ struct ScheduleView: View {
             } catch {
                 presentedError = PresentedError(
                     title: "Unable to Update Schedule",
-                    message: error.localizedDescription
+                    message: error.localizedDescription,
+                    offersSettings: (error as? NotificationCoordinatorError)
+                        == .permissionDenied
                 )
             }
         }
+    }
+
+    private func alert(for error: PresentedError) -> Alert {
+        guard error.offersSettings else {
+            return Alert(
+                title: Text(error.title),
+                message: Text(error.message),
+                dismissButton: .cancel(Text("OK"))
+            )
+        }
+
+        return Alert(
+            title: Text("Notifications Are Off"),
+            message: Text(error.message),
+            primaryButton: .default(Text("Open Settings")) {
+                openAppSettings()
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func openAppSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
+            return
+        }
+
+        openURL(settingsURL)
     }
 }
 
@@ -178,4 +205,5 @@ private struct PresentedError: Identifiable {
     let id = UUID()
     let title: String
     let message: String
+    let offersSettings: Bool
 }
