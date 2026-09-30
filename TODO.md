@@ -111,20 +111,22 @@ once each. Library browsing filters remain independent.
 - [x] Test selection matching, persistence compatibility, and failed saves.
 - [x] Test Today navigation, reminder refresh and cancellation, recovery from
       an empty selection, reset behaviour, and scheduling failures.
-- [ ] Verify selection controls and empty states with Dynamic Type and VoiceOver.
+- [x] Verify selection controls and empty states with Dynamic Type and VoiceOver.
 
   Source review completed: tag labels wrap, long source summaries stack, the
   decorative selection checkmark is hidden from VoiceOver, matching counts have
   an explicit accessibility label/value, and empty Today selections omit inactive
   navigation controls. Preview cases cover long/missing tags, no sources, and
-  empty Today at the largest accessibility text size. Live verification remains:
-  - At the largest text size, check Settings → Source and Affirmation Selection
-    for full labels, reachable toggles, and a scrollable matching-count section.
-  - With VoiceOver, confirm All affirmations announces its selected state,
-    favourites/tag switches announce their labels and on/off state, and the
-    matching count reads correctly after a change.
-  - Check no sources, no favourites, a missing selected tag, and an empty library:
-    Today and Settings should explain recovery, with every message reachable.
+  empty Today at the largest accessibility text size.
+  User performed the guided live checks on 1 October 2026 and confirmed:
+  - Large text leaves source labels readable, switches reachable, and the
+    matching-count section scrollable.
+  - Turning every source off shows a count of zero and a readable Today recovery
+    message without navigation buttons; choosing All restores Today content.
+  - VoiceOver announces All's selected state, favourites/tag labels and switch
+    states, and the updated matching count. Recovery messages and the path back
+    to All affirmations are reachable.
+  Missing-tag and empty-library cases remain preview/source-review coverage.
 
 ## 10. Visual polish
 
