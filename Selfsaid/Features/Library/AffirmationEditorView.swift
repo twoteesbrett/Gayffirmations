@@ -77,7 +77,7 @@ struct AffirmationEditorView: View {
     private var tagSection: some View {
         Section {
             ForEach(tagChoices, id: \.self) { tag in
-                Toggle(tag, isOn: Binding(
+                Toggle(tag.lowercased(), isOn: Binding(
                     get: { selectedTags.contains(tag) },
                     set: { isSelected in
                         if isSelected {

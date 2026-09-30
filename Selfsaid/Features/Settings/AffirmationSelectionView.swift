@@ -47,7 +47,7 @@ struct AffirmationSelectionView: View {
                         get: { selection.containsTag(tag) },
                         set: { saveSelection(selection.selectingTag(tag, included: $0)) }
                     )) {
-                        Text("Tag: \(tag)")
+                        Text("Tag: \(tag.lowercased())")
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }

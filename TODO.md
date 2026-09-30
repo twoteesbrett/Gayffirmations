@@ -130,7 +130,15 @@ once each. Library browsing filters remain independent.
 
 ## 10. Visual polish
 
-- [ ] Refine the Library layout around tag and favourites filters.
+- [x] Refine the Library layout around tag and favourites filters.
+
+  First polish pass adds visible All, Favourites, and Tags controls, a tag
+  selection sheet, a matching count, roomier rows, and theme-coloured 44-point
+  favourite buttons. Library browsing supports favourites and multiple tags
+  using the shared any-source matching rule, independently of Settings.
+  Active tags wrap below the controls; clearing all filters shows all entries.
+  Dark appearance and long-tag accessibility previews are included. Simulator
+  build passes; live visual and VoiceOver review remains part of the final pass.
 - [ ] Finalize the identity, typography, colors, and imagery for each theme.
 - [ ] Refine each theme's light and dark appearance.
 - [ ] Replace temporary theme previews with final artwork.

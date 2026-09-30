@@ -24,7 +24,7 @@ enum AffirmationSelection: Codable, Hashable {
 
     var name: String {
         if self == .all { return "All affirmations" }
-        let names = (includesFavourites ? ["Favourites"] : []) + selectedTags
+        let names = (includesFavourites ? ["Favourites"] : []) + selectedTags.map { $0.lowercased() }
         return names.isEmpty ? "None selected" : names.joined(separator: ", ")
     }
 
@@ -35,7 +35,7 @@ enum AffirmationSelection: Codable, Hashable {
         case .favourites:
             "Mark an affirmation as a favourite in Library or change your selection in Settings."
         case .tag(let tag):
-            "Add the tag “\(tag)” to an affirmation in Library or change your selection in Settings."
+            "Add the tag “\(tag.lowercased())” to an affirmation in Library or change your selection in Settings."
         case .sources:
             "Choose favourites or tags in Settings, or add matching entries in Library."
         }
