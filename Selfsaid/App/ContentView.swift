@@ -42,11 +42,13 @@ struct ContentView: View {
     var body: some View {
         TabView {
             TodayView(store: affirmationStore)
+                .floatingTabBarClearance()
                 .tabItem {
                     Label("Today", systemImage: "sun.max")
                 }
 
             LibraryView(store: affirmationStore)
+                .floatingTabBarClearance()
                 .tabItem {
                     Label("Library", systemImage: "books.vertical")
                 }
@@ -55,6 +57,7 @@ struct ContentView: View {
                 store: scheduleStore,
                 notificationCoordinator: notificationCoordinator
             )
+                .floatingTabBarClearance()
                 .tabItem {
                     Label("Schedule", systemImage: "clock")
                 }
@@ -83,6 +86,21 @@ struct ContentView: View {
                 }
             }
         )
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func floatingTabBarClearance() -> some View {
+        if #available(iOS 26.0, *) {
+            safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear
+                    .frame(height: 72)
+                    .accessibilityHidden(true)
+            }
+        } else {
+            self
+        }
     }
 }
 

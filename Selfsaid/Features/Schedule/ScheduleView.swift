@@ -201,6 +201,21 @@ struct ScheduleView: View {
     )
 }
 
+#Preview("Accessibility text size") {
+    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let scheduleStore = ScheduleStore()
+
+    ScheduleView(
+        store: scheduleStore,
+        notificationCoordinator: NotificationCoordinator(
+            affirmationStore: affirmationStore,
+            scheduleStore: scheduleStore,
+            scheduler: LocalNotificationService()
+        )
+    )
+    .environment(\.dynamicTypeSize, .accessibility5)
+}
+
 private struct PresentedError: Identifiable {
     let id = UUID()
     let title: String

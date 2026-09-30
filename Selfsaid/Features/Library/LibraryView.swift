@@ -49,12 +49,15 @@ struct LibraryView: View {
     private var affirmationList: some View {
         List(store.affirmations) { affirmation in
             HStack(spacing: 12) {
-                Text(affirmation.text)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        editorDestination = .edit(affirmation)
-                    }
+                Button {
+                    editorDestination = .edit(affirmation)
+                } label: {
+                    Text(affirmation.text)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens the affirmation editor")
 
                 Button {
                     performPersistedChange {
@@ -139,4 +142,9 @@ private enum EditorDestination: Identifiable {
 
 #Preview("Empty") {
     LibraryView(store: AffirmationStore())
+}
+
+#Preview("Accessibility text size") {
+    LibraryView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.dynamicTypeSize, .accessibility5)
 }

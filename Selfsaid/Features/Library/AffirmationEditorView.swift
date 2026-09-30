@@ -9,6 +9,7 @@ struct AffirmationEditorView: View {
     @State private var text: String
     @State private var validationMessage: String?
     @FocusState private var textFieldIsFocused: Bool
+    @AccessibilityFocusState private var validationMessageIsFocused: Bool
 
     init(
         affirmation: Affirmation? = nil,
@@ -30,10 +31,13 @@ struct AffirmationEditorView: View {
                     )
                     .lineLimit(3...8)
                     .focused($textFieldIsFocused)
+                    .accessibilityLabel("Affirmation text")
 
                     if let validationMessage {
                         Text(validationMessage)
                             .foregroundStyle(.red)
+                            .accessibilityLabel("Error: \(validationMessage)")
+                            .accessibilityFocused($validationMessageIsFocused)
                     }
                 }
             }
@@ -64,6 +68,7 @@ struct AffirmationEditorView: View {
             dismiss()
         } catch {
             validationMessage = error.localizedDescription
+            validationMessageIsFocused = true
         }
     }
 }
