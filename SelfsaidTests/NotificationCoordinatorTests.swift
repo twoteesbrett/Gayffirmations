@@ -134,12 +134,14 @@ struct NotificationCoordinatorTests {
     private func makeCoordinator(
         scheduler: NotificationSchedulerSpy,
         isEnabled: Bool = false,
-        affirmations: [Affirmation] = [
-            Affirmation(text: "One"),
-            Affirmation(text: "Two")
-        ]
+        affirmations: [Affirmation]? = nil
     ) -> (NotificationCoordinator, ScheduleStore) {
-        let affirmationStore = AffirmationStore(affirmations: affirmations)
+        let affirmationStore = AffirmationStore(
+            affirmations: affirmations ?? [
+                Affirmation(text: "One"),
+                Affirmation(text: "Two")
+            ]
+        )
         let scheduleStore = ScheduleStore(
             schedule: AffirmationSchedule(
                 isEnabled: isEnabled,
