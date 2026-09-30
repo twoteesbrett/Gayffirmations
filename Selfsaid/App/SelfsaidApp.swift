@@ -60,7 +60,7 @@ struct SelfsaidApp: App {
             )
             .environment(\.appTheme, themeStore.selectedTheme)
             .tint(themeStore.selectedTheme.accentColor)
-            .preferredColorScheme(themeStore.selectedTheme.preferredColorScheme)
+            .fontDesign(themeStore.selectedTheme.fontDesign)
         }
     }
 }

@@ -23,12 +23,20 @@ struct TodayView: View {
                     Spacer()
 
                     if let affirmation = deck.currentAffirmation {
+                        Image(systemName: appTheme.symbol)
+                            .font(.system(size: 36, weight: .light))
+                            .foregroundStyle(appTheme.accentColor)
+                            .accessibilityHidden(true)
+
                         Text("TODAY'S AFFIRMATION")
-                            .font(.caption)
+                            .font(.caption.weight(.semibold))
+                            .tracking(2)
                             .foregroundStyle(.secondary)
 
                         Text(affirmation.text)
-                            .font(.title)
+                            .font(appTheme.affirmationFont)
+                            .lineSpacing(6)
+                            .frame(maxWidth: 560)
                             .multilineTextAlignment(.center)
                             .accessibilityLabel("Affirmation: \(affirmation.text)")
                     } else {
@@ -45,7 +53,8 @@ struct TodayView: View {
                         navigationControls
                     }
                 }
-                .padding()
+                .padding(.horizontal, 28)
+                .padding(.vertical, 24)
                 .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }
         }
@@ -67,13 +76,15 @@ struct TodayView: View {
                     nextButton
                 }
             } else {
-                HStack(spacing: 40) {
+                HStack(spacing: 16) {
                     previousButton
                     nextButton
                 }
             }
         }
         .buttonStyle(.bordered)
+        .buttonBorderShape(.capsule)
+        .controlSize(.large)
         .disabled(!deck.canNavigate)
     }
 
@@ -110,4 +121,68 @@ struct TodayView: View {
         selectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
     )
     .environment(\.dynamicTypeSize, .accessibility5)
+}
+
+#Preview("Warm Coast — light") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .warm)
+        .tint(AppTheme.warm.accentColor)
+        .fontDesign(AppTheme.warm.fontDesign)
+        .preferredColorScheme(.light)
+}
+
+#Preview("Warm Coast — dark") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .warm)
+        .tint(AppTheme.warm.accentColor)
+        .fontDesign(AppTheme.warm.fontDesign)
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Midnight — light") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .midnight)
+        .tint(AppTheme.midnight.accentColor)
+        .fontDesign(AppTheme.midnight.fontDesign)
+        .preferredColorScheme(.light)
+}
+
+#Preview("Midnight — dark") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .midnight)
+        .tint(AppTheme.midnight.accentColor)
+        .fontDesign(AppTheme.midnight.fontDesign)
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Playful Pop — light") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .playful)
+        .tint(AppTheme.playful.accentColor)
+        .fontDesign(AppTheme.playful.fontDesign)
+        .preferredColorScheme(.light)
+}
+
+#Preview("Playful Pop — dark") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .playful)
+        .tint(AppTheme.playful.accentColor)
+        .fontDesign(AppTheme.playful.fontDesign)
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Quiet Linen — light") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .refined)
+        .tint(AppTheme.refined.accentColor)
+        .fontDesign(AppTheme.refined.fontDesign)
+        .preferredColorScheme(.light)
+}
+
+#Preview("Quiet Linen — dark") {
+    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+        .environment(\.appTheme, .refined)
+        .tint(AppTheme.refined.accentColor)
+        .fontDesign(AppTheme.refined.fontDesign)
+        .preferredColorScheme(.dark)
 }

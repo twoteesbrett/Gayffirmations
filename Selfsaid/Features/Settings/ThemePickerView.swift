@@ -53,16 +53,10 @@ private struct ThemePreviewRow: View {
             RoundedRectangle(cornerRadius: 14)
                 .fill(theme.backgroundGradient)
                 .frame(width: 72, height: 58)
-                .overlay(alignment: .bottomLeading) {
-                    HStack(spacing: 4) {
-                        ForEach(Array(theme.previewColors.enumerated()), id: \.offset) {
-                            _, color in
-                            Circle()
-                                .fill(color)
-                                .frame(width: 12, height: 12)
-                        }
-                    }
-                    .padding(8)
+                .overlay {
+                    Image(systemName: theme.symbol)
+                        .font(.system(size: 26, weight: .light))
+                        .foregroundStyle(theme.accentColor)
                 }
                 .overlay {
                     RoundedRectangle(cornerRadius: 14)

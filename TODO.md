@@ -141,6 +141,13 @@ once each. Library browsing filters remain independent.
   build passes; live visual and VoiceOver review remains part of the final pass.
 - [ ] Finalize the identity, typography, colors, and imagery for each theme.
 - [ ] Refine each theme's light and dark appearance.
+
+  Theme styling pass centralizes adaptive accent/background colours, typography,
+  and a decorative symbol for each theme. Today uses larger, scalable type and
+  capsule navigation controls. The theme picker shares the same palette and
+  symbol; app screens inherit the selected type design and follow system
+  appearance. Eight Today previews cover every theme in light and dark.
+  Simulator build passes; visual approval and final artwork remain pending.
 - [ ] Replace temporary theme previews with final artwork.
 - [ ] Add restrained transitions and haptics.
 - [ ] Create an app icon and launch presentation.

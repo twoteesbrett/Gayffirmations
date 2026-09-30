@@ -1,67 +1,66 @@
 import SwiftUI
+import UIKit
 
 extension AppTheme {
     var accentColor: Color {
         switch self {
-        case .warm:
-            Color(red: 0.88, green: 0.32, blue: 0.20)
-        case .midnight:
-            Color(red: 0.38, green: 0.84, blue: 0.82)
-        case .playful:
-            Color(red: 0.93, green: 0.12, blue: 0.46)
-        case .refined:
-            Color(red: 0.08, green: 0.25, blue: 0.20)
-        }
-    }
-
-    var previewColors: [Color] {
-        switch self {
-        case .warm:
-            [.orange, Color(red: 1, green: 0.72, blue: 0.56), .blue]
-        case .midnight:
-            [.purple, .pink, .cyan]
-        case .playful:
-            [.pink, .yellow, .mint]
-        case .refined:
-            [Color(red: 0.08, green: 0.25, blue: 0.20), .brown, .white]
+        case .warm: adaptiveColor(light: 0xA8432D, dark: 0xFFB199)
+        case .midnight: adaptiveColor(light: 0x286B70, dark: 0x80D6D0)
+        case .playful: adaptiveColor(light: 0xAD285A, dark: 0xFFA6CC)
+        case .refined: adaptiveColor(light: 0x315B48, dark: 0xB7CFAC)
         }
     }
 
     var backgroundGradient: LinearGradient {
         let colors: [Color]
-
         switch self {
         case .warm:
-            colors = [
-                Color(red: 1, green: 0.93, blue: 0.88),
-                Color(red: 1, green: 0.78, blue: 0.66)
-            ]
+            colors = [adaptiveColor(light: 0xFFF5EB, dark: 0x291C19),
+                      adaptiveColor(light: 0xF5D6C2, dark: 0x422920)]
         case .midnight:
-            colors = [
-                Color(red: 0.05, green: 0.07, blue: 0.13),
-                Color(red: 0.16, green: 0.09, blue: 0.24)
-            ]
+            colors = [adaptiveColor(light: 0xF0EFF8, dark: 0x101827),
+                      adaptiveColor(light: 0xD7DFEC, dark: 0x292039)]
         case .playful:
-            colors = [
-                Color(red: 1, green: 0.88, blue: 0.92),
-                Color(red: 0.95, green: 0.78, blue: 0.94)
-            ]
+            colors = [adaptiveColor(light: 0xFFF1F5, dark: 0x2B192C),
+                      adaptiveColor(light: 0xEEDDF6, dark: 0x41213C)]
         case .refined:
-            colors = [
-                Color(red: 0.95, green: 0.92, blue: 0.86),
-                Color(red: 0.83, green: 0.80, blue: 0.71)
-            ]
+            colors = [adaptiveColor(light: 0xF6F3EA, dark: 0x20231E),
+                      adaptiveColor(light: 0xE2DDCF, dark: 0x33382E)]
         }
-
-        return LinearGradient(
-            colors: colors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
-    var preferredColorScheme: ColorScheme? {
-        self == .midnight ? .dark : .light
+    var fontDesign: Font.Design {
+        switch self {
+        case .warm, .midnight: .default
+        case .playful: .rounded
+        case .refined: .serif
+        }
+    }
+
+    var affirmationFont: Font {
+        .system(.largeTitle, design: fontDesign, weight: self == .playful ? .semibold : .regular)
+    }
+
+    var symbol: String {
+        switch self {
+        case .warm: "sun.horizon"
+        case .midnight: "moon.stars"
+        case .playful: "sparkles"
+        case .refined: "leaf"
+        }
+    }
+
+    private func adaptiveColor(light: UInt32, dark: UInt32) -> Color {
+        Color(uiColor: UIColor { traits in
+            let hex = traits.userInterfaceStyle == .dark ? dark : light
+            return UIColor(
+                red: CGFloat((hex >> 16) & 0xFF) / 255,
+                green: CGFloat((hex >> 8) & 0xFF) / 255,
+                blue: CGFloat(hex & 0xFF) / 255,
+                alpha: 1
+            )
+        })
     }
 }
 
