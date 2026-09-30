@@ -36,7 +36,8 @@ struct SelfsaidApp: App {
         let notificationCoordinator = NotificationCoordinator(
             affirmationStore: affirmationStore,
             scheduleStore: scheduleStore,
-            scheduler: LocalNotificationService()
+            scheduler: LocalNotificationService(),
+            selectionStore: AffirmationSelectionStore(repository: repository)
         )
         self.notificationCoordinator = notificationCoordinator
         resetCoordinator = AppDataResetCoordinator(

@@ -30,7 +30,8 @@ final class AppDataResetCoordinator {
         let failures = [
             affirmationStore.persistenceErrorMessage,
             scheduleStore.persistenceErrorMessage,
-            themeStore.persistenceErrorMessage
+            themeStore.persistenceErrorMessage,
+            notificationCoordinator.selectionStore.persistenceErrorMessage
         ].compactMap { $0 }
         guard failures.isEmpty else {
             throw PersistenceUnavailableError(reason: failures.joined(separator: "\n"))
@@ -40,11 +41,13 @@ final class AppDataResetCoordinator {
         try repository.saveAppData(
             affirmations: affirmationStore.defaultAffirmations,
             schedule: scheduleStore.defaultSchedule,
-            theme: themeStore.defaultTheme
+            theme: themeStore.defaultTheme,
+            selection: .all
         )
         affirmationStore.applyPersistedDefaults()
         scheduleStore.applyPersistedDefaults()
         themeStore.applyPersistedDefaults()
+        notificationCoordinator.selectionStore.applyPersistedDefaults()
         notificationCoordinator.removePendingReminders()
     }
 }

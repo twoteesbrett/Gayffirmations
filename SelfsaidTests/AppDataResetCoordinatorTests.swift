@@ -25,6 +25,7 @@ struct AppDataResetCoordinatorTests {
         try library.add(text: "Custom")
         try theme.select(.midnight)
         try await coordinator.setEnabled(true)
+        try await coordinator.setSelection(.tag("Work"))
         let originalLibrary = library.affirmations
         let originalSchedule = schedule.schedule
         let originalReminders = scheduler.scheduledReminders
@@ -35,12 +36,14 @@ struct AppDataResetCoordinatorTests {
         #expect(library.affirmations == originalLibrary)
         #expect(schedule.schedule == originalSchedule)
         #expect(theme.selectedTheme == .midnight)
+        #expect(coordinator.selectionStore.selection == .tag("Work"))
         #expect(scheduler.scheduledReminders == originalReminders)
         repository.shouldFail = false
         try resetCoordinator.resetAll()
         #expect(library.affirmations == defaults)
         #expect(schedule.schedule == AffirmationSchedule())
         #expect(theme.selectedTheme == .warm)
+        #expect(coordinator.selectionStore.selection == .all)
         #expect(scheduler.scheduledReminders.isEmpty)
         #expect(repository.didSave)
     }
@@ -57,7 +60,8 @@ struct AppDataResetCoordinatorTests {
         let theme = ThemeStore(repository: repository, defaultTheme: .warm)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule,
-            scheduler: NotificationSchedulerSpy(authorizationStatus: .authorized)
+            scheduler: NotificationSchedulerSpy(authorizationStatus: .authorized),
+            selectionStore: AffirmationSelectionStore(repository: repository)
         )
         let resetCoordinator = AppDataResetCoordinator(
             affirmationStore: library,
@@ -69,7 +73,9 @@ struct AppDataResetCoordinatorTests {
         try library.add(text: "Custom")
         try theme.select(.midnight)
         try await coordinator.setEnabled(true)
+        try await coordinator.setSelection(.favourites)
         try resetCoordinator.resetAll()
+        #expect(try repository.loadAffirmationSelection() == .all)
         #expect(try repository.loadAffirmations() == defaults)
         #expect(try repository.loadSchedule() == AffirmationSchedule())
         #expect(try repository.loadTheme() == .warm)
@@ -114,7 +120,7 @@ private final class ResetRepositorySpy: AppDataRepository {
     var shouldFail = false
     var didSave = false
 
-    func saveAppData(affirmations: [Affirmation], schedule: AffirmationSchedule, theme: AppTheme) throws {
+    func saveAppData(affirmations: [Affirmation], schedule: AffirmationSchedule, theme: AppTheme, selection: AffirmationSelection) throws {
         if shouldFail { throw NotificationSchedulerTestError.failed }
         didSave = true
     }

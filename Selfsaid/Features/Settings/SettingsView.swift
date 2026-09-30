@@ -21,6 +21,21 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Affirmation selection") {
+                    NavigationLink {
+                        AffirmationSelectionView(
+                            affirmationStore: affirmationStore,
+                            notificationCoordinator: notificationCoordinator
+                        )
+                    } label: {
+                        LabeledContent("Source", value: notificationCoordinator.selectionStore.selection.name)
+                    }
+                    if notificationCoordinator.selectedAffirmations.isEmpty {
+                        Text(notificationCoordinator.selectionStore.selection.emptyMessage)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section("Notifications") {
                     NavigationLink {
                         ScheduleView(
@@ -29,7 +44,7 @@ struct SettingsView: View {
                         )
                     } label: {
                         LabeledContent("Daily reminders") {
-                            Text(scheduleStore.schedule.isEnabled ? "On" : "Off")
+                            Text(notificationCoordinator.deliveryIsPaused ? "Paused" : (scheduleStore.schedule.isEnabled ? "On" : "Off"))
                         }
                     }
                 }
@@ -151,7 +166,7 @@ private enum ResetAction: String, Identifiable {
         case .schedule:
             "This turns off daily reminders, restores the default times, and removes pending notifications."
         case .all:
-            "This restores the affirmation library, notification schedule, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
+            "This restores the affirmation library, notification schedule, affirmation selection, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
         }
     }
 }

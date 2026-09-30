@@ -30,6 +30,10 @@ final class AffirmationSelectionStore {
         }
     }
 
+    func applyPersistedDefaults() {
+        selection = .all
+    }
+
     func select(_ selection: AffirmationSelection) throws {
         if let persistenceErrorMessage {
             throw PersistenceUnavailableError(reason: persistenceErrorMessage)

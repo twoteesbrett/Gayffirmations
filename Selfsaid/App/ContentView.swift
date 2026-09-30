@@ -36,6 +36,9 @@ struct ContentView: View {
             scheduleStore.persistenceErrorMessage.map {
                 "Schedule: \($0)"
             },
+            notificationCoordinator.selectionStore.persistenceErrorMessage.map {
+                "Affirmation selection: \($0)"
+            },
             themeStore.persistenceErrorMessage.map {
                 "Theme: \($0)"
             }
@@ -50,7 +53,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            TodayView(store: affirmationStore)
+            TodayView(store: affirmationStore, selectionStore: notificationCoordinator.selectionStore)
                 .floatingTabBarClearance()
                 .tabItem {
                     Label("Today", systemImage: "sun.max")
@@ -73,6 +76,9 @@ struct ContentView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
+        }
+        .task {
+            await notificationCoordinator.reconcileOnLaunch()
         }
         .alert("Unable to Update Reminders", isPresented: Binding(
             get: { notificationCoordinator.errorMessage != nil },

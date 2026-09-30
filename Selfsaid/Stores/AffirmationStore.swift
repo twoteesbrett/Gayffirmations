@@ -21,11 +21,9 @@ final class AffirmationStore {
     private(set) var affirmations: [Affirmation]
     private(set) var persistenceErrorMessage: String?
 
-    // The coordinator can reject a text edit before it is saved (for example,
-    // while reminders are updating), then refresh reminders after a saved edit.
-    // Favorite changes bypass both hooks.
-    var willChangeReminderText: (() throws -> Void)?
-    var didChangeReminderText: (() -> Void)?
+    // The coordinator checks delivery changes before saving and refreshes afterward.
+    var willChangeAffirmations: (([Affirmation]) throws -> Void)?
+    var didChangeAffirmations: (([Affirmation]) -> Void)?
 
     private let repository: (any AffirmationRepository)?
     let defaultAffirmations: [Affirmation]
@@ -126,15 +124,12 @@ final class AffirmationStore {
             throw PersistenceUnavailableError(reason: persistenceErrorMessage)
         }
 
-        let reminderTextChanged = affirmations.map(\.text) != updatedAffirmations.map(\.text)
-        if reminderTextChanged {
-            try willChangeReminderText?()
-        }
+        guard updatedAffirmations != affirmations else { return }
+        try willChangeAffirmations?(updatedAffirmations)
         try repository?.saveAffirmations(updatedAffirmations)
+        let previousAffirmations = affirmations
         affirmations = updatedAffirmations
-        if reminderTextChanged {
-            didChangeReminderText?()
-        }
+        didChangeAffirmations?(previousAffirmations)
     }
 
     private func normalizedTags(_ tags: [String]) -> [String] {

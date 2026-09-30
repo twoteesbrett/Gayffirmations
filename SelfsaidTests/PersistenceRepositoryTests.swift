@@ -66,10 +66,11 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let affirmations = [Affirmation(text: "Reset")]
         let schedule = AffirmationSchedule()
-        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .warm)
+        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .warm, selection: .favourites)
         #expect(try fixture.repository.loadAffirmations() == affirmations)
         #expect(try fixture.repository.loadSchedule() == schedule)
         #expect(try fixture.repository.loadTheme() == .warm)
+        #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
     @Test("A theme can be saved and loaded")

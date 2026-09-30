@@ -10,7 +10,8 @@ The first version should let someone:
 
 - View an affirmation and move to another one.
 - Add, edit, and delete their own affirmations.
-- Mark affirmations as favorites.
+- Mark affirmations as favorites and organise them with tags.
+- Choose all affirmations, or combine favorites and tags for Today and daily reminders.
 - Keep affirmations and settings after closing the app.
 - Choose how many affirmation notifications they receive each day.
 - Define the daily period in which those notifications may arrive.
@@ -27,6 +28,11 @@ each section.
 
 For example, four notifications between 9:00 AM and 5:00 PM would arrive at
 approximately 10:00 AM, 12:00 PM, 2:00 PM, and 4:00 PM.
+
+Today and reminders share the selection saved in Settings. Combined choices
+include entries matching any choice, once each. Library filters only
+change browsing. If the selected source has no entries, reminders pause while
+retaining the enabled schedule and resume when matching entries return.
 
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be

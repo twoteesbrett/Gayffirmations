@@ -29,8 +29,8 @@ protocol AffirmationSelectionRepository {
 }
 
 protocol AppDataRepository {
-    // A throwing save must leave all three sections unchanged.
-    func saveAppData(affirmations: [Affirmation], schedule: AffirmationSchedule, theme: AppTheme) throws
+    // A throwing save must leave every section unchanged.
+    func saveAppData(affirmations: [Affirmation], schedule: AffirmationSchedule, theme: AppTheme, selection: AffirmationSelection) throws
 }
 
 final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, ThemeRepository, AffirmationSelectionRepository, AppDataRepository {
@@ -90,15 +90,18 @@ final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, T
     func saveAppData(
         affirmations: [Affirmation],
         schedule: AffirmationSchedule,
-        theme: AppTheme
+        theme: AppTheme,
+        selection: AffirmationSelection
     ) throws {
         // Complete every throwing operation before changing any saved data.
         let affirmationData = try encoder.encode(affirmations)
         let scheduleData = try encoder.encode(schedule)
         let themeData = try encoder.encode(theme)
+        let selectionData = try encoder.encode(selection)
         userDefaults.set(affirmationData, forKey: Key.affirmations)
         userDefaults.set(scheduleData, forKey: Key.schedule)
         userDefaults.set(themeData, forKey: Key.theme)
+        userDefaults.set(selectionData, forKey: Key.affirmationSelection)
     }
 
     private func load<Value: Decodable>(

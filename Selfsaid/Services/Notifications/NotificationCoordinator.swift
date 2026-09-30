@@ -24,6 +24,7 @@ final class NotificationCoordinator {
     private(set) var isUpdating = false
     var errorMessage: String?
     private var refreshTask: Task<Void, Never>?
+    let selectionStore: AffirmationSelectionStore
     private let affirmationStore: AffirmationStore
     private let scheduleStore: ScheduleStore
     private let scheduler: any NotificationScheduling
@@ -32,17 +33,21 @@ final class NotificationCoordinator {
     init(
         affirmationStore: AffirmationStore,
         scheduleStore: ScheduleStore,
-        scheduler: any NotificationScheduling
+        scheduler: any NotificationScheduling,
+        selectionStore: AffirmationSelectionStore? = nil
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
         self.scheduler = scheduler
+        self.selectionStore = selectionStore ?? AffirmationSelectionStore()
         planner = NotificationPlanner()
-        affirmationStore.willChangeReminderText = { [weak self] in
+        affirmationStore.willChangeAffirmations = { [weak self] _ in
+            // A pending source change may depend on tags or favourites too.
             try self?.checkIdle()
         }
-        affirmationStore.didChangeReminderText = { [weak self] in
-            self?.refreshAfterLibraryChange()
+        affirmationStore.didChangeAffirmations = { [weak self] previous in
+            guard let self, self.deliveryChanges(from: previous, to: self.affirmationStore.affirmations) else { return }
+            self.refreshAfterLibraryChange()
         }
     }
 
@@ -93,9 +98,10 @@ final class NotificationCoordinator {
     }
 
     private func enableNotifications() async throws {
-        let reminders = try planner.reminders(
+        try checkDeliveryData()
+        let reminders = try plannedReminders(
             for: scheduleStore.schedule,
-            affirmations: affirmationStore.affirmations
+            affirmations: selectedAffirmations
         )
 
         switch await scheduler.authorizationStatus() {
@@ -110,7 +116,7 @@ final class NotificationCoordinator {
         }
 
         do {
-            try await scheduler.replacePendingNotifications(with: reminders)
+            try await replaceReminders(with: reminders)
             try scheduleStore.setEnabled(true)
         } catch {
             if scheduleStore.schedule.isEnabled {
@@ -133,13 +139,14 @@ final class NotificationCoordinator {
             return
         }
 
-        let reminders = try planner.reminders(
+        try checkDeliveryData()
+        let reminders = try plannedReminders(
             for: updatedSchedule,
-            affirmations: affirmationStore.affirmations
+            affirmations: selectedAffirmations
         )
 
         do {
-            try await scheduler.replacePendingNotifications(with: reminders)
+            try await replaceReminders(with: reminders)
             try scheduleStore.replace(with: updatedSchedule)
         } catch {
             try await refreshRemindersOrDisable()
@@ -149,11 +156,12 @@ final class NotificationCoordinator {
 
     private func refreshRemindersOrDisable() async throws {
         do {
-            let reminders = try planner.reminders(
+            try checkDeliveryData()
+            let reminders = try plannedReminders(
                 for: scheduleStore.schedule,
-                affirmations: affirmationStore.affirmations
+                affirmations: selectedAffirmations
             )
-            try await scheduler.replacePendingNotifications(with: reminders)
+            try await replaceReminders(with: reminders)
         } catch {
             scheduler.removePendingNotifications()
             do {
@@ -167,26 +175,114 @@ final class NotificationCoordinator {
         }
     }
 
+    var selectedAffirmations: [Affirmation] {
+        selectionStore.selection.matchingAffirmations(in: affirmationStore.affirmations)
+    }
+
+    var deliveryIsPaused: Bool {
+        scheduleStore.schedule.isEnabled && selectedAffirmations.isEmpty
+    }
+
+    func setSelection(_ selection: AffirmationSelection) async throws {
+        try checkIdle()
+        try checkDeliveryData()
+        guard selection != selectionStore.selection else { return }
+        isUpdating = true
+        defer { isUpdating = false }
+
+        guard scheduleStore.schedule.isEnabled else {
+            try selectionStore.select(selection)
+            return
+        }
+
+        let entries = selection.matchingAffirmations(in: affirmationStore.affirmations)
+        let reminders = try plannedReminders(for: scheduleStore.schedule, affirmations: entries)
+        do {
+            try await replaceReminders(with: reminders)
+            try selectionStore.select(selection)
+        } catch {
+            // The previous selection is still saved; restore its reminders.
+            try await refreshRemindersOrDisable()
+            throw error
+        }
+    }
+
+    func reconcileOnLaunch() async {
+        guard !isUpdating else { return }
+        // Never schedule fallback data after a failed load.
+        guard affirmationStore.persistenceErrorMessage == nil,
+              scheduleStore.persistenceErrorMessage == nil,
+              selectionStore.persistenceErrorMessage == nil else {
+            scheduler.removePendingNotifications()
+            return
+        }
+        guard scheduleStore.schedule.isEnabled else {
+            scheduler.removePendingNotifications()
+            return
+        }
+        isUpdating = true
+        defer { isUpdating = false }
+        do {
+            try await refreshRemindersOrDisable()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func deliveryChanges(from previous: [Affirmation], to updated: [Affirmation]) -> Bool {
+        let selection = selectionStore.selection
+        return selection.matchingAffirmations(in: previous).map(\.text)
+            != selection.matchingAffirmations(in: updated).map(\.text)
+    }
+
+    private func plannedReminders(
+        for schedule: AffirmationSchedule,
+        affirmations: [Affirmation]
+    ) throws -> [NotificationReminder] {
+        // Validate times even while the selected collection is empty.
+        _ = try ScheduleCalculator().notificationTimes(for: schedule)
+        guard !affirmations.isEmpty else { return [] }
+        return try planner.reminders(for: schedule, affirmations: affirmations)
+    }
+
+    private func replaceReminders(with reminders: [NotificationReminder]) async throws {
+        guard !reminders.isEmpty else {
+            scheduler.removePendingNotifications()
+            return
+        }
+        guard await scheduler.authorizationStatus() == .authorized else {
+            throw NotificationCoordinatorError.permissionDenied
+        }
+        try await scheduler.replacePendingNotifications(with: reminders)
+    }
+
     private func checkIdle() throws {
         guard !isUpdating else {
             throw NotificationCoordinatorError.updateInProgress
         }
     }
 
+    private func checkDeliveryData() throws {
+        let failures = [
+            affirmationStore.persistenceErrorMessage,
+            scheduleStore.persistenceErrorMessage,
+            selectionStore.persistenceErrorMessage
+        ].compactMap { $0 }
+        guard failures.isEmpty else {
+            throw PersistenceUnavailableError(reason: failures.joined(separator: "\n"))
+        }
+    }
+
     private func refreshAfterLibraryChange() {
         guard scheduleStore.schedule.isEnabled else { return }
-        // Stop old text immediately, before the asynchronous replacement begins.
+        // Remove outdated delivery immediately, before asynchronous replacement.
         scheduler.removePendingNotifications()
         isUpdating = true
         refreshTask = Task { [weak self] in
             guard let self else { return }
             defer { self.isUpdating = false }
             do {
-                if self.affirmationStore.affirmations.isEmpty {
-                    try self.disableNotifications()
-                } else {
-                    try await self.refreshRemindersOrDisable()
-                }
+                try await self.refreshRemindersOrDisable()
             } catch {
                 self.errorMessage = error.localizedDescription
             }

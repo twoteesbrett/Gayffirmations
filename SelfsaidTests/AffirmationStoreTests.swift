@@ -31,20 +31,20 @@ struct AffirmationStoreTests {
         #expect(affirmation.tags == ["Work", "Confidence"])
     }
 
-    @Test("Tag edits persist without changing favourites or refreshing reminders")
+    @Test("Tag edits persist without changing favourites and notify change observers")
     func editsTags() throws {
         let original = Affirmation(text: "Keep me", isFavorite: true, tags: ["Work"])
         let repository = InMemoryAffirmationRepository(affirmations: [original])
         let store = AffirmationStore(repository: repository, defaultAffirmations: [])
         var reminderChanges = 0
-        store.willChangeReminderText = { reminderChanges += 1 }
-        store.didChangeReminderText = { reminderChanges += 1 }
+        store.willChangeAffirmations = { _ in reminderChanges += 1 }
+        store.didChangeAffirmations = { _ in reminderChanges += 1 }
 
         try store.update(id: original.id, text: original.text, tags: [" Calm ", "calm"])
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: [])
         #expect(restarted.affirmations.first?.tags == ["Calm"])
         #expect(restarted.affirmations.first?.isFavorite == true)
-        #expect(reminderChanges == 0)
+        #expect(reminderChanges == 2)
 
         try store.update(id: original.id, text: "New text")
         #expect(store.affirmations.first?.tags == ["Calm"])

@@ -86,29 +86,31 @@ Complete the intended functionality before continuing visual polish.
 
 ## 9. Affirmation selection and delivery
 
-Start with one shared selection for Today and reminders: all affirmations,
-favourites, or one tag. Library browsing filters remain independent.
+Use one shared selection for Today and reminders: all affirmations, or any
+combination of favourites and tags. Include entries matching any chosen source
+once each. Library browsing filters remain independent.
 
 - [x] Define a small selection model and one shared rule for finding matching
       affirmations; keep selection logic out of views and notification services.
 - [x] Save and restore the selection, defaulting existing installations to all
       affirmations.
-- [ ] Add a selection control in Settings showing the number of matching entries.
-- [ ] Use the selected entries in Today while retaining next/previous behaviour.
-- [ ] Use the same selected entries when planning reminders, retaining the
+- [x] Add selection controls in Settings showing the number of matching entries.
+- [x] Allow favourites and multiple tags together, without duplicate delivery.
+- [x] Use the selected entries in Today while retaining next/previous behaviour.
+- [x] Use the same selected entries when planning reminders, retaining the
       existing notification times and rotation through entries.
-- [ ] Refresh pending reminders when the selection changes or edits to text,
+- [x] Refresh pending reminders when the selection changes or edits to text,
       tags, favourites, or library membership affect delivery.
-- [ ] Define and implement an empty-selection state: explain it in Today and
+- [x] Define and implement an empty-selection state: explain it in Today and
       Settings, remove pending reminders, preserve the chosen selection and
       schedule preference, and resume delivery when matching entries return.
-- [ ] Keep a selected tag identifiable when its last entry is removed so users
+- [x] Keep a selected tag identifiable when its last entry is removed so users
       can understand the empty state and choose another source.
-- [ ] Include selection in reset behaviour: reset-all restores all affirmations;
+- [x] Include selection in reset behaviour: reset-all restores all affirmations;
       restoring the library preserves selection and reevaluates matching entries.
 - [x] Test selection matching, persistence compatibility, and failed saves.
-- [ ] Test Today navigation, reminder refresh and cancellation, recovery from an empty selection,
-      reset behaviour, and scheduling failures.
+- [x] Test Today navigation, reminder refresh and cancellation, recovery from
+      an empty selection, reset behaviour, and scheduling failures.
 - [ ] Verify selection controls and empty states with Dynamic Type and VoiceOver.
 
 ## 10. Visual polish

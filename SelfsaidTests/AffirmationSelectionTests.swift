@@ -4,6 +4,41 @@ import Testing
 
 @MainActor
 struct AffirmationSelectionTests {
+    @Test("Combined choices include favourites or any selected tag, without duplicates")
+    func combinesSources() {
+        let favourite = Affirmation(text: "Favourite", isFavorite: true)
+        let overlap = Affirmation(text: "Both", isFavorite: true, tags: ["Confidence", "Work"])
+        let tagged = Affirmation(text: "Tagged", tags: ["confidence"])
+        let work = Affirmation(text: "Work", tags: ["Work"])
+        let other = Affirmation(text: "Other")
+        let selection = AffirmationSelection.sources(favourites: true, tags: ["Confidence", "Work"])
+        #expect(selection.matchingAffirmations(in: [favourite, overlap, tagged, work, other])
+            == [favourite, overlap, tagged, work])
+    }
+
+    @Test("Changing individual choices preserves the other choices")
+    func changesIndividualChoices() {
+        let selection = AffirmationSelection.favourites.selectingTag("Confidence", included: true)
+        #expect(selection.includesFavourites)
+        #expect(selection.containsTag("confidence"))
+        let tagsOnly = selection.selectingFavourites(false)
+        #expect(tagsOnly.selectedTags == ["Confidence"])
+        let empty = tagsOnly.selectingTag("CONFIDENCE", included: false)
+        #expect(empty.matchingAffirmations(in: Affirmation.samples).isEmpty)
+        #expect(empty.name == "None selected")
+        let fromAll = AffirmationSelection.all.selectingTag("Work", included: true)
+        #expect(fromAll.selectedTags == ["Work"])
+        #expect(!fromAll.includesFavourites)
+    }
+
+    @Test("Selections saved before multiple choices still decode")
+    func loadsPreviousSelectionFormat() throws {
+        let decoder = JSONDecoder()
+        #expect(try decoder.decode(AffirmationSelection.self, from: Data(#"{"all":{}}"#.utf8)) == .all)
+        #expect(try decoder.decode(AffirmationSelection.self, from: Data(#"{"favourites":{}}"#.utf8)) == .favourites)
+        #expect(try decoder.decode(AffirmationSelection.self, from: Data(#"{"tag":{"_0":"Work"}}"#.utf8)) == .tag("Work"))
+    }
+
     @Test("Selections preserve library order and match tags regardless of case")
     func matchesEntries() {
         let first = Affirmation(text: "First", tags: ["Work", "Calm"])
@@ -50,7 +85,11 @@ struct AffirmationSelectionTests {
         defer { fixture.removeSavedData() }
         let store = AffirmationSelectionStore(repository: fixture.repository)
 
-        for selection: AffirmationSelection in [.favourites, .tag("Work"), .all] {
+        for selection: AffirmationSelection in [
+            .favourites, .tag("Work"), .all,
+            .sources(favourites: true, tags: ["Confidence", "Work"]),
+            .sources(favourites: false, tags: [])
+        ] {
             try store.select(selection)
             let restarted = AffirmationSelectionStore(repository: fixture.repository)
             #expect(restarted.selection == selection)

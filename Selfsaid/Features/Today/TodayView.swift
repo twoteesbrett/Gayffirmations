@@ -2,14 +2,17 @@ import SwiftUI
 
 struct TodayView: View {
     let store: AffirmationStore
+    let selectionStore: AffirmationSelectionStore
     @State private var deck: AffirmationDeck
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.appTheme) private var appTheme
 
-    init(store: AffirmationStore) {
+    init(store: AffirmationStore, selectionStore: AffirmationSelectionStore? = nil) {
+        let selectionStore = selectionStore ?? AffirmationSelectionStore()
+        self.selectionStore = selectionStore
         self.store = store
         _deck = State(
-            initialValue: AffirmationDeck(affirmations: store.affirmations)
+            initialValue: AffirmationDeck(affirmations: selectionStore.selection.matchingAffirmations(in: store.affirmations))
         )
     }
 
@@ -30,9 +33,9 @@ struct TodayView: View {
                             .accessibilityLabel("Affirmation: \(affirmation.text)")
                     } else {
                         ContentUnavailableView(
-                            "No Affirmations",
+                            "No Matching Affirmations",
                             systemImage: "text.quote",
-                            description: Text("Add an affirmation to begin.")
+                            description: Text(selectionStore.selection.emptyMessage)
                         )
                     }
 
@@ -45,9 +48,13 @@ struct TodayView: View {
             }
         }
         .background(appTheme.backgroundGradient.ignoresSafeArea())
-        .onChange(of: store.affirmations) { _, updatedAffirmations in
+        .onChange(of: selectedAffirmations) { _, updatedAffirmations in
             deck.replaceAffirmations(with: updatedAffirmations)
         }
+    }
+
+    private var selectedAffirmations: [Affirmation] {
+        selectionStore.selection.matchingAffirmations(in: store.affirmations)
     }
 
     private var navigationControls: some View {

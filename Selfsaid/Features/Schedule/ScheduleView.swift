@@ -18,6 +18,8 @@ struct ScheduleView: View {
             } footer: {
                 if isUpdatingSchedule {
                     ProgressView("Updating schedule…")
+                } else if notificationCoordinator.deliveryIsPaused {
+                    Text("Reminders are paused because the selected source has no affirmations. They will resume when matching entries return.")
                 } else {
                     Text("Selfsaid will ask for permission when you enable reminders.")
                 }
@@ -58,7 +60,10 @@ struct ScheduleView: View {
 
     @ViewBuilder
     private var preview: some View {
-        if let times = try? calculator.notificationTimes(for: store.schedule) {
+        if notificationCoordinator.deliveryIsPaused {
+            Text("No reminders will be delivered until the selected source has entries.")
+                .foregroundStyle(.secondary)
+        } else if let times = try? calculator.notificationTimes(for: store.schedule) {
             if times.isEmpty {
                 Text("No reminders are scheduled.")
                     .foregroundStyle(.secondary)

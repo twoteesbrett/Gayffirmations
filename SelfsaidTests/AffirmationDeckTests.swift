@@ -3,6 +3,24 @@ import Testing
 
 @MainActor
 struct AffirmationDeckTests {
+    @Test("Changing the delivery source preserves a matching entry and handles empty sources")
+    func changesDeliverySource() {
+        let first = Affirmation(text: "First", tags: ["Work"])
+        let second = Affirmation(text: "Second", isFavorite: true, tags: ["Work"])
+        let library = [first, second]
+        var deck = AffirmationDeck(affirmations: library)
+        deck.showNext()
+        deck.replaceAffirmations(with: AffirmationSelection.favourites.matchingAffirmations(in: library))
+        #expect(deck.currentAffirmation == second)
+        #expect(!deck.canNavigate)
+        deck.replaceAffirmations(with: AffirmationSelection.tag("Missing").matchingAffirmations(in: library))
+        #expect(deck.currentAffirmation == nil)
+        deck.showNext()
+        deck.replaceAffirmations(with: AffirmationSelection.tag("Work").matchingAffirmations(in: library))
+        #expect(deck.currentAffirmation == first)
+        #expect(deck.canNavigate)
+    }
+
     private let affirmations = [
         Affirmation(text: "First"),
         Affirmation(text: "Second"),
