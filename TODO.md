@@ -113,6 +113,19 @@ once each. Library browsing filters remain independent.
       an empty selection, reset behaviour, and scheduling failures.
 - [ ] Verify selection controls and empty states with Dynamic Type and VoiceOver.
 
+  Source review completed: tag labels wrap, long source summaries stack, the
+  decorative selection checkmark is hidden from VoiceOver, matching counts have
+  an explicit accessibility label/value, and empty Today selections omit inactive
+  navigation controls. Preview cases cover long/missing tags, no sources, and
+  empty Today at the largest accessibility text size. Live verification remains:
+  - At the largest text size, check Settings → Source and Affirmation Selection
+    for full labels, reachable toggles, and a scrollable matching-count section.
+  - With VoiceOver, confirm All affirmations announces its selected state,
+    favourites/tag switches announce their labels and on/off state, and the
+    matching count reads correctly after a change.
+  - Check no sources, no favourites, a missing selected tag, and an empty library:
+    Today and Settings should explain recovery, with every message reachable.
+
 ## 10. Visual polish
 
 - [ ] Refine the Library layout around tag and favourites filters.

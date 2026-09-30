@@ -41,10 +41,12 @@ struct TodayView: View {
 
                     Spacer()
 
-                    navigationControls
+                    if deck.currentAffirmation != nil {
+                        navigationControls
+                    }
                 }
-                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                 .padding()
+                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }
         }
         .background(appTheme.backgroundGradient.ignoresSafeArea())
@@ -100,4 +102,12 @@ struct TodayView: View {
 #Preview("Accessibility text size") {
     TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
         .environment(\.dynamicTypeSize, .accessibility5)
+}
+
+#Preview("Empty selection at largest text size") {
+    TodayView(
+        store: AffirmationStore(affirmations: Affirmation.samples),
+        selectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
+    )
+    .environment(\.dynamicTypeSize, .accessibility5)
 }

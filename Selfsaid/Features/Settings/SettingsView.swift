@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         NavigationStack {
@@ -28,7 +29,21 @@ struct SettingsView: View {
                             notificationCoordinator: notificationCoordinator
                         )
                     } label: {
-                        LabeledContent("Source", value: notificationCoordinator.selectionStore.selection.name)
+                        ViewThatFits(in: .horizontal) {
+                            if !dynamicTypeSize.isAccessibilitySize {
+                                LabeledContent("Source") {
+                                    Text(notificationCoordinator.selectionStore.selection.name)
+                                        .fixedSize()
+                                }
+                            }
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Source")
+                                Text(notificationCoordinator.selectionStore.selection.name)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
                     }
                     if notificationCoordinator.selectedAffirmations.isEmpty {
                         Text(notificationCoordinator.selectionStore.selection.emptyMessage)
