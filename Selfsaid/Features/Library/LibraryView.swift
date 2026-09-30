@@ -5,10 +5,18 @@ struct LibraryView: View {
 
     @State private var editorDestination: EditorDestination?
     @State private var persistenceErrorMessage: String?
+    @State private var filter: LibraryFilter = .all
 
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(spacing: 0) {
+                Picker("Show affirmations", selection: $filter) {
+                    Text("All").tag(LibraryFilter.all)
+                    Text("Favourites").tag(LibraryFilter.favourites)
+                }
+                .pickerStyle(.segmented)
+                .padding()
+
                 if store.affirmations.isEmpty {
                     ContentUnavailableView {
                         Label("No Affirmations", systemImage: "text.quote")
@@ -19,6 +27,17 @@ struct LibraryView: View {
                             editorDestination = .new
                         }
                         .buttonStyle(.borderedProminent)
+                    }
+                } else if filteredAffirmations.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Favourites", systemImage: "heart")
+                    } description: {
+                        Text("Tap the heart beside an affirmation to find it here.")
+                    } actions: {
+                        Button("Show All Affirmations") {
+                            filter = .all
+                        }
+                        .buttonStyle(.bordered)
                     }
                 } else {
                     affirmationList
@@ -46,8 +65,17 @@ struct LibraryView: View {
         }
     }
 
+    private var filteredAffirmations: [Affirmation] {
+        switch filter {
+        case .all:
+            store.affirmations
+        case .favourites:
+            store.affirmations.filter(\.isFavorite)
+        }
+    }
+
     private var affirmationList: some View {
-        List(store.affirmations) { affirmation in
+        List(filteredAffirmations) { affirmation in
             HStack(spacing: 12) {
                 Button {
                     editorDestination = .edit(affirmation)
@@ -122,6 +150,11 @@ struct LibraryView: View {
     }
 }
 
+private enum LibraryFilter: Hashable {
+    case all
+    case favourites
+}
+
 private enum EditorDestination: Identifiable {
     case new
     case edit(Affirmation)
@@ -142,6 +175,13 @@ private enum EditorDestination: Identifiable {
 
 #Preview("Empty") {
     LibraryView(store: AffirmationStore())
+}
+
+#Preview("With favourites") {
+    LibraryView(store: AffirmationStore(affirmations: [
+        Affirmation(text: "I can take this one step at a time.", isFavorite: true),
+        Affirmation(text: "My effort matters.")
+    ]))
 }
 
 #Preview("Accessibility text size") {

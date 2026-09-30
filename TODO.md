@@ -70,8 +70,21 @@ Work from top to bottom, keeping the app runnable after each milestone.
 - [x] Verify that Settings and its confirmation dialogs work with Dynamic Type
       and VoiceOver.
 
-## 8. Visual polish
+## 8. Library organisation
 
+- [ ] Add optional tags to affirmations, allowing more than one tag per entry.
+- [ ] Add tag selection and creation to the affirmation editor.
+- [ ] Add Library filters for all affirmations, favourites, and individual tags.
+- [ ] Show a useful empty state when a filter has no matching affirmations.
+- [ ] Save and restore tags while keeping existing saved affirmations and
+      favourite status compatible.
+- [ ] Test tag editing, filtering, and loading existing saved data.
+- [ ] Keep the initial scope simple: no tag colours, nested categories, or
+      separate tag-management screen.
+
+## 9. Visual polish
+
+- [ ] Refine the Library layout around tag and favourites filters.
 - [ ] Finalize the identity, typography, colors, and imagery for each theme.
 - [ ] Refine each theme's light and dark appearance.
 - [ ] Replace temporary theme previews with final artwork.
@@ -81,6 +94,8 @@ Work from top to bottom, keeping the app runnable after each milestone.
 
 ## Later ideas
 
+- [ ] Let users choose tags or favourites as the source for Today and reminders,
+      with defined behaviour when the chosen collection is empty.
 - [ ] Select days of the week.
 - [ ] Randomize delivery within each time section.
 - [ ] Support overnight schedules.
