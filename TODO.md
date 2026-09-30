@@ -41,7 +41,7 @@ Work from top to bottom, keeping the app runnable after each milestone.
 - [x] Add a notification-scheduling protocol.
 - [x] Request notification permission only when the user enables notifications.
 - [x] Schedule local notifications using affirmations from the library.
-- [ ] Replace old pending notifications when the schedule changes.
+- [x] Replace old pending notifications when the schedule changes.
 - [x] Remove pending notifications when the schedule is disabled.
 - [ ] Explain how to enable notifications when permission has been denied.
 

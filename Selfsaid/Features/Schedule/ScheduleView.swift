@@ -5,7 +5,7 @@ struct ScheduleView: View {
     let notificationCoordinator: NotificationCoordinator
 
     @State private var presentedError: PresentedError?
-    @State private var isUpdatingNotifications = false
+    @State private var isUpdatingSchedule = false
 
     private let calculator = ScheduleCalculator()
 
@@ -14,10 +14,9 @@ struct ScheduleView: View {
             Form {
                 Section {
                     Toggle("Daily reminders", isOn: enabledBinding)
-                        .disabled(isUpdatingNotifications)
                 } footer: {
-                    if isUpdatingNotifications {
-                        ProgressView("Updating reminders…")
+                    if isUpdatingSchedule {
+                        ProgressView("Updating schedule…")
                     } else {
                         Text("Selfsaid will ask for permission when you enable reminders.")
                     }
@@ -49,6 +48,7 @@ struct ScheduleView: View {
                     preview
                 }
             }
+            .disabled(isUpdatingSchedule)
             .navigationTitle("Schedule")
             .alert(item: $presentedError) { presentedError in
                 Alert(
@@ -95,8 +95,10 @@ struct ScheduleView: View {
         Binding(
             get: { store.schedule.startTime.date() },
             set: { date in
-                performPersistedChange {
-                    try store.setStartTime(TimeOfDay(date: date))
+                performScheduleChange {
+                    try await notificationCoordinator.setStartTime(
+                        TimeOfDay(date: date)
+                    )
                 }
             }
         )
@@ -106,8 +108,10 @@ struct ScheduleView: View {
         Binding(
             get: { store.schedule.endTime.date() },
             set: { date in
-                performPersistedChange {
-                    try store.setEndTime(TimeOfDay(date: date))
+                performScheduleChange {
+                    try await notificationCoordinator.setEndTime(
+                        TimeOfDay(date: date)
+                    )
                 }
             }
         )
@@ -117,39 +121,38 @@ struct ScheduleView: View {
         Binding(
             get: { store.schedule.notificationsPerDay },
             set: { notificationsPerDay in
-                performPersistedChange {
-                    try store.setNotificationsPerDay(notificationsPerDay)
+                performScheduleChange {
+                    try await notificationCoordinator.setNotificationsPerDay(
+                        notificationsPerDay
+                    )
                 }
             }
         )
     }
 
-    private func performPersistedChange(_ change: () throws -> Void) {
-        do {
-            try change()
-        } catch {
-            presentedError = PresentedError(
-                title: "Unable to Save",
-                message: error.localizedDescription
-            )
+    private func updateNotifications(isEnabled: Bool) {
+        performScheduleChange {
+            try await notificationCoordinator.setEnabled(isEnabled)
         }
     }
 
-    private func updateNotifications(isEnabled: Bool) {
-        guard !isUpdatingNotifications else {
+    private func performScheduleChange(
+        _ change: @escaping @MainActor () async throws -> Void
+    ) {
+        guard !isUpdatingSchedule else {
             return
         }
 
-        isUpdatingNotifications = true
+        isUpdatingSchedule = true
 
         Task {
-            defer { isUpdatingNotifications = false }
+            defer { isUpdatingSchedule = false }
 
             do {
-                try await notificationCoordinator.setEnabled(isEnabled)
+                try await change()
             } catch {
                 presentedError = PresentedError(
-                    title: "Unable to Update Reminders",
+                    title: "Unable to Update Schedule",
                     message: error.localizedDescription
                 )
             }

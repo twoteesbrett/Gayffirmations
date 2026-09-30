@@ -37,6 +37,24 @@ final class NotificationCoordinator {
         }
     }
 
+    func setStartTime(_ startTime: TimeOfDay) async throws {
+        var updatedSchedule = scheduleStore.schedule
+        updatedSchedule.startTime = startTime
+        try await apply(updatedSchedule)
+    }
+
+    func setEndTime(_ endTime: TimeOfDay) async throws {
+        var updatedSchedule = scheduleStore.schedule
+        updatedSchedule.endTime = endTime
+        try await apply(updatedSchedule)
+    }
+
+    func setNotificationsPerDay(_ notificationsPerDay: Int) async throws {
+        var updatedSchedule = scheduleStore.schedule
+        updatedSchedule.notificationsPerDay = notificationsPerDay
+        try await apply(updatedSchedule)
+    }
+
     private func enableNotifications() async throws {
         let reminders = try planner.reminders(
             for: scheduleStore.schedule,
@@ -67,5 +85,37 @@ final class NotificationCoordinator {
     private func disableNotifications() throws {
         try scheduleStore.setEnabled(false)
         scheduler.removePendingNotifications()
+    }
+
+    private func apply(_ updatedSchedule: AffirmationSchedule) async throws {
+        guard scheduleStore.schedule.isEnabled else {
+            try scheduleStore.replace(with: updatedSchedule)
+            return
+        }
+
+        let reminders = try planner.reminders(
+            for: updatedSchedule,
+            affirmations: affirmationStore.affirmations
+        )
+
+        try await scheduler.replacePendingNotifications(with: reminders)
+
+        do {
+            try scheduleStore.replace(with: updatedSchedule)
+        } catch {
+            await restorePendingNotifications()
+            throw error
+        }
+    }
+
+    private func restorePendingNotifications() async {
+        guard let reminders = try? planner.reminders(
+            for: scheduleStore.schedule,
+            affirmations: affirmationStore.affirmations
+        ) else {
+            return
+        }
+
+        try? await scheduler.replacePendingNotifications(with: reminders)
     }
 }

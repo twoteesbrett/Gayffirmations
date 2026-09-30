@@ -56,6 +56,10 @@ final class ScheduleStore {
         try update { $0.notificationsPerDay = notificationsPerDay }
     }
 
+    func replace(with schedule: AffirmationSchedule) throws {
+        try update { $0 = schedule }
+    }
+
     private func update(
         _ change: (inout AffirmationSchedule) -> Void
     ) throws {
