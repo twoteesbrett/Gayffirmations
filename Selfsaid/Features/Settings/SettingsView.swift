@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
     let themeStore: ThemeStore
@@ -43,6 +44,11 @@ struct SettingsView: View {
             .themedBackground()
             .disabled(notificationCoordinator.isUpdating)
             .navigationTitle("Settings")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
             .confirmationDialog(
                 pendingReset?.title ?? "Reset",
                 isPresented: resetConfirmationIsPresented,

@@ -3,118 +3,155 @@ import SwiftUI
 struct TodayView: View {
     let store: AffirmationStore
     let selectionStore: AffirmationSelectionStore
-    @State private var deck: AffirmationDeck
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.appTheme) private var appTheme
+    let scheduleStore: ScheduleStore
+    let isUpdating: Bool
 
-    init(store: AffirmationStore, selectionStore: AffirmationSelectionStore? = nil) {
-        let selectionStore = selectionStore ?? AffirmationSelectionStore()
-        self.selectionStore = selectionStore
+    @State private var errorMessage: String?
+    @State private var manualSelection: ManualSelection?
+    @Environment(\.appTheme) private var appTheme
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var refreshDate = Date.now
+
+    init(
+        store: AffirmationStore,
+        selectionStore: AffirmationSelectionStore? = nil,
+        scheduleStore: ScheduleStore? = nil,
+        isUpdating: Bool = false
+    ) {
         self.store = store
-        _deck = State(
-            initialValue: AffirmationDeck(affirmations: selectionStore.selection.matchingAffirmations(in: store.affirmations))
-        )
+        self.selectionStore = selectionStore ?? AffirmationSelectionStore()
+        self.scheduleStore = scheduleStore ?? ScheduleStore()
+        self.isUpdating = isUpdating
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                VStack(spacing: 32) {
-                    Spacer()
+        TimelineView(.periodic(from: refreshMinute, by: 60)) { context in
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(spacing: 32) {
+                        Spacer(minLength: 0)
 
-                    if let affirmation = deck.currentAffirmation {
-                        Image(systemName: appTheme.symbol)
-                            .font(.system(size: 36, weight: .light))
-                            .foregroundStyle(appTheme.accentColor)
-                            .accessibilityHidden(true)
+                        if let affirmation = currentAffirmation(at: context.date) {
+                            Image(systemName: appTheme.symbol)
+                                .font(.system(size: 36, weight: .light))
+                                .foregroundStyle(appTheme.accentColor)
+                                .accessibilityHidden(true)
 
-                        Text("TODAY'S AFFIRMATION")
-                            .font(.caption.weight(.semibold))
-                            .tracking(2)
-                            .foregroundStyle(.secondary)
+                            affirmationMessage(affirmation)
 
-                        Text(affirmation.text)
-                            .font(appTheme.affirmationFont)
-                            .lineSpacing(6)
-                            .frame(maxWidth: 560)
-                            .multilineTextAlignment(.center)
-                            .accessibilityLabel("Affirmation: \(affirmation.text)")
-                    } else {
-                        ContentUnavailableView(
-                            "No Matching Affirmations",
-                            systemImage: "text.quote",
-                            description: Text(selectionStore.selection.emptyMessage)
-                        )
-                    }
-
-                    Spacer()
-
-                    if deck.currentAffirmation != nil {
-                        VStack(spacing: 12) {
-                            Text("\(deck.currentIndex + 1) of \(deck.affirmations.count)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .accessibilityLabel("Affirmation \(deck.currentIndex + 1) of \(deck.affirmations.count)")
-                            navigationControls
+                            favoriteButton(for: affirmation)
+                        } else {
+                            ContentUnavailableView(
+                                "No Matching Affirmations",
+                                systemImage: "text.quote",
+                                description: Text(selectionStore.selection.emptyMessage)
+                            )
                         }
+
+                        Spacer(minLength: 0)
                     }
+                    .padding(.horizontal, 28)
+                    .padding(.vertical, 24)
+                    .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                 }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 24)
-                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }
         }
         .themedBackground()
-        .onChange(of: selectedAffirmations, initial: true) { _, updatedAffirmations in
-            deck.replaceAffirmations(with: updatedAffirmations)
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { refreshDate = .now }
         }
+        .onChange(of: scheduleStore.schedule) { _, _ in
+            manualSelection = nil
+        }
+        .onChange(of: selectionStore.selection) { _, _ in
+            manualSelection = nil
+        }
+        .alert("Unable to Save Favourite", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "Please try again.")
+        }
+    }
+
+    private func affirmationMessage(_ affirmation: Affirmation) -> some View {
+        Text(affirmation.text)
+            .font(appTheme.affirmationFont)
+            .lineSpacing(6)
+            .frame(maxWidth: 560)
+            .multilineTextAlignment(.center)
+            .accessibilityLabel("Affirmation: \(affirmation.text)")
+            .contentShape(Rectangle())
+            .overlay {
+                AffirmationTapTarget(
+                    onDoubleTap: { cycleAffirmation(by: 1) },
+                    onTripleTap: { cycleAffirmation(by: -1) }
+                )
+                .accessibilityHidden(true)
+            }
+            .accessibilityAction(named: "Next affirmation") { cycleAffirmation(by: 1) }
+            .accessibilityAction(named: "Previous affirmation") { cycleAffirmation(by: -1) }
+    }
+
+    private var refreshMinute: Date {
+        Calendar.current.dateInterval(of: .minute, for: refreshDate)?.start ?? refreshDate
+    }
+
+    private func currentAffirmation(at date: Date) -> Affirmation? {
+        if let manualSelection, date < manualSelection.expiresAt,
+           let affirmation = selectedAffirmations.first(where: { $0.id == manualSelection.id }) {
+            return affirmation
+        }
+
+        return TodayAffirmationResolver().affirmation(
+            at: date,
+            schedule: scheduleStore.schedule,
+            affirmations: selectedAffirmations
+        )
     }
 
     private var selectedAffirmations: [Affirmation] {
         selectionStore.selection.matchingAffirmations(in: store.affirmations)
     }
 
-    private var navigationControls: some View {
-        Group {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(spacing: 12) {
-                    previousButton
-                    nextButton
-                }
-            } else {
-                HStack(spacing: 16) {
-                    previousButton
-                    nextButton
-                }
-            }
-        }
-        .frame(maxWidth: 360)
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.capsule)
-        .controlSize(.large)
-        .disabled(!deck.canNavigate)
+    private func cycleAffirmation(by offset: Int) {
+        let date = Date.now
+        let affirmations = selectedAffirmations
+        guard affirmations.count > 1,
+              let current = currentAffirmation(at: date),
+              let index = affirmations.firstIndex(where: { $0.id == current.id }) else { return }
+
+        let nextIndex = (index + offset + affirmations.count) % affirmations.count
+        manualSelection = ManualSelection(
+            id: affirmations[nextIndex].id,
+            expiresAt: TodayAffirmationResolver().nextChange(after: date, schedule: scheduleStore.schedule)
+        )
     }
 
-    private var previousButton: some View {
-        Button {
-            deck.showPrevious()
-        } label: {
-            Label("Previous", systemImage: "chevron.left")
-                .frame(maxWidth: .infinity)
-        }
+    private struct ManualSelection {
+        let id: Affirmation.ID
+        let expiresAt: Date
     }
 
-    private var nextButton: some View {
+    private func favoriteButton(for affirmation: Affirmation) -> some View {
         Button {
-            deck.showNext()
-        } label: {
-            HStack {
-                Text("Next")
-                Image(systemName: "chevron.right")
-                    .accessibilityHidden(true)
+            do {
+                try store.toggleFavorite(id: affirmation.id)
+            } catch {
+                errorMessage = error.localizedDescription
             }
-            .frame(maxWidth: .infinity)
+        } label: {
+            Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
+                .font(.title3)
+                .foregroundStyle(affirmation.isFavorite ? appTheme.accentColor : Color.secondary)
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .disabled(isUpdating)
+        .accessibilityLabel(affirmation.isFavorite ? "Remove from favourites" : "Add to favourites")
     }
 }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct LibraryView: View {
+    @Environment(\.dismiss) private var dismiss
     let store: AffirmationStore
     let notificationCoordinator: NotificationCoordinator
 
@@ -59,6 +60,9 @@ struct LibraryView: View {
             .themedBackground()
             .navigationTitle("Library")
             .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add Affirmation", systemImage: "plus") {
                         editorDestination = .new

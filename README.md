@@ -8,7 +8,7 @@ visual polish will follow once the core behavior is working.
 
 The first version should let someone:
 
-- View an affirmation and move to another one.
+- View the current affirmation and save it as a favourite from Today.
 - Add, edit, and delete their own affirmations.
 - Mark affirmations as favorites and organise them with tags.
 - Choose all affirmations, or combine favorites and tags for Today and daily reminders.
@@ -34,6 +34,14 @@ Choose All, favourites, or tags; presets select a set of available tags. Combine
 choices include entries matching any choice, once each. The Tags button opens
 the preset picker and individual tag controls. If the selected source has no entries, reminders pause while
 retaining the enabled schedule and resume when matching entries return.
+
+Today shows the most recent scheduled affirmation, keeping the final reminder
+current overnight. With reminders off, it rotates once per local calendar day.
+The menu opens Library and Settings. Double-tapping the message advances to the
+next affirmation; triple-tapping goes back. These temporary choices expire at
+the next reminder, or at midnight without reminders. Changing the schedule or
+source selection clears the temporary choice. VoiceOver exposes equivalent
+Next and Previous actions.
 
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be

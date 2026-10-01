@@ -15,6 +15,7 @@ struct ContentView: View {
     let resetCoordinator: AppDataResetCoordinator
 
     @State private var startupPersistenceErrorMessage: String?
+    @State private var destination: Destination?
 
     init(
         affirmationStore: AffirmationStore,
@@ -52,30 +53,28 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView {
-            TodayView(store: affirmationStore, selectionStore: notificationCoordinator.selectionStore)
-                .floatingTabBarClearance()
-                .tabItem {
-                    Label("Today", systemImage: "sun.max")
-                }
-
-            LibraryView(store: affirmationStore, notificationCoordinator: notificationCoordinator)
-                .floatingTabBarClearance()
-                .tabItem {
-                    Label("Library", systemImage: "books.vertical")
-                }
-
-            SettingsView(
-                affirmationStore: affirmationStore,
+        NavigationStack {
+            TodayView(
+                store: affirmationStore,
+                selectionStore: notificationCoordinator.selectionStore,
                 scheduleStore: scheduleStore,
-                themeStore: themeStore,
-                notificationCoordinator: notificationCoordinator,
-                resetCoordinator: resetCoordinator
+                isUpdating: notificationCoordinator.isUpdating
             )
-                .floatingTabBarClearance()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button("Library", systemImage: "books.vertical") { destination = .library }
+                        Button("Settings", systemImage: "gearshape") { destination = .settings }
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .frame(minWidth: 44, minHeight: 44)
+                    }
+                    .accessibilityLabel("Menu")
                 }
+            }
+            .sheet(item: $destination) { destination in
+                destinationView(destination)
+            }
         }
         .task {
             await notificationCoordinator.reconcileOnLaunch()
@@ -103,6 +102,22 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder
+    private func destinationView(_ destination: Destination) -> some View {
+        switch destination {
+        case .library:
+            LibraryView(store: affirmationStore, notificationCoordinator: notificationCoordinator)
+        case .settings:
+            SettingsView(
+                affirmationStore: affirmationStore,
+                scheduleStore: scheduleStore,
+                themeStore: themeStore,
+                notificationCoordinator: notificationCoordinator,
+                resetCoordinator: resetCoordinator
+            )
+        }
+    }
+
     private var startupPersistenceErrorIsPresented: Binding<Bool> {
         Binding(
             get: { startupPersistenceErrorMessage != nil },
@@ -115,19 +130,9 @@ struct ContentView: View {
     }
 }
 
-private extension View {
-    @ViewBuilder
-    func floatingTabBarClearance() -> some View {
-        if #available(iOS 26.0, *) {
-            safeAreaInset(edge: .bottom, spacing: 0) {
-                Color.clear
-                    .frame(height: 72)
-                    .accessibilityHidden(true)
-            }
-        } else {
-            self
-        }
-    }
+private enum Destination: String, Identifiable {
+    case library, settings
+    var id: Self { self }
 }
 
 #Preview {
