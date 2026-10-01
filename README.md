@@ -43,8 +43,8 @@ the next reminder, or at midnight without reminders. Changing the schedule or
 source selection clears the temporary choice. VoiceOver exposes equivalent
 Next and Previous actions.
 
-Today uses bundled photos for playful, confidence, and self-worth tags, with the
-theme gradient for other tags. Photo selection prefers a selected tag matching
+Today uses bundled photos for playful, confidence, self-worth, joy, authenticity,
+and anxiety tags, with the theme gradient for other tags. Photo selection prefers a selected tag matching
 the affirmation, then falls back to the order in `AffirmationPhoto`.
 That file also holds each photo’s portrait and landscape message positions and
 dark overlay strength. Positions describe the message centre as a fraction of

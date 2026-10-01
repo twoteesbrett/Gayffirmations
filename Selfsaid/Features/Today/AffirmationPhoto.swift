@@ -4,14 +4,18 @@ enum AffirmationPhoto: String, CaseIterable {
     case playful
     case confidence
     case selfWorth = "self-worth"
+    case joy
+    case authenticity
+    case anxiety
 
     var tag: String { rawValue }
 
     // Message centre as a fraction of the usable height: 0 = top, 1 = bottom.
     var portraitMessagePosition: CGFloat {
         switch self {
-        case .playful, .confidence: 0.20
-        case .selfWorth: 0.50
+        case .playful, .confidence, .joy: 0.20
+        case .selfWorth, .anxiety: 0.50
+        case .authenticity: 0.70
         }
     }
 
@@ -21,6 +25,9 @@ enum AffirmationPhoto: String, CaseIterable {
         switch self {
         case .playful, .confidence: 0.38
         case .selfWorth: 0.55
+        case .joy: 0.38
+        case .authenticity: 0.30
+        case .anxiety: 0.45
         }
     }
 

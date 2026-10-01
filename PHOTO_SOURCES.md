@@ -9,5 +9,9 @@ have not yet been verified.
 | confidence | confidence | pexels-satyam-pathak-742233074-18540100.jpg |
 | self-worth | self-worth | pexels-sargonsama-38440480.jpg |
 
+| joy | joy | pexels-chetanvlad-2923157.jpg |
+| authenticity | authenticity | pexels-cyligan-35584322.jpg |
+| anxiety | anxiety | pexels-theladofalps-290430173-29328298.jpg |
+
 Original image files are retained in the asset catalog for this first preview.
 Before release, verify source licences and optimise image size and metadata.
