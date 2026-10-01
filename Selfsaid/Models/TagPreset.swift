@@ -8,6 +8,7 @@ struct TagPreset: Identifiable {
 
     static let predefined: [TagPreset] = [
         TagPreset(name: "Feel Good", tags: ["self-worth", "confidence", "joy"]),
+        TagPreset(name: "Playful", tags: ["playful"]),
         TagPreset(name: "Being Me", tags: ["gay identity", "pride", "authenticity", "shame"]),
         TagPreset(name: "My Body", tags: ["body image", "appearance", "masculinity", "ageing"]),
         TagPreset(name: "Love & Dating", tags: ["dating", "relationships", "rejection", "intimacy"]),

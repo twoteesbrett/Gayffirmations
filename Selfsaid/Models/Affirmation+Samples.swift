@@ -25,6 +25,28 @@ extension Affirmation {
             tags: ["joy", "authenticity"]
         ),
 
+        // Playful
+        Affirmation(
+            text: "Hey, handsome… looking great!",
+            tags: ["playful"]
+        ),
+        Affirmation(
+            text: "Looking good. Go enjoy yourself.",
+            tags: ["playful"]
+        ),
+        Affirmation(
+            text: "You’re allowed to know you’re gorgeous.",
+            tags: ["playful"]
+        ),
+        Affirmation(
+            text: "A little charm. A little cheek. All you.",
+            tags: ["playful"]
+        ),
+        Affirmation(
+            text: "Take the compliment, handsome.",
+            tags: ["playful"]
+        ),
+
         // Being Me
         Affirmation(
             text: "Being gay is a part of me I can hold with tenderness and pride.",

@@ -26,20 +26,31 @@ struct TodayView: View {
 
     var body: some View {
         TimelineView(.periodic(from: refreshMinute, by: 60)) { context in
+            let photo = AffirmationPhoto.resolve(
+                for: currentAffirmation(at: context.date),
+                selectedTags: selectionStore.selection.selectedTags
+            )
             GeometryReader { geometry in
                 ScrollView {
                     VStack(spacing: 32) {
-                        Spacer(minLength: 0)
+                        if (photo == .playful || photo == .confidence)
+                            && geometry.size.height > geometry.size.width {
+                            Spacer().frame(height: geometry.size.height * 0.08)
+                        } else {
+                            Spacer(minLength: 0)
+                        }
 
                         if let affirmation = currentAffirmation(at: context.date) {
-                            Image(systemName: appTheme.symbol)
-                                .font(.system(size: 36, weight: .light))
-                                .foregroundStyle(appTheme.accentColor)
-                                .accessibilityHidden(true)
+                            if photo == nil {
+                                Image(systemName: appTheme.symbol)
+                                    .font(.system(size: 36, weight: .light))
+                                    .foregroundStyle(appTheme.accentColor)
+                                    .accessibilityHidden(true)
+                            }
 
                             affirmationMessage(affirmation)
 
-                            favoriteButton(for: affirmation)
+                            favoriteButton(for: affirmation, hasPhoto: photo != nil)
                         } else {
                             ContentUnavailableView(
                                 "No Matching Affirmations",
@@ -55,8 +66,17 @@ struct TodayView: View {
                     .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                 }
             }
+            .foregroundStyle(photo == nil ? Color.primary : Color.white)
+            .tint(photo == nil ? appTheme.accentColor : .white)
+            .toolbarBackground(photo == nil ? .automatic : .hidden, for: .navigationBar)
+            .background {
+                if let photo {
+                    AffirmationPhotoBackground(photo: photo)
+                } else {
+                    appTheme.backgroundGradient.ignoresSafeArea()
+                }
+            }
         }
-        .themedBackground()
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }
         }
@@ -135,7 +155,7 @@ struct TodayView: View {
         let expiresAt: Date
     }
 
-    private func favoriteButton(for affirmation: Affirmation) -> some View {
+    private func favoriteButton(for affirmation: Affirmation, hasPhoto: Bool) -> some View {
         Button {
             do {
                 try store.toggleFavorite(id: affirmation.id)
@@ -145,7 +165,7 @@ struct TodayView: View {
         } label: {
             Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
                 .font(.title3)
-                .foregroundStyle(affirmation.isFavorite ? appTheme.accentColor : Color.secondary)
+                .foregroundStyle(hasPhoto ? Color.white : (affirmation.isFavorite ? appTheme.accentColor : Color.secondary))
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
         }
@@ -238,4 +258,22 @@ struct TodayView: View {
         .tint(AppTheme.refined.accentColor)
         .fontDesign(AppTheme.refined.fontDesign)
         .preferredColorScheme(.dark)
+}
+
+#Preview("Photo — Playful") {
+    TodayView(store: AffirmationStore(affirmations: [
+        Affirmation(text: "Hey, handsome… looking great!", tags: ["playful"])
+    ]))
+}
+
+#Preview("Photo — Confidence") {
+    TodayView(store: AffirmationStore(affirmations: [
+        Affirmation(text: "I can trust myself while I’m still learning.", tags: ["confidence"])
+    ]))
+}
+
+#Preview("Photo — Self-worth") {
+    TodayView(store: AffirmationStore(affirmations: [
+        Affirmation(text: "My worth is already here; I don’t have to earn it.", tags: ["self-worth"])
+    ]))
 }
