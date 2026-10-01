@@ -75,9 +75,12 @@ private struct ThemePreviewRow: View {
     }
 
     private var artwork: some View {
-        Image(theme.backgroundPhotoName)
-            .resizable()
-            .scaledToFill()
+        theme.backgroundGradient
+            .overlay {
+                Text("Aa")
+                    .font(.system(.title2, design: theme.fontDesign, weight: .medium))
+                    .foregroundStyle(theme.textColor)
+            }
             .frame(width: 72, height: 58)
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay {

@@ -30,6 +30,9 @@ struct TodayView: View {
         TimelineView(.periodic(from: refreshMinute, by: 60)) { context in
             let affirmation = currentAffirmation(at: context.date)
             GeometryReader { geometry in
+                // Balance the space reserved for the toolbar and home indicator so
+                // the message sits at the screen's centre, rather than below it.
+                let centeringInset = geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
                 ScrollView {
                     ZStack {
                         if let affirmation {
@@ -39,15 +42,16 @@ struct TodayView: View {
                         } else {
                             ContentUnavailableView {
                                 Label("No Matching Affirmations", systemImage: "text.quote")
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(appTheme.textColor)
                             } description: {
                                 Text(selectionStore.selection.emptyMessage)
-                                    .foregroundStyle(.white.opacity(0.85))
+                                    .foregroundStyle(appTheme.textColor.opacity(0.85))
                             }
                         }
                     }
                     .padding(.horizontal, 28)
-                    .padding(.vertical, 24)
+                    .padding(.top, 24 + max(0, -centeringInset))
+                    .padding(.bottom, 24 + max(0, centeringInset))
                     .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                     .overlay {
                         AffirmationSwipeTarget(
@@ -69,11 +73,11 @@ struct TodayView: View {
                 .iconOnlyBackground()
             }
         }
-        .foregroundStyle(.white)
-        .tint(.white)
+        .foregroundStyle(appTheme.textColor)
+        .tint(appTheme.textColor)
         .toolbarBackground(.hidden, for: .navigationBar)
         .background {
-            ThemePhotoBackground(theme: appTheme)
+            appTheme.backgroundGradient.ignoresSafeArea()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }
@@ -167,7 +171,7 @@ struct TodayView: View {
         } label: {
             Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
                 .font(.system(size: 22, weight: .regular))
-                .foregroundStyle(.white)
+                .foregroundStyle(appTheme.textColor)
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
         }

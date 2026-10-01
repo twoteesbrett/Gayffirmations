@@ -22,18 +22,18 @@ struct ThemeStoreTests {
         #expect(repository.theme == .warm)
     }
 
-    @Test("A theme selection survives recreating the store")
-    func selectionSurvivesRestart() throws {
+    @Test("A theme selection survives recreating the store", arguments: AppTheme.allCases)
+    func selectionSurvivesRestart(theme: AppTheme) throws {
         let repository = InMemoryThemeRepository()
         let firstStore = ThemeStore(repository: repository, defaultTheme: .warm)
 
-        try firstStore.select(.playful)
+        try firstStore.select(theme)
         let restartedStore = ThemeStore(
             repository: repository,
             defaultTheme: .warm
         )
 
-        #expect(restartedStore.selectedTheme == .playful)
+        #expect(restartedStore.selectedTheme == theme)
     }
 
     @Test("Reset restores and saves the default theme")

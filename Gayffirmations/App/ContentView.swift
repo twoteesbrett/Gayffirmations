@@ -14,6 +14,8 @@ struct ContentView: View {
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
 
+    @Environment(\.colorScheme) private var systemColorScheme
+
     @State private var startupPersistenceErrorMessage: String?
     @State private var destination: Destination?
 
@@ -68,7 +70,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "line.3.horizontal")
                             .font(.system(size: 22, weight: .regular))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(themeStore.selectedTheme.textColor)
                             .frame(minWidth: 44, minHeight: 44)
                     }
                     .accessibilityLabel("Menu")
@@ -77,8 +79,10 @@ struct ContentView: View {
             }
             .sheet(item: $destination) { destination in
                 destinationView(destination)
+                    .environment(\.colorScheme, resolvedColorScheme)
             }
         }
+        .environment(\.colorScheme, resolvedColorScheme)
         .task {
             await notificationCoordinator.reconcileOnLaunch()
         }
@@ -103,6 +107,12 @@ struct ContentView: View {
                     + (startupPersistenceErrorMessage ?? "")
             )
         }
+    }
+
+    // Override view appearance without changing the window's system appearance.
+    // Explicitly update sheets too, including when a theme returns to system mode.
+    private var resolvedColorScheme: ColorScheme {
+        themeStore.selectedTheme.preferredColorScheme ?? systemColorScheme
     }
 
     @ViewBuilder
