@@ -4,6 +4,22 @@ import Testing
 
 @MainActor
 struct PersistenceRepositoryTests {
+    @Test("Unexpected saved value types are preserved instead of replaced with defaults")
+    func preservesUnexpectedValueTypes() {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        fixture.userDefaults.set("unexpected saved content", forKey: "Selfsaid.affirmations")
+
+        let store = AffirmationStore(repository: fixture.repository, defaultAffirmations: Affirmation.samples)
+
+        #expect(store.persistenceErrorMessage != nil)
+        #expect(fixture.userDefaults.string(forKey: "Selfsaid.affirmations") == "unexpected saved content")
+        #expect(throws: PersistenceUnavailableError.self) {
+            try store.restoreDefaults()
+        }
+        #expect(fixture.userDefaults.string(forKey: "Selfsaid.affirmations") == "unexpected saved content")
+    }
+
     @Test("Missing saved data is reported as absent")
     func missingData() throws {
         let fixture = RepositoryFixture()

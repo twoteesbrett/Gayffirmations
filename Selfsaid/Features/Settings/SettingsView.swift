@@ -6,10 +6,10 @@ struct SettingsView: View {
     let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
+    var showLibrary: () -> Void = {}
 
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         NavigationStack {
@@ -22,31 +22,13 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Affirmation selection") {
-                    NavigationLink {
-                        AffirmationSelectionView(
-                            affirmationStore: affirmationStore,
-                            notificationCoordinator: notificationCoordinator
-                        )
-                    } label: {
-                        ViewThatFits(in: .horizontal) {
-                            if !dynamicTypeSize.isAccessibilitySize {
-                                LabeledContent("Source") {
-                                    Text(notificationCoordinator.selectionStore.selection.name)
-                                        .fixedSize()
-                                }
-                            }
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Source")
-                                Text(notificationCoordinator.selectionStore.selection.name)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
+                Section("Affirmations") {
+                    Text(notificationCoordinator.selectionStore.selection.name)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Choose in Library", systemImage: "books.vertical", action: showLibrary)
                     if notificationCoordinator.selectedAffirmations.isEmpty {
-                        Text(notificationCoordinator.selectionStore.selection.emptyMessage)
+                        Text("No matching affirmations. Reminders pause until matching entries return.")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -193,7 +175,7 @@ private enum ResetAction: String, Identifiable {
     let notificationCoordinator = NotificationCoordinator(
         affirmationStore: affirmationStore,
         scheduleStore: scheduleStore,
-        scheduler: LocalNotificationService()
+        scheduler: PreviewNotificationScheduler()
     )
     let resetCoordinator = AppDataResetCoordinator(
         affirmationStore: affirmationStore,

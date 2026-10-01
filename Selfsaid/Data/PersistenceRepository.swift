@@ -108,8 +108,11 @@ final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, T
         _ type: Value.Type,
         forKey key: String
     ) throws -> Value? {
-        guard let data = userDefaults.data(forKey: key) else {
+        guard let savedValue = userDefaults.object(forKey: key) else {
             return nil
+        }
+        guard let data = savedValue as? Data else {
+            throw PersistenceUnavailableError(reason: "Saved data has an unexpected format.")
         }
 
         return try decoder.decode(type, from: data)

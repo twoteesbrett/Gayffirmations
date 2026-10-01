@@ -50,7 +50,13 @@ struct TodayView: View {
                     Spacer()
 
                     if deck.currentAffirmation != nil {
-                        navigationControls
+                        VStack(spacing: 12) {
+                            Text("\(deck.currentIndex + 1) of \(deck.affirmations.count)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .accessibilityLabel("Affirmation \(deck.currentIndex + 1) of \(deck.affirmations.count)")
+                            navigationControls
+                        }
                     }
                 }
                 .padding(.horizontal, 28)
@@ -59,7 +65,7 @@ struct TodayView: View {
             }
         }
         .background(appTheme.backgroundGradient.ignoresSafeArea())
-        .onChange(of: selectedAffirmations) { _, updatedAffirmations in
+        .onChange(of: selectedAffirmations, initial: true) { _, updatedAffirmations in
             deck.replaceAffirmations(with: updatedAffirmations)
         }
     }

@@ -200,7 +200,7 @@ struct ScheduleView: View {
             notificationCoordinator: NotificationCoordinator(
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
-                scheduler: LocalNotificationService()
+                scheduler: PreviewNotificationScheduler()
             )
         )
     }
@@ -216,7 +216,7 @@ struct ScheduleView: View {
             notificationCoordinator: NotificationCoordinator(
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
-                scheduler: LocalNotificationService()
+                scheduler: PreviewNotificationScheduler()
             )
         )
         .environment(\.dynamicTypeSize, .accessibility5)

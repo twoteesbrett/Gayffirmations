@@ -70,35 +70,31 @@ struct AffirmationEditorView: View {
     }
 
     private var tagChoices: [String] {
-        Array(Set(availableTags + selectedTags))
-            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+        TagPreset.tagChoices(from: selectedTags + availableTags, includePredefined: true)
     }
 
     private var tagSection: some View {
-        Section {
-            ForEach(tagChoices, id: \.self) { tag in
-                Toggle(tag.lowercased(), isOn: Binding(
-                    get: { selectedTags.contains(tag) },
-                    set: { isSelected in
-                        if isSelected {
-                            selectedTags.append(tag)
-                        } else {
-                            selectedTags.removeAll { $0 == tag }
-                        }
-                    }
-                ))
+        Group {
+            TagSelectionSection(
+                tags: tagChoices,
+                selection: .sources(favourites: false, tags: selectedTags)
+            ) { selection in
+                selectedTags = selection.selectedTags
             }
-            HStack {
-                TextField("New tag", text: $newTag)
-                    .submitLabel(.done)
-                    .onSubmit(addTag)
-                Button("Add", action: addTag)
-                    .disabled(newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            Section {
+                HStack {
+                    TextField("New tag", text: $newTag)
+                        .submitLabel(.done)
+                        .onSubmit(addTag)
+                    Button("Add", action: addTag)
+                        .disabled(newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            } header: {
+                Text("Your own tags")
+            } footer: {
+                Text("Tags are optional. Choose a preset, adjust individual tags, or add your own.")
             }
-        } header: {
-            Text("Tags")
-        } footer: {
-            Text("Choose existing tags or add your own. Tags are optional.")
         }
     }
 

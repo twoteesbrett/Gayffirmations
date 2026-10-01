@@ -88,13 +88,14 @@ Complete the intended functionality before continuing visual polish.
 
 Use one shared selection for Today and reminders: all affirmations, or any
 combination of favourites and tags. Include entries matching any chosen source
-once each. Library browsing filters remain independent.
+once each. Library now manages this shared selection for browsing, Today, and
+reminders; Settings links to Library.
 
 - [x] Define a small selection model and one shared rule for finding matching
       affirmations; keep selection logic out of views and notification services.
 - [x] Save and restore the selection, defaulting existing installations to all
       affirmations.
-- [x] Add selection controls in Settings showing the number of matching entries.
+- [x] Manage the saved selection in Library and show the matching count; Settings links to Library.
 - [x] Allow favourites and multiple tags together, without duplicate delivery.
 - [x] Use the selected entries in Today while retaining next/previous behaviour.
 - [x] Use the same selected entries when planning reminders, retaining the
@@ -135,7 +136,7 @@ once each. Library browsing filters remain independent.
   First polish pass adds visible All, Favourites, and Tags controls, a tag
   selection sheet, a matching count, roomier rows, and theme-coloured 44-point
   favourite buttons. Library browsing supports favourites and multiple tags
-  using the shared any-source matching rule, independently of Settings.
+  using the shared any-source matching rule for Library, Today, and reminders.
   Active tags wrap below the controls; clearing all filters shows all entries.
   Dark appearance and long-tag accessibility previews are included. Simulator
   build passes; live visual and VoiceOver review remains part of the final pass.
@@ -153,7 +154,28 @@ once each. Library browsing filters remain independent.
 - [ ] Create an app icon and launch presentation.
 - [ ] Perform a final accessibility and usability pass.
 
+## Fixed category presets
+
+- [x] Bundle 30 starter affirmations (five per preset), with multiple tags covering all 23 predefined tags. Existing saved libraries are preserved; restoring defaults loads the starter collection.
+
+- [x] Define the six fixed categories as presets of tags.
+- [x] Share a Presets menu and flat tag list across Library and the editor; remove duplicate Settings selection controls.
+- [x] Applying a preset replaces selected tags while preserving Favourites.
+- [x] Recognize matching presets; show Custom selection for other tag combinations.
+- [x] Offer predefined tags in the editor; offer available presets in the shared Library selection controls.
+- [x] Persist Library choices through the reminder coordinator; Settings links to Library, and Today shows its position in the selected collection.
+- [x] Review shared-selection ownership and save failures, keep Clear all available for custom-only libraries, and make the Library selection summary scroll with its entries at large text sizes.
+- [x] Isolate previews from real notification scheduling and preserve unexpected saved value types.
+- [ ] Perform live visual and accessibility review of shared selection controls.
+
 ## Later ideas
+
+- [ ] Allow users to create and edit category presets. Initially use fixed presets:
+  Feel Good (self-worth, confidence, joy); Being Me (gay identity, pride,
+  authenticity, shame); My Body (body image, appearance, masculinity, ageing);
+  Love & Dating (dating, relationships, rejection, intimacy); Connection
+  (friends, chosen family, belonging, loneliness); Tough Days (anxiety,
+  setbacks, uncertainty, starting again). Custom tags remain available in the flat tag list.
 
 - [ ] Select days of the week.
 - [ ] Randomize delivery within each time section.

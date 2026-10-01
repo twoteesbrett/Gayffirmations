@@ -33,11 +33,11 @@ enum AffirmationSelection: Codable, Hashable {
         case .all:
             "Add an affirmation in Library to begin."
         case .favourites:
-            "Mark an affirmation as a favourite in Library or change your selection in Settings."
+            "Mark an affirmation as a favourite in Library or choose All in Library."
         case .tag(let tag):
-            "Add the tag “\(tag.lowercased())” to an affirmation in Library or change your selection in Settings."
+            "Add the tag “\(tag.lowercased())” to an affirmation in Library or choose All in Library."
         case .sources:
-            "Choose favourites or tags in Settings, or add matching entries in Library."
+            "Choose All, favourites, or tags in Library, or add matching entries in Library."
         }
     }
 

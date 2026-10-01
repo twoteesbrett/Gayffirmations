@@ -4,6 +4,31 @@ import Testing
 
 @MainActor
 struct NotificationCoordinatorTests {
+    @Test("Opening Library preserves the shared coordinator and its reminder hooks")
+    func libraryUsesSharedCoordinator() async throws {
+        let entry = Affirmation(text: "Selected", tags: ["confidence"])
+        let library = AffirmationStore(affirmations: [entry, Affirmation(text: "Other")])
+        let schedule = ScheduleStore()
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
+        )
+        try await coordinator.setSelection(.tag("confidence"))
+        try await coordinator.setEnabled(true)
+
+        _ = LibraryView(store: library, notificationCoordinator: coordinator)
+        try library.update(id: entry.id, text: "Edited", tags: entry.tags)
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Edited" })
+        #expect(!scheduler.scheduledReminders.isEmpty)
+
+        try library.update(id: entry.id, text: "Edited", tags: [])
+        await coordinator.waitForLibraryRefresh()
+        #expect(coordinator.selectedAffirmations.isEmpty)
+        #expect(coordinator.deliveryIsPaused)
+        #expect(scheduler.scheduledReminders.isEmpty)
+    }
+
     @Test("An unreadable schedule does not block saving a healthy Today selection")
     func corruptScheduleAllowsSelectionChanges() async throws {
         let suiteName = "DeliveryRecoveryTests.\(UUID().uuidString)"
