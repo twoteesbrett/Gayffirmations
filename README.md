@@ -37,8 +37,8 @@ retaining the enabled schedule and resume when matching entries return.
 
 Today shows the most recent scheduled affirmation, keeping the final reminder
 current overnight. With reminders off, it rotates once per local calendar day.
-The menu opens Library and Settings. Double-tapping anywhere in the affirmation area advances to the
-next affirmation; triple-tapping goes back. These temporary choices expire at
+The menu opens Library and Settings. Swiping left anywhere in the affirmation area advances to the
+next affirmation; swiping right goes back. These temporary choices expire at
 the next reminder, or at midnight without reminders. Changing the schedule or
 source selection clears the temporary choice. VoiceOver exposes equivalent
 Next and Previous actions.

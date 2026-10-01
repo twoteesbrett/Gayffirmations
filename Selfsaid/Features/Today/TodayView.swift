@@ -58,9 +58,9 @@ struct TodayView: View {
                         .padding(.horizontal, 28)
                     }
                     .overlay {
-                        AffirmationTapTarget(
-                            onDoubleTap: { cycleAffirmation(by: 1) },
-                            onTripleTap: { cycleAffirmation(by: -1) }
+                        AffirmationSwipeTarget(
+                            onSwipeLeft: { cycleAffirmation(by: 1) },
+                            onSwipeRight: { cycleAffirmation(by: -1) }
                         )
                         .accessibilityHidden(true)
                     }
