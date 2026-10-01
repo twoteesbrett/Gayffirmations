@@ -19,41 +19,44 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             List {
-                selectionBar
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 4, bottom: 12, trailing: 4))
+                Section {
+                    selectionBar
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 4, bottom: 12, trailing: 4))
+                }
 
-                if store.affirmations.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Affirmations", systemImage: "text.quote")
-                    } description: {
-                        Text("Add an affirmation to begin.")
-                    } actions: {
-                        Button("Add Affirmation", systemImage: "plus") {
-                            editorDestination = .new
+                Section {
+                    if store.affirmations.isEmpty {
+                        ContentUnavailableView {
+                            Label("No Affirmations", systemImage: "text.quote")
+                        } description: {
+                            Text("Add an affirmation to begin.")
+                        } actions: {
+                            Button("Add Affirmation", systemImage: "plus") {
+                                editorDestination = .new
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
-                    }
-                } else if selectedAffirmations.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Matching Affirmations", systemImage: "text.quote")
-                    } description: {
-                        Text(selection.emptyMessage)
-                    } actions: {
-                        Button("Show All Affirmations") {
-                            saveSelection(.all)
+                    } else if selectedAffirmations.isEmpty {
+                        ContentUnavailableView {
+                            Label("No Matching Affirmations", systemImage: "text.quote")
+                        } description: {
+                            Text(selection.emptyMessage)
+                        } actions: {
+                            Button("Show All Affirmations") {
+                                saveSelection(.all)
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
+                    } else {
+                        affirmationList
                     }
-                } else {
-                    affirmationList
                 }
             }
             .listStyle(.insetGrouped)
             .contentMargins(.top, 0, for: .scrollContent)
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemGroupedBackground))
+            .themedBackground()
             .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -127,7 +130,7 @@ struct LibraryView: View {
             selectionButton("Favourites", systemImage: "heart", isSelected: selection.includesFavourites) {
                 saveSelection(selection.selectingFavourites(!selection.includesFavourites))
             }
-            selectionButton("Presets & Tags", systemImage: "tag", isSelected: hasSelectedTags) {
+            selectionButton("Tags", systemImage: "tag", isSelected: hasSelectedTags) {
                 isTagPickerPresented = true
             }
         }
@@ -157,6 +160,7 @@ struct LibraryView: View {
                     onChange: saveSelection
                 )
             }
+            .themedBackground()
             .disabled(isSavingSelection || notificationCoordinator.isUpdating)
             .navigationTitle("Presets & Tags")
             .navigationBarTitleDisplayMode(.inline)

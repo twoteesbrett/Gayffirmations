@@ -31,8 +31,8 @@ approximately 10:00 AM, 12:00 PM, 2:00 PM, and 4:00 PM.
 
 Library, Today, and reminders share one saved selection managed in Library.
 Choose All, favourites, or tags; presets select a set of available tags. Combined
-choices include entries matching any choice, once each. Settings links to Library
-to change the selection. If the selected source has no entries, reminders pause while
+choices include entries matching any choice, once each. The Tags button opens
+the preset picker and individual tag controls. If the selected source has no entries, reminders pause while
 retaining the enabled schedule and resume when matching entries return.
 
 The first version will require the end time to be later than the start time on

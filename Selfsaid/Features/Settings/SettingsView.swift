@@ -6,7 +6,6 @@ struct SettingsView: View {
     let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
-    var showLibrary: () -> Void = {}
 
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
@@ -19,17 +18,6 @@ struct SettingsView: View {
                         ThemePickerView(store: themeStore)
                     } label: {
                         LabeledContent("Theme", value: themeStore.selectedTheme.name)
-                    }
-                }
-
-                Section("Affirmations") {
-                    Text(notificationCoordinator.selectionStore.selection.name)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Button("Choose in Library", systemImage: "books.vertical", action: showLibrary)
-                    if notificationCoordinator.selectedAffirmations.isEmpty {
-                        Text("No matching affirmations. Reminders pause until matching entries return.")
-                            .foregroundStyle(.secondary)
                     }
                 }
 
@@ -52,6 +40,7 @@ struct SettingsView: View {
                     resetButton(.all)
                 }
             }
+            .themedBackground()
             .disabled(notificationCoordinator.isUpdating)
             .navigationTitle("Settings")
             .confirmationDialog(

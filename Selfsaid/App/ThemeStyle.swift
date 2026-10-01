@@ -74,3 +74,19 @@ extension EnvironmentValues {
         set { self[AppThemeKey.self] = newValue }
     }
 }
+
+extension View {
+    func themedBackground() -> some View {
+        modifier(ThemedBackground())
+    }
+}
+
+private struct ThemedBackground: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View {
+        content
+            .scrollContentBackground(.hidden)
+            .background(theme.backgroundGradient.ignoresSafeArea())
+    }
+}

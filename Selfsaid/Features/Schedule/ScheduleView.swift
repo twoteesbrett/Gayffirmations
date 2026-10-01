@@ -51,7 +51,8 @@ struct ScheduleView: View {
                 preview
             }
         }
-        .disabled(isUpdatingSchedule)
+        .themedBackground()
+        .disabled(isUpdatingSchedule || notificationCoordinator.isUpdating)
         .navigationTitle("Notification Schedule")
         .alert(item: $presentedError) { presentedError in
             alert(for: presentedError)
@@ -140,7 +141,7 @@ struct ScheduleView: View {
     private func performScheduleChange(
         _ change: @escaping @MainActor () async throws -> Void
     ) {
-        guard !isUpdatingSchedule else {
+        guard !isUpdatingSchedule, !notificationCoordinator.isUpdating else {
             return
         }
 

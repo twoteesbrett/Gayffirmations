@@ -48,6 +48,7 @@ struct AffirmationEditorView: View {
                 }
                 tagSection
             }
+            .themedBackground()
             .navigationTitle(affirmation == nil ? "New Affirmation" : "Edit Affirmation")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

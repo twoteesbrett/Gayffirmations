@@ -14,7 +14,6 @@ struct ContentView: View {
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
 
-    @State private var selectedTab: AppTab = .today
     @State private var startupPersistenceErrorMessage: String?
 
     init(
@@ -53,34 +52,30 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView {
             TodayView(store: affirmationStore, selectionStore: notificationCoordinator.selectionStore)
                 .floatingTabBarClearance()
                 .tabItem {
                     Label("Today", systemImage: "sun.max")
                 }
-                .tag(AppTab.today)
 
             LibraryView(store: affirmationStore, notificationCoordinator: notificationCoordinator)
                 .floatingTabBarClearance()
                 .tabItem {
                     Label("Library", systemImage: "books.vertical")
                 }
-                .tag(AppTab.library)
 
             SettingsView(
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
                 themeStore: themeStore,
                 notificationCoordinator: notificationCoordinator,
-                resetCoordinator: resetCoordinator,
-                showLibrary: { selectedTab = .library }
+                resetCoordinator: resetCoordinator
             )
                 .floatingTabBarClearance()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
-                .tag(AppTab.settings)
         }
         .task {
             await notificationCoordinator.reconcileOnLaunch()
@@ -118,10 +113,6 @@ struct ContentView: View {
             }
         )
     }
-}
-
-private enum AppTab: Hashable {
-    case today, library, settings
 }
 
 private extension View {

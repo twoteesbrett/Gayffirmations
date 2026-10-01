@@ -20,6 +20,7 @@ struct ThemePickerView: View {
                 store.selectedTheme == theme ? .isSelected : []
             )
         }
+        .themedBackground()
         .navigationTitle("Theme")
         .alert("Unable to Change Theme", isPresented: errorIsPresented) {
             Button("OK", role: .cancel) {}
@@ -47,46 +48,87 @@ struct ThemePickerView: View {
 private struct ThemePreviewRow: View {
     let theme: AppTheme
     let isSelected: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack(spacing: 16) {
-            RoundedRectangle(cornerRadius: 14)
-                .fill(theme.backgroundGradient)
-                .frame(width: 72, height: 58)
-                .overlay {
-                    Image(systemName: theme.symbol)
-                        .font(.system(size: 26, weight: .light))
-                        .foregroundStyle(theme.accentColor)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        artwork
+                        Spacer()
+                        selectionIndicator
+                    }
+                    description
                 }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(.primary.opacity(0.12))
+            } else {
+                HStack(spacing: 16) {
+                    artwork
+                    description
+                    Spacer(minLength: 8)
+                    selectionIndicator
                 }
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(theme.name)
-                    .font(.headline)
-                Text(theme.description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer(minLength: 8)
-
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(theme.accentColor)
-                    .accessibilityHidden(true)
             }
         }
         .contentShape(Rectangle())
         .padding(.vertical, 4)
     }
+
+    private var artwork: some View {
+        RoundedRectangle(cornerRadius: 14)
+            .fill(theme.backgroundGradient)
+            .frame(width: 72, height: 58)
+            .overlay {
+                Image(systemName: theme.symbol)
+                    .font(.system(size: 26, weight: .light))
+                    .foregroundStyle(theme.accentColor)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(.primary.opacity(0.12))
+            }
+            .accessibilityHidden(true)
+    }
+
+    private var description: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(theme.name)
+                .font(.headline)
+            Text(theme.description)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder
+    private var selectionIndicator: some View {
+        if isSelected {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(theme.accentColor)
+                .accessibilityHidden(true)
+        }
+    }
 }
 
 #Preview {
+    let store = ThemeStore()
     NavigationStack {
-        ThemePickerView(store: ThemeStore())
+        ThemePickerView(store: store)
     }
+    .environment(\.appTheme, store.selectedTheme)
+    .tint(store.selectedTheme.accentColor)
+    .fontDesign(store.selectedTheme.fontDesign)
+}
+
+#Preview("Largest text size in dark mode") {
+    let store = ThemeStore()
+    NavigationStack {
+        ThemePickerView(store: store)
+    }
+    .environment(\.appTheme, store.selectedTheme)
+    .tint(store.selectedTheme.accentColor)
+    .fontDesign(store.selectedTheme.fontDesign)
+    .environment(\.dynamicTypeSize, .accessibility5)
+    .preferredColorScheme(.dark)
 }

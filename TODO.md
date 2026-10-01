@@ -89,13 +89,13 @@ Complete the intended functionality before continuing visual polish.
 Use one shared selection for Today and reminders: all affirmations, or any
 combination of favourites and tags. Include entries matching any chosen source
 once each. Library now manages this shared selection for browsing, Today, and
-reminders; Settings links to Library.
+reminders; Settings keeps appearance, notifications, and data controls.
 
 - [x] Define a small selection model and one shared rule for finding matching
       affirmations; keep selection logic out of views and notification services.
 - [x] Save and restore the selection, defaulting existing installations to all
       affirmations.
-- [x] Manage the saved selection in Library and show the matching count; Settings links to Library.
+- [x] Manage the saved selection in Library and show the matching count.
 - [x] Allow favourites and multiple tags together, without duplicate delivery.
 - [x] Use the selected entries in Today while retaining next/previous behaviour.
 - [x] Use the same selected entries when planning reminders, retaining the
@@ -154,6 +154,12 @@ reminders; Settings links to Library.
 - [ ] Create an app icon and launch presentation.
 - [ ] Perform a final accessibility and usability pass.
 
+  Layout review centralizes theme backgrounds across all screens and sheets,
+  preserves separate rounded Library sections, keeps Today navigation buttons
+  equal in width, and stacks theme previews at accessibility text sizes.
+  Daily reminder controls also respect shared coordinator updates. Live visual
+  and VoiceOver verification remains pending.
+
 ## Fixed category presets
 
 - [x] Bundle 30 starter affirmations (five per preset), with multiple tags covering all 23 predefined tags. Existing saved libraries are preserved; restoring defaults loads the starter collection.
@@ -163,7 +169,7 @@ reminders; Settings links to Library.
 - [x] Applying a preset replaces selected tags while preserving Favourites.
 - [x] Recognize matching presets; show Custom selection for other tag combinations.
 - [x] Offer predefined tags in the editor; offer available presets in the shared Library selection controls.
-- [x] Persist Library choices through the reminder coordinator; Settings links to Library, and Today shows its position in the selected collection.
+- [x] Persist Library choices through the reminder coordinator; Today shows its position in the selected collection.
 - [x] Review shared-selection ownership and save failures, keep Clear all available for custom-only libraries, and make the Library selection summary scroll with its entries at large text sizes.
 - [x] Isolate previews from real notification scheduling and preserve unexpected saved value types.
 - [ ] Perform live visual and accessibility review of shared selection controls.

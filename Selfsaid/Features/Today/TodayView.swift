@@ -64,7 +64,7 @@ struct TodayView: View {
                 .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }
         }
-        .background(appTheme.backgroundGradient.ignoresSafeArea())
+        .themedBackground()
         .onChange(of: selectedAffirmations, initial: true) { _, updatedAffirmations in
             deck.replaceAffirmations(with: updatedAffirmations)
         }
@@ -88,6 +88,7 @@ struct TodayView: View {
                 }
             }
         }
+        .frame(maxWidth: 360)
         .buttonStyle(.bordered)
         .buttonBorderShape(.capsule)
         .controlSize(.large)
@@ -95,16 +96,25 @@ struct TodayView: View {
     }
 
     private var previousButton: some View {
-        Button("Previous", systemImage: "chevron.left") {
+        Button {
             deck.showPrevious()
+        } label: {
+            Label("Previous", systemImage: "chevron.left")
+                .frame(maxWidth: .infinity)
         }
     }
 
     private var nextButton: some View {
-        Button("Next", systemImage: "chevron.right") {
+        Button {
             deck.showNext()
+        } label: {
+            HStack {
+                Text("Next")
+                Image(systemName: "chevron.right")
+                    .accessibilityHidden(true)
+            }
+            .frame(maxWidth: .infinity)
         }
-        .labelStyle(.titleAndIcon)
     }
 }
 
