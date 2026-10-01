@@ -65,11 +65,19 @@ struct NotificationPlannerTests {
         )
     }
 
-    @Test("At least one affirmation is required for a non-empty plan")
-    func requiresAffirmation() {
+    @Test("An empty selection pauses delivery")
+    func emptySelectionPausesDelivery() throws {
         let schedule = AffirmationSchedule(notificationsPerDay: 1)
+        #expect(try planner.reminders(for: schedule, affirmations: []).isEmpty)
+    }
 
-        #expect(throws: NotificationPlannerError.noAffirmations) {
+    @Test("An empty selection still rejects invalid reminder times")
+    func emptySelectionValidatesSchedule() {
+        let schedule = AffirmationSchedule(
+            startTime: TimeOfDay(hour: 17, minute: 0),
+            endTime: TimeOfDay(hour: 9, minute: 0)
+        )
+        #expect(throws: ScheduleCalculatorError.endMustBeAfterStart) {
             try planner.reminders(for: schedule, affirmations: [])
         }
     }

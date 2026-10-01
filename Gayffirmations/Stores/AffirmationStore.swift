@@ -21,7 +21,7 @@ final class AffirmationStore {
     private(set) var affirmations: [Affirmation]
     private(set) var persistenceErrorMessage: String?
 
-    // The coordinator checks delivery changes before saving and refreshes afterward.
+    // Hooks allow the coordinator to block overlapping updates and refresh delivery after saving.
     var willChangeAffirmations: (([Affirmation]) throws -> Void)?
     var didChangeAffirmations: (([Affirmation]) -> Void)?
 

@@ -52,7 +52,8 @@ longer text stays within margins and can scroll.
 
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be
-added later.
+added later. Reminder combinations that round to duplicate delivery minutes
+are rejected; choose a longer period or fewer reminders.
 
 ## Technical direction
 
@@ -65,7 +66,7 @@ added later.
   throughout the app.
 - Add architecture only when the app has a concrete need for it.
 
-A likely project structure as the app grows is:
+The current project structure is:
 
 ```text
 Gayffirmations/
@@ -74,15 +75,25 @@ Gayffirmations/
 ├── Features/
 │   ├── Today/
 │   ├── Library/
-│   ├── Editor/
-│   └── Schedule/
+│   ├── Schedule/
+│   └── Settings/
 ├── Data/
-├── Services/
+├── Services/Notifications/
+├── Stores/
 └── Components/
 ```
 
-Folders should be introduced as their first files are added rather than being
-created in advance.
+Stores validate and persist their own state, updating observable values only after
+successful saves. Views send reminder-affecting schedule and source changes through
+`NotificationCoordinator`, which serializes updates and restores prior reminders
+when a save or replacement fails. Library edits notify that same coordinator through
+store callbacks. `AppDataResetCoordinator` handles resets across all stores.
+
+`AffirmationSelection` owns matching rules; `ScheduleCalculator` owns reminder times;
+`NotificationPlanner` combines those times with affirmation text; and
+`TodayAffirmationResolver` uses the same slot order. An empty matching collection
+produces no reminders. Clearing the final Library filter returns to All.
+`WrappingLayout` handles button placement without knowing about selections or storage.
 
 ## Development approach
 

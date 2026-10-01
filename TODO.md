@@ -174,6 +174,26 @@ reminders; Settings keeps appearance, notifications, and data controls.
 - [x] Isolate previews from real notification scheduling and preserve unexpected saved value types.
 - [ ] Perform live visual and accessibility review of shared selection controls.
 
+## Code review — 2 October 2026
+
+- [x] Review state ownership, persistence failures, notification recovery, Today
+      selection, shared tag controls, theme styling, and recent Library changes.
+- [x] Separate the wrapping layout from Library and move its empty-filter fallback
+      into the selection model; preserve the user-verified wrapping behavior.
+- [x] Remove duplicate reminder-time calculations, the obsolete no-affirmations
+      planner error, repeated coordinator update boilerplate, and a redundant view wrapper.
+- [x] Validate decoded times so malformed saved schedules cannot bypass model invariants.
+- [x] Reject duplicate delivery minutes and preserve existing delivery after an
+      invalid enabled-schedule change; display the actual preview validation error.
+- [x] Add regression coverage for empty-filter fallback, paused planning, corrupt
+      times, and narrow schedules; update architecture documentation.
+
+The historical empty-source checks above describe an earlier control design.
+The current Library returns to All when its final filter is cleared. Saved
+empty selections and editor tag removal remain supported. The floating Clear
+button has been removed; All performs that reset. Clear tags remains available
+inside the tag picker and editor.
+
 ## Later ideas
 
 - [ ] Allow users to create and edit category presets. Initially use fixed presets:

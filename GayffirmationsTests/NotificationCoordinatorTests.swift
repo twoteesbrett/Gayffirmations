@@ -4,6 +4,24 @@ import Testing
 
 @MainActor
 struct NotificationCoordinatorTests {
+    @Test("An invalid narrow period leaves the enabled schedule and reminders unchanged")
+    func narrowPeriodPreservesDelivery() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let (coordinator, store) = makeCoordinator(scheduler: scheduler)
+        try await coordinator.setEnabled(true)
+        try await coordinator.setNotificationsPerDay(4)
+        let previousSchedule = store.schedule
+        let previousReminders = scheduler.scheduledReminders
+        let previousReplacements = scheduler.replaceCallCount
+        await #expect(throws: ScheduleCalculatorError.remindersTooClose) {
+            try await coordinator.setEndTime(TimeOfDay(hour: 9, minute: 1))
+        }
+        #expect(store.schedule == previousSchedule)
+        #expect(scheduler.scheduledReminders == previousReminders)
+        #expect(scheduler.replaceCallCount == previousReplacements)
+        #expect(!coordinator.isUpdating)
+    }
+
     @Test("Opening Library preserves the shared coordinator and its reminder hooks")
     func libraryUsesSharedCoordinator() async throws {
         let entry = Affirmation(text: "Selected", tags: ["confidence"])

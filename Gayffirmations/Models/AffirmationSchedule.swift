@@ -31,6 +31,22 @@ struct TimeOfDay: Codable, Equatable, Comparable {
         self.minute = minute
     }
 
+    private enum CodingKeys: String, CodingKey {
+        case hour, minute
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let hour = try container.decode(Int.self, forKey: .hour)
+        let minute = try container.decode(Int.self, forKey: .minute)
+        guard (0..<24).contains(hour), (0..<60).contains(minute) else {
+            throw DecodingError.dataCorrupted(
+                .init(codingPath: decoder.codingPath, debugDescription: "Saved time is outside the valid hour or minute range.")
+            )
+        }
+        self.init(hour: hour, minute: minute)
+    }
+
     init(date: Date, calendar: Calendar = .current) {
         let components = calendar.dateComponents([.hour, .minute], from: date)
         self.init(hour: components.hour ?? 0, minute: components.minute ?? 0)

@@ -5,6 +5,18 @@ import Testing
 struct ScheduleCalculatorTests {
     private let calculator = ScheduleCalculator()
 
+    @Test("A narrow period cannot deliver several reminders at the same minute")
+    func rejectsDuplicateTimes() {
+        let schedule = AffirmationSchedule(
+            startTime: TimeOfDay(hour: 9, minute: 0),
+            endTime: TimeOfDay(hour: 9, minute: 1),
+            notificationsPerDay: 4
+        )
+        #expect(throws: ScheduleCalculatorError.remindersTooClose) {
+            try calculator.notificationTimes(for: schedule)
+        }
+    }
+
     @Test("Four reminders are centered in equal sections")
     func commonSchedule() throws {
         let schedule = AffirmationSchedule(

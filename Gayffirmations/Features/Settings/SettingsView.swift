@@ -111,12 +111,10 @@ struct SettingsView: View {
     }
 }
 
-private enum ResetAction: String, Identifiable {
+private enum ResetAction {
     case affirmations
     case schedule
     case all
-
-    var id: Self { self }
 
     var label: String {
         switch self {

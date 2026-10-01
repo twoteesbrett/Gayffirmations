@@ -4,6 +4,28 @@ import Testing
 
 @MainActor
 struct PersistenceRepositoryTests {
+    @Test("Invalid saved times preserve the original data and block schedule updates",
+          arguments: [(-1, 0), (24, 0), (9, -1), (9, 60)])
+    func invalidSavedTime(hour: Int, minute: Int) throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let data = Data("""
+        {"isEnabled":true,"startTime":{"hour":\(hour),"minute":\(minute)},
+        "endTime":{"hour":17,"minute":0},"notificationsPerDay":4}
+        """.utf8)
+        fixture.userDefaults.set(data, forKey: "gayffirmations.schedule")
+        #expect(throws: DecodingError.self) {
+            try fixture.repository.loadSchedule()
+        }
+        let store = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        #expect(store.persistenceErrorMessage != nil)
+        #expect(!store.schedule.isEnabled)
+        #expect(throws: PersistenceUnavailableError.self) {
+            try store.setEnabled(true)
+        }
+        #expect(fixture.userDefaults.data(forKey: "gayffirmations.schedule") == data)
+    }
+
     @Test("Unexpected saved value types are preserved instead of replaced with defaults")
     func preservesUnexpectedValueTypes() {
         let fixture = RepositoryFixture()

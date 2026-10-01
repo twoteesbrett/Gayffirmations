@@ -133,7 +133,7 @@ struct ContentView: View {
     }
 }
 
-private enum Destination: String, Identifiable {
+private enum Destination: Identifiable {
     case library, settings
     var id: Self { self }
 }

@@ -63,29 +63,23 @@ final class NotificationCoordinator {
     }
 
     func setStartTime(_ startTime: TimeOfDay) async throws {
-        try checkIdle()
-        isUpdating = true
-        defer { isUpdating = false }
-        var updatedSchedule = scheduleStore.schedule
-        updatedSchedule.startTime = startTime
-        try await apply(updatedSchedule)
+        try await updateSchedule { $0.startTime = startTime }
     }
 
     func setEndTime(_ endTime: TimeOfDay) async throws {
-        try checkIdle()
-        isUpdating = true
-        defer { isUpdating = false }
-        var updatedSchedule = scheduleStore.schedule
-        updatedSchedule.endTime = endTime
-        try await apply(updatedSchedule)
+        try await updateSchedule { $0.endTime = endTime }
     }
 
     func setNotificationsPerDay(_ notificationsPerDay: Int) async throws {
+        try await updateSchedule { $0.notificationsPerDay = notificationsPerDay }
+    }
+
+    private func updateSchedule(_ change: (inout AffirmationSchedule) -> Void) async throws {
         try checkIdle()
         isUpdating = true
         defer { isUpdating = false }
         var updatedSchedule = scheduleStore.schedule
-        updatedSchedule.notificationsPerDay = notificationsPerDay
+        change(&updatedSchedule)
         try await apply(updatedSchedule)
     }
 
@@ -99,7 +93,7 @@ final class NotificationCoordinator {
 
     private func enableNotifications() async throws {
         try checkDeliveryData()
-        let reminders = try plannedReminders(
+        let reminders = try planner.reminders(
             for: scheduleStore.schedule,
             affirmations: selectedAffirmations
         )
@@ -140,7 +134,7 @@ final class NotificationCoordinator {
         }
 
         try checkDeliveryData()
-        let reminders = try plannedReminders(
+        let reminders = try planner.reminders(
             for: updatedSchedule,
             affirmations: selectedAffirmations
         )
@@ -164,7 +158,7 @@ final class NotificationCoordinator {
         }
 
         do {
-            let reminders = try plannedReminders(
+            let reminders = try planner.reminders(
                 for: scheduleStore.schedule,
                 affirmations: selectedAffirmations
             )
@@ -207,7 +201,7 @@ final class NotificationCoordinator {
 
         try checkDeliveryData()
         let entries = selection.matchingAffirmations(in: affirmationStore.affirmations)
-        let reminders = try plannedReminders(for: scheduleStore.schedule, affirmations: entries)
+        let reminders = try planner.reminders(for: scheduleStore.schedule, affirmations: entries)
         do {
             try await replaceReminders(with: reminders)
             try selectionStore.select(selection)
@@ -244,16 +238,6 @@ final class NotificationCoordinator {
         let selection = selectionStore.selection
         return selection.matchingAffirmations(in: previous).map(\.text)
             != selection.matchingAffirmations(in: updated).map(\.text)
-    }
-
-    private func plannedReminders(
-        for schedule: AffirmationSchedule,
-        affirmations: [Affirmation]
-    ) throws -> [NotificationReminder] {
-        // Validate times even while the selected collection is empty.
-        _ = try ScheduleCalculator().notificationTimes(for: schedule)
-        guard !affirmations.isEmpty else { return [] }
-        return try planner.reminders(for: schedule, affirmations: affirmations)
     }
 
     private func replaceReminders(with reminders: [NotificationReminder]) async throws {

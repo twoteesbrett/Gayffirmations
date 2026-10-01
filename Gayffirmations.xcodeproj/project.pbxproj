@@ -18,6 +18,8 @@
 
 /* Begin PBXFileReference section */
 		8BB2E9E2306B8B56000EC3C3 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		8BF464D1306F0E2200E708F5 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		8BF464D2306F0E2200E708F5 /* PHOTO_SOURCES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PHOTO_SOURCES.md; sourceTree = "<group>"; };
 		8BF98E80306A3C0800CA7342 /* Gayffirmations.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gayffirmations.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001306A3C0800CA7342 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		A1000002306A3C0800CA7342 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
@@ -55,6 +57,8 @@
 			isa = PBXGroup;
 			children = (
 				8BB2E9E2306B8B56000EC3C3 /* .gitignore */,
+				8BF464D1306F0E2200E708F5 /* LICENSE */,
+				8BF464D2306F0E2200E708F5 /* PHOTO_SOURCES.md */,
 				A1000001306A3C0800CA7342 /* README.md */,
 				A1000002306A3C0800CA7342 /* TODO.md */,
 				8BF98E82306A3C0800CA7342 /* Gayffirmations */,

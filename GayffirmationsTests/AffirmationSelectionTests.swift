@@ -4,6 +4,21 @@ import Testing
 
 @MainActor
 struct AffirmationSelectionTests {
+    @Test("Clearing the final Library filter returns to All while active filters remain selected")
+    func emptyLibraryFiltersDefaultToAll() {
+        #expect(AffirmationSelection.sources(favourites: false, tags: []).usingAllWhenEmpty == .all)
+        #expect(AffirmationSelection.all.usingAllWhenEmpty == .all)
+        for selection: AffirmationSelection in [
+            .favourites, .tag("Work"), .sources(favourites: true, tags: ["Work"])
+        ] {
+            #expect(selection.usingAllWhenEmpty == selection)
+        }
+        let cleared = AffirmationSelection.favourites.selectingFavourites(false)
+        #expect(cleared.usingAllWhenEmpty == .all)
+        // Empty selections remain available to the editor and existing saved data.
+        #expect(cleared.matchingAffirmations(in: Affirmation.samples).isEmpty)
+    }
+
     @Test("Combined choices include favourites or any selected tag, without duplicates")
     func combinesSources() {
         let favourite = Affirmation(text: "Favourite", isFavorite: true)

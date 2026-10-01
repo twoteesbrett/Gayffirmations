@@ -6,7 +6,6 @@ struct LibraryView: View {
     let notificationCoordinator: NotificationCoordinator
 
     @Environment(\.appTheme) private var appTheme
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var editorDestination: EditorDestination?
     @State private var persistenceErrorMessage: String?
@@ -89,27 +88,14 @@ struct LibraryView: View {
 
     private var selectionBar: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: 8) { selectionControls }
-            } else {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 8) { selectionControls }
-                    VStack(alignment: .leading, spacing: 8) { selectionControls }
-                }
+            WrappingLayout(spacing: 8) {
+                selectionControls
             }
 
             if hasSelectedTags {
-                HStack(alignment: .top, spacing: 12) {
-                    Text(selection.selectedTags.map { $0.lowercased() }.joined(separator: ", "))
-                        .font(.subheadline)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                    Button("Clear") { saveSelection(.all) }
-                        .font(.subheadline)
-                        .frame(minHeight: 44)
-                        .buttonStyle(.borderless)
-                        .accessibilityLabel("Use all affirmations")
-                }
+                Text(selection.selectedTags.map { $0.lowercased() }.joined(separator: ", "))
+                    .font(.subheadline)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Text("These affirmations appear in Today and reminders.")
@@ -188,20 +174,24 @@ struct LibraryView: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage)
-                .font(.subheadline.weight(.medium))
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .foregroundStyle(isSelected ? appTheme.accentColor : Color.primary)
-                .background {
-                    Capsule()
-                        .fill(isSelected ? appTheme.accentColor.opacity(0.12) : Color(.secondarySystemGroupedBackground))
-                }
-                .overlay {
-                    Capsule()
-                        .strokeBorder(isSelected ? appTheme.accentColor : Color.primary.opacity(0.12), lineWidth: 1)
-                }
+            HStack(spacing: 8) {
+                Image(systemName: systemImage)
+                    .accessibilityHidden(true)
+                Text(title)
+            }
+            .font(.subheadline.weight(.medium))
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .foregroundStyle(isSelected ? appTheme.accentColor : Color.primary)
+            .background {
+                Capsule()
+                    .fill(isSelected ? appTheme.accentColor.opacity(0.12) : Color(.secondarySystemGroupedBackground))
+            }
+            .overlay {
+                Capsule()
+                    .strokeBorder(isSelected ? appTheme.accentColor : Color.primary.opacity(0.12), lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
@@ -209,14 +199,11 @@ struct LibraryView: View {
 
     private func saveSelection(_ selection: AffirmationSelection) {
         guard !isSavingSelection, !notificationCoordinator.isUpdating else { return }
-        // Clearing the last choice returns to the whole library.
-        let updatedSelection: AffirmationSelection = selection.includesFavourites || !selection.selectedTags.isEmpty
-            ? selection : .all
         isSavingSelection = true
         Task {
             defer { isSavingSelection = false }
             do {
-                try await notificationCoordinator.setSelection(updatedSelection)
+                try await notificationCoordinator.setSelection(selection.usingAllWhenEmpty)
             } catch {
                 persistenceErrorMessage = error.localizedDescription
             }

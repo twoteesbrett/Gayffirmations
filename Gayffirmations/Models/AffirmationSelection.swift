@@ -22,6 +22,11 @@ enum AffirmationSelection: Codable, Hashable {
         }
     }
 
+    /// Library returns to all affirmations when the final filter is cleared.
+    var usingAllWhenEmpty: AffirmationSelection {
+        includesFavourites || !selectedTags.isEmpty ? self : .all
+    }
+
     var name: String {
         if self == .all { return "All affirmations" }
         let names = (includesFavourites ? ["Favourites"] : []) + selectedTags.map { $0.lowercased() }

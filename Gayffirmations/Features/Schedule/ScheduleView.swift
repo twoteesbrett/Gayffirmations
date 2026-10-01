@@ -64,7 +64,15 @@ struct ScheduleView: View {
         if notificationCoordinator.deliveryIsPaused {
             Text("No reminders will be delivered until the selected source has entries.")
                 .foregroundStyle(.secondary)
-        } else if let times = try? calculator.notificationTimes(for: store.schedule) {
+        } else {
+            schedulePreview
+        }
+    }
+
+    @ViewBuilder
+    private var schedulePreview: some View {
+        switch Result(catching: { try calculator.notificationTimes(for: store.schedule) }) {
+        case .success(let times):
             if times.isEmpty {
                 Text("No reminders are scheduled.")
                     .foregroundStyle(.secondary)
@@ -75,11 +83,8 @@ struct ScheduleView: View {
                     }
                 }
             }
-        } else {
-            Label(
-                ScheduleCalculatorError.endMustBeAfterStart.localizedDescription,
-                systemImage: "exclamationmark.triangle"
-            )
+        case .failure(let error):
+            Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
                 .foregroundStyle(.red)
         }
     }
@@ -88,7 +93,9 @@ struct ScheduleView: View {
         Binding(
             get: { store.schedule.isEnabled },
             set: { isEnabled in
-                updateNotifications(isEnabled: isEnabled)
+                performScheduleChange {
+                    try await notificationCoordinator.setEnabled(isEnabled)
+                }
             }
         )
     }
@@ -130,12 +137,6 @@ struct ScheduleView: View {
                 }
             }
         )
-    }
-
-    private func updateNotifications(isEnabled: Bool) {
-        performScheduleChange {
-            try await notificationCoordinator.setEnabled(isEnabled)
-        }
     }
 
     private func performScheduleChange(

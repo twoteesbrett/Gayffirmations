@@ -1,16 +1,5 @@
 import Foundation
 
-enum NotificationPlannerError: LocalizedError, Equatable {
-    case noAffirmations
-
-    var errorDescription: String? {
-        switch self {
-        case .noAffirmations:
-            "Add at least one affirmation before enabling reminders."
-        }
-    }
-}
-
 struct NotificationPlanner {
     private let calculator = ScheduleCalculator()
 
@@ -20,13 +9,8 @@ struct NotificationPlanner {
     ) throws -> [NotificationReminder] {
         let times = try calculator.notificationTimes(for: schedule)
 
-        guard !times.isEmpty else {
-            return []
-        }
-
-        guard !affirmations.isEmpty else {
-            throw NotificationPlannerError.noAffirmations
-        }
+        // An empty selected library pauses delivery, but still validates the schedule.
+        guard !affirmations.isEmpty else { return [] }
 
         return times.enumerated().map { index, time in
             NotificationReminder(
