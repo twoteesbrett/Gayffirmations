@@ -1,4 +1,4 @@
-# gayaffirmations build plan
+# Gayffirmations build plan
 
 Work from top to bottom, keeping the app runnable after each milestone.
 Complete the intended functionality before continuing visual polish.
