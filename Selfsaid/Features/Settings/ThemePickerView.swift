@@ -75,14 +75,11 @@ private struct ThemePreviewRow: View {
     }
 
     private var artwork: some View {
-        RoundedRectangle(cornerRadius: 14)
-            .fill(theme.backgroundGradient)
+        Image(theme.backgroundPhotoName)
+            .resizable()
+            .scaledToFill()
             .frame(width: 72, height: 58)
-            .overlay {
-                Image(systemName: theme.symbol)
-                    .font(.system(size: 26, weight: .light))
-                    .foregroundStyle(theme.accentColor)
-            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(.primary.opacity(0.12))

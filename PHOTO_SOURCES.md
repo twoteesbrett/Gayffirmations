@@ -1,17 +1,18 @@
-# Background photo candidates
+# Theme background photos
 
-User-supplied Pexels downloads, bundled for visual evaluation. Distribution rights
-have not yet been verified.
+Today uses one fixed scenery asset per theme, independent of affirmation tags.
+The theme picker previews the same assets.
 
-| Asset | Tag | Original filename |
+| Theme | Asset | Original Pexels filename |
 | --- | --- | --- |
-| playful | playful | pexels-djordje-petrovic-590080-1402278.jpg |
-| confidence | confidence | pexels-satyam-pathak-742233074-18540100.jpg |
-| self-worth | self-worth | pexels-sargonsama-38440480.jpg |
+| Warm Coast | theme-warm | pexels-theladofalps-290430173-29328298.jpg |
+| Midnight | theme-midnight | pexels-theladofalps-290430173-29328298.jpg |
+| Playful Pop | theme-playful | pexels-sargonsama-38440480.jpg |
+| Quiet Linen | theme-refined | pexels-sargonsama-38440480.jpg |
 
-| joy | joy | pexels-chetanvlad-2923157.jpg |
-| authenticity | authenticity | pexels-cyligan-35584322.jpg |
-| anxiety | anxiety | pexels-theladofalps-290430173-29328298.jpg |
+Two user-supplied scenery photos are reused in four separate theme slots pending
+final photo choices. No people appear in these backgrounds. The unused tag-based
+photo candidates have been removed from the asset catalog.
 
-Original image files are retained in the asset catalog for this first preview.
-Before release, verify source licences and optimise image size and metadata.
+Distribution rights have not yet been verified. Before release, verify source
+licences and optimise image size and metadata.

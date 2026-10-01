@@ -57,7 +57,7 @@ Complete the intended functionality before continuing visual polish.
 
 ## 7. Settings and personalization
 
-- [x] Replace the Schedule tab with a Settings tab.
+- [x] Move Schedule into Settings, reachable from the Today menu.
 - [x] Move the existing notification schedule into Settings.
 - [x] Define a theme model that shares one layout and varies visual tokens such
       as color, typography, backgrounds, and imagery.
@@ -143,11 +143,11 @@ reminders; Settings keeps appearance, notifications, and data controls.
 - [ ] Finalize the identity, typography, colors, and imagery for each theme.
 - [ ] Refine each theme's light and dark appearance.
 
-  Theme styling pass centralizes adaptive accent/background colours, typography,
-  and a decorative symbol for each theme. Today uses larger, scalable type and
-  capsule navigation controls. The theme picker shares the same palette and
-  symbol; app screens inherit the selected type design and follow system
-  appearance. Eight Today previews cover every theme in light and dark.
+  Theme styling centralizes adaptive accent/background colours and typography.
+  Today uses scalable, centred text over a fixed photo per theme and horizontal
+  swipes to browse. The theme picker previews the same photos; app screens
+  inherit the selected type design and follow system appearance. Eight Today
+  previews cover every theme in light and dark.
   Simulator build passes; visual approval and final artwork remain pending.
 - [ ] Replace temporary theme previews with final artwork.
 - [ ] Add restrained transitions and haptics.
@@ -155,21 +155,21 @@ reminders; Settings keeps appearance, notifications, and data controls.
 - [ ] Perform a final accessibility and usability pass.
 
   Layout review centralizes theme backgrounds across all screens and sheets,
-  preserves separate rounded Library sections, keeps Today navigation buttons
-  equal in width, and stacks theme previews at accessibility text sizes.
+  preserves separate rounded Library sections, provides VoiceOver actions for
+  Today browsing, and stacks theme previews at accessibility text sizes.
   Daily reminder controls also respect shared coordinator updates. Live visual
   and VoiceOver verification remains pending.
 
 ## Fixed category presets
 
-- [x] Bundle 30 starter affirmations (five per preset), with multiple tags covering all 23 predefined tags. Existing saved libraries are preserved; restoring defaults loads the starter collection.
+- [x] Bundle 35 starter affirmations (five per preset), with multiple tags covering all 24 predefined tags. Existing saved libraries are preserved; restoring defaults loads the starter collection.
 
-- [x] Define the six fixed categories as presets of tags.
+- [x] Define the seven fixed categories as presets of tags.
 - [x] Share a Presets menu and flat tag list across Library and the editor; remove duplicate Settings selection controls.
 - [x] Applying a preset replaces selected tags while preserving Favourites.
 - [x] Recognize matching presets; show Custom selection for other tag combinations.
 - [x] Offer predefined tags in the editor; offer available presets in the shared Library selection controls.
-- [x] Persist Library choices through the reminder coordinator; Today shows its position in the selected collection.
+- [x] Persist Library choices through the reminder coordinator; Today supports swiping through the selected collection.
 - [x] Review shared-selection ownership and save failures, keep Clear all available for custom-only libraries, and make the Library selection summary scroll with its entries at large text sizes.
 - [x] Isolate previews from real notification scheduling and preserve unexpected saved value types.
 - [ ] Perform live visual and accessibility review of shared selection controls.
@@ -177,7 +177,7 @@ reminders; Settings keeps appearance, notifications, and data controls.
 ## Later ideas
 
 - [ ] Allow users to create and edit category presets. Initially use fixed presets:
-  Feel Good (self-worth, confidence, joy); Being Me (gay identity, pride,
+  Feel Good (self-worth, confidence, joy); Playful (playful); Being Me (gay identity, pride,
   authenticity, shame); My Body (body image, appearance, masculinity, ageing);
   Love & Dating (dating, relationships, rejection, intimacy); Connection
   (friends, chosen family, belonging, loneliness); Tough Days (anxiety,

@@ -2,6 +2,8 @@ import SwiftUI
 import UIKit
 
 extension AppTheme {
+    var backgroundPhotoName: String { "theme-\(rawValue)" }
+
     var accentColor: Color {
         switch self {
         case .warm: adaptiveColor(light: 0xA8432D, dark: 0xFFB199)
@@ -40,15 +42,6 @@ extension AppTheme {
 
     var affirmationFont: Font {
         .system(.largeTitle, design: fontDesign, weight: self == .playful ? .semibold : .regular)
-    }
-
-    var symbol: String {
-        switch self {
-        case .warm: "sun.horizon"
-        case .midnight: "moon.stars"
-        case .playful: "sparkles"
-        case .refined: "leaf"
-        }
     }
 
     private func adaptiveColor(light: UInt32, dark: UInt32) -> Color {
