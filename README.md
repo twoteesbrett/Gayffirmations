@@ -1,6 +1,6 @@
-# Selfsaid
+# gayaffirmations
 
-Selfsaid is an iOS affirmation app built as both a useful product and a way to
+gayaffirmations is an iOS affirmation app built as both a useful product and a way to
 learn Swift and SwiftUI. The first goal is reliable, easy-to-read functionality;
 visual polish will follow once the core behavior is working.
 
@@ -68,7 +68,7 @@ added later.
 A likely project structure as the app grows is:
 
 ```text
-Selfsaid/
+gayaffirmations/
 ├── App/
 ├── Models/
 ├── Features/
