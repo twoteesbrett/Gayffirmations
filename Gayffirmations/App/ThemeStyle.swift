@@ -2,10 +2,18 @@ import SwiftUI
 import UIKit
 
 extension AppTheme {
+    var backgroundPhotoName: String? {
+        self == .muscle ? "theme-muscle" : nil
+    }
+
+    var photoOverlayOpacity: Double {
+        self == .muscle ? 0.50 : 0
+    }
+
     // These palettes stay dark so system controls and secondary text remain readable.
     var preferredColorScheme: ColorScheme? {
         switch self {
-        case .midnight, .slate, .afterHours, .cherry: .dark
+        case .midnight, .slate, .afterHours, .cherry, .muscle: .dark
         default: nil
         }
     }
@@ -25,6 +33,7 @@ extension AppTheme {
         case .cherry: adaptiveColor(light: 0xFFD4BC, dark: 0xFFD4BC)
         case .bubblegum: adaptiveColor(light: 0x8C2350, dark: 0xFFB9D5)
         case .daydream: adaptiveColor(light: 0x674192, dark: 0xD4B8FA)
+        case .muscle: adaptiveColor(light: 0xBAC7D2, dark: 0xBAC7D2)
         }
     }
 
@@ -43,6 +52,7 @@ extension AppTheme {
         case .cherry: adaptiveColor(light: 0xFFF2DE, dark: 0xFFF2DE)
         case .bubblegum: adaptiveColor(light: 0x6F2146, dark: 0xFFF0F6)
         case .daydream: adaptiveColor(light: 0x493261, dark: 0xF6F0FF)
+        case .muscle: adaptiveColor(light: 0xF5F5F2, dark: 0xF5F5F2)
         }
     }
 
@@ -85,6 +95,9 @@ extension AppTheme {
         case .bubblegum:
             colors = [adaptiveColor(light: 0xFFD5E6, dark: 0x442033),
                       adaptiveColor(light: 0xFFDEC9, dark: 0x563026)]
+        case .muscle:
+            colors = [adaptiveColor(light: 0x252A30, dark: 0x252A30),
+                      adaptiveColor(light: 0x0D1014, dark: 0x0D1014)]
         case .daydream:
             colors = [adaptiveColor(light: 0xEDE1FA, dark: 0x2C2342),
                       adaptiveColor(light: 0xD7EAF7, dark: 0x203749)]
@@ -94,7 +107,7 @@ extension AppTheme {
 
     var fontDesign: Font.Design {
         switch self {
-        case .warm, .midnight, .slate, .coast, .cherry: .default
+        case .warm, .midnight, .slate, .coast, .cherry, .muscle: .default
         case .playful, .bubblegum, .daydream: .rounded
         case .refined, .paper, .forest, .goldenHour, .afterHours: .serif
         }
@@ -103,6 +116,7 @@ extension AppTheme {
     var affirmationFont: Font {
         let weight: Font.Weight
         switch self {
+        case .muscle: weight = .bold
         case .playful, .bubblegum, .daydream, .cherry: weight = .semibold
         default: weight = .regular
         }

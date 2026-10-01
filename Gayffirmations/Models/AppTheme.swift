@@ -14,6 +14,7 @@ enum AppTheme: String, Codable, CaseIterable, Identifiable {
     case cherry
     case bubblegum
     case daydream
+    case muscle
 
     var id: Self { self }
 
@@ -32,6 +33,7 @@ enum AppTheme: String, Codable, CaseIterable, Identifiable {
         case .cherry: "Cherry"
         case .bubblegum: "Bubblegum"
         case .daydream: "Daydream"
+        case .muscle: "Steel"
         }
     }
 
@@ -50,6 +52,7 @@ enum AppTheme: String, Codable, CaseIterable, Identifiable {
         case .cherry: "Rich cherry red with bold, cheeky confidence."
         case .bubblegum: "Pink and peach with an upbeat, playful spirit."
         case .daydream: "Lavender and pale blue for a light, whimsical mood."
+        case .muscle: "Charcoal, steel, and bold type with a strong, focused feel."
         }
     }
 }

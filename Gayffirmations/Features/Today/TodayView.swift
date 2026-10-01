@@ -6,6 +6,8 @@ struct TodayView: View {
     let scheduleStore: ScheduleStore
     let isUpdating: Bool
 
+    @AppStorage("gayffirmations.themePhotosEnabled") private var usesPhotoBackground = true
+
     @State private var errorMessage: String?
     @State private var manualSelection: ManualSelection?
     @State private var browsingForward = true
@@ -77,7 +79,8 @@ struct TodayView: View {
         .tint(appTheme.textColor)
         .toolbarBackground(.hidden, for: .navigationBar)
         .background {
-            appTheme.backgroundGradient.ignoresSafeArea()
+            ThemeBackground(theme: appTheme, usesPhoto: usesPhotoBackground)
+                .ignoresSafeArea()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }

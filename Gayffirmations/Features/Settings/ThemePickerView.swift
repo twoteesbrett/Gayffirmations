@@ -3,22 +3,37 @@ import SwiftUI
 struct ThemePickerView: View {
     let store: ThemeStore
 
+    @AppStorage("gayffirmations.themePhotosEnabled") private var usesPhotoBackground = true
+
     @State private var errorMessage: String?
 
     var body: some View {
-        List(AppTheme.allCases) { theme in
-            Button {
-                select(theme)
-            } label: {
-                ThemePreviewRow(
-                    theme: theme,
-                    isSelected: store.selectedTheme == theme
-                )
+        List {
+            if store.selectedTheme.backgroundPhotoName != nil {
+                Section {
+                    Toggle("Use photo background", isOn: $usesPhotoBackground)
+                } footer: {
+                    Text("Turn off to use the theme’s colours on Today.")
+                }
             }
-            .buttonStyle(.plain)
-            .accessibilityAddTraits(
-                store.selectedTheme == theme ? .isSelected : []
-            )
+
+            Section {
+                ForEach(AppTheme.allCases) { theme in
+                    Button {
+                        select(theme)
+                    } label: {
+                        ThemePreviewRow(
+                            theme: theme,
+                            isSelected: store.selectedTheme == theme,
+                            usesPhoto: usesPhotoBackground
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(
+                        store.selectedTheme == theme ? .isSelected : []
+                    )
+                }
+            }
         }
         .themedBackground()
         .navigationTitle("Theme")
@@ -48,6 +63,7 @@ struct ThemePickerView: View {
 private struct ThemePreviewRow: View {
     let theme: AppTheme
     let isSelected: Bool
+    let usesPhoto: Bool
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -75,7 +91,7 @@ private struct ThemePreviewRow: View {
     }
 
     private var artwork: some View {
-        theme.backgroundGradient
+        ThemeBackground(theme: theme, usesPhoto: usesPhoto)
             .overlay {
                 Text("Aa")
                     .font(.system(.title2, design: theme.fontDesign, weight: .medium))
