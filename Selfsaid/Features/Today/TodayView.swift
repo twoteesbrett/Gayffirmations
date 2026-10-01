@@ -26,49 +26,57 @@ struct TodayView: View {
 
     var body: some View {
         TimelineView(.periodic(from: refreshMinute, by: 60)) { context in
+            let affirmation = currentAffirmation(at: context.date)
             let photo = AffirmationPhoto.resolve(
-                for: currentAffirmation(at: context.date),
+                for: affirmation,
                 selectedTags: selectionStore.selection.selectedTags
             )
             GeometryReader { geometry in
                 ScrollView {
-                    VStack(spacing: 32) {
-                        if (photo == .playful || photo == .confidence)
-                            && geometry.size.height > geometry.size.width {
-                            Spacer().frame(height: geometry.size.height * 0.08)
-                        } else {
-                            Spacer(minLength: 0)
-                        }
+                    AffirmationMessageLayout(
+                        viewportHeight: geometry.size.height,
+                        centreFraction: photo?.messagePosition(in: geometry.size) ?? 0.50
+                    ) {
+                        VStack(spacing: 32) {
+                            if let affirmation {
+                                if photo == nil {
+                                    Image(systemName: appTheme.symbol)
+                                        .font(.system(size: 36, weight: .light))
+                                        .foregroundStyle(appTheme.accentColor)
+                                        .accessibilityHidden(true)
+                                }
 
-                        if let affirmation = currentAffirmation(at: context.date) {
-                            if photo == nil {
-                                Image(systemName: appTheme.symbol)
-                                    .font(.system(size: 36, weight: .light))
-                                    .foregroundStyle(appTheme.accentColor)
-                                    .accessibilityHidden(true)
+                                affirmationMessage(affirmation)
+                            } else {
+                                ContentUnavailableView(
+                                    "No Matching Affirmations",
+                                    systemImage: "text.quote",
+                                    description: Text(selectionStore.selection.emptyMessage)
+                                )
                             }
-
-                            affirmationMessage(affirmation)
-
-                            favoriteButton(for: affirmation, hasPhoto: photo != nil)
-                        } else {
-                            ContentUnavailableView(
-                                "No Matching Affirmations",
-                                systemImage: "text.quote",
-                                description: Text(selectionStore.selection.emptyMessage)
-                            )
                         }
-
-                        Spacer(minLength: 0)
+                        .padding(.horizontal, 28)
                     }
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 24)
-                    .frame(maxWidth: .infinity, minHeight: geometry.size.height)
+                    .overlay {
+                        AffirmationTapTarget(
+                            onDoubleTap: { cycleAffirmation(by: 1) },
+                            onTripleTap: { cycleAffirmation(by: -1) }
+                        )
+                        .accessibilityHidden(true)
+                    }
                 }
             }
             .foregroundStyle(photo == nil ? Color.primary : Color.white)
             .tint(photo == nil ? appTheme.accentColor : .white)
             .toolbarBackground(photo == nil ? .automatic : .hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    if let affirmation {
+                        favoriteButton(for: affirmation)
+                    }
+                }
+                .iconOnlyBackground()
+            }
             .background {
                 if let photo {
                     AffirmationPhotoBackground(photo: photo)
@@ -103,14 +111,6 @@ struct TodayView: View {
             .frame(maxWidth: 560)
             .multilineTextAlignment(.center)
             .accessibilityLabel("Affirmation: \(affirmation.text)")
-            .contentShape(Rectangle())
-            .overlay {
-                AffirmationTapTarget(
-                    onDoubleTap: { cycleAffirmation(by: 1) },
-                    onTripleTap: { cycleAffirmation(by: -1) }
-                )
-                .accessibilityHidden(true)
-            }
             .accessibilityAction(named: "Next affirmation") { cycleAffirmation(by: 1) }
             .accessibilityAction(named: "Previous affirmation") { cycleAffirmation(by: -1) }
     }
@@ -155,7 +155,7 @@ struct TodayView: View {
         let expiresAt: Date
     }
 
-    private func favoriteButton(for affirmation: Affirmation, hasPhoto: Bool) -> some View {
+    private func favoriteButton(for affirmation: Affirmation) -> some View {
         Button {
             do {
                 try store.toggleFavorite(id: affirmation.id)
@@ -164,8 +164,8 @@ struct TodayView: View {
             }
         } label: {
             Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
-                .font(.title3)
-                .foregroundStyle(hasPhoto ? Color.white : (affirmation.isFavorite ? appTheme.accentColor : Color.secondary))
+                .font(.system(size: 22, weight: .regular))
+                .foregroundStyle(.white)
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
         }

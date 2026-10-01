@@ -37,11 +37,18 @@ retaining the enabled schedule and resume when matching entries return.
 
 Today shows the most recent scheduled affirmation, keeping the final reminder
 current overnight. With reminders off, it rotates once per local calendar day.
-The menu opens Library and Settings. Double-tapping the message advances to the
+The menu opens Library and Settings. Double-tapping anywhere in the affirmation area advances to the
 next affirmation; triple-tapping goes back. These temporary choices expire at
 the next reminder, or at midnight without reminders. Changing the schedule or
 source selection clears the temporary choice. VoiceOver exposes equivalent
 Next and Previous actions.
+
+Today uses bundled photos for playful, confidence, and self-worth tags, with the
+theme gradient for other tags. Photo selection prefers a selected tag matching
+the affirmation, then falls back to the order in `AffirmationPhoto`.
+That file also holds each photo’s portrait and landscape message positions and
+dark overlay strength. Positions describe the message centre as a fraction of
+the available height; longer text stays within margins and can scroll.
 
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be

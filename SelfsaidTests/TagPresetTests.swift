@@ -17,8 +17,9 @@ struct TagPresetTests {
         let tags = TagPreset.tagChoices(from: ["PRIDE", "Work"], includePredefined: true)
         #expect(tags.contains("PRIDE"))
         #expect(!tags.contains("pride"))
-        #expect(tags.count == 24)
-        #expect(TagPreset.presets(for: tags).count == 6)
+        #expect(tags.contains("playful"))
+        #expect(tags.count == 25)
+        #expect(TagPreset.presets(for: tags).count == 7)
     }
 
     @Test("Applying a preset replaces tags and preserves Favourites")

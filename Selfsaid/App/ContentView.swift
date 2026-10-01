@@ -67,10 +67,13 @@ struct ContentView: View {
                         Button("Settings", systemImage: "gearshape") { destination = .settings }
                     } label: {
                         Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 22, weight: .regular))
+                            .foregroundStyle(.white)
                             .frame(minWidth: 44, minHeight: 44)
                     }
                     .accessibilityLabel("Menu")
                 }
+                .iconOnlyBackground()
             }
             .sheet(item: $destination) { destination in
                 destinationView(destination)
