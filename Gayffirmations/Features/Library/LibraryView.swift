@@ -142,7 +142,7 @@ struct LibraryView: View {
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Choose a preset or tags. Entries matching any selected tag or Favourites appear in Library, Today, and reminders.")
+                    Text("Choose tags. Entries matching any selected tag or Favourites appear in Library, Today, and reminders.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,
@@ -152,7 +152,7 @@ struct LibraryView: View {
             }
             .themedBackground()
             .disabled(isSavingSelection || notificationCoordinator.isUpdating)
-            .navigationTitle("Presets & Tags")
+            .navigationTitle("Tags")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

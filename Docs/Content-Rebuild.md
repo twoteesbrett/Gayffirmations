@@ -2,9 +2,9 @@
 
 ## Current baseline
 
-The shipped catalogue now has one Neutral theme, no starter affirmations, no predefined tag presets, and no theme photos. Library editing, custom tags, favourites, selections, scheduling, persistence, and accessibility remain available.
+The shipped catalogue has one Neutral theme, 15 initial affirmations, five initial tags (body, food, confidence, gay, and self-kindness), and no theme photos. Library editing, custom tags, favourites, selections, scheduling, persistence, and accessibility remain available.
 
-On the next launch, a one-time content revision clears saved affirmations (including favourites and tags), the selected theme, source selections, and the old photo toggle. Reminder schedules remain saved; launch reconciliation removes reminders when there are no eligible affirmations. New content created after that launch is preserved. Before clearing preferences, the repository saves the old content in `gayffirmations.contentBeforeRebuild`. Removed bundled content is also backed up outside the project at `/private/tmp/gayffirmations-content-before-reset.zip`.
+On the next launch, a one-time content revision clears saved affirmations (including favourites and tags), the selected theme, source selections, and the old photo toggle. Reminder schedules remain saved; launch reconciliation removes reminders when there are no eligible affirmations. New content created after that launch is preserved. The initial affirmation catalogue is seeded once, including into an empty library saved by the baseline version. Stable IDs and matching text prevent duplicate starters; subsequent edits and deletions are preserved. Before clearing preferences, the repository saves the old content in `gayffirmations.contentBeforeRebuild`. Removed bundled content is also backed up outside the project at `/private/tmp/gayffirmations-content-before-reset.zip`.
 
 Retired theme identifiers decode as Neutral. Unknown or malformed saved data still reports an error. Retired identifiers are retained only for migration.
 
@@ -16,7 +16,7 @@ Each photo is a separate definition with a stable ID, asset name, accessibility 
 
 Use portrait JPEGs around 1440 × 3120 where practical. Preserve originals separately. Validate the portrait and landscape crops and text contrast, including long affirmations, large text, and both toolbar icons.
 
-Affirmations should have stable IDs, text, and explicit tag IDs. Tags should have stable IDs and editable display names; presets refer to tag IDs. This avoids a spelling change breaking filtering or favourites. Before adding a revised starter library, define how built-in entries and user-created entries coexist and how edits/favourites survive catalogue updates.
+Affirmations should have stable IDs, text, and explicit tag IDs. Tags should have stable IDs and editable display names. This avoids a spelling change breaking filtering or favourites. Before adding a revised starter library, define how built-in entries and user-created entries coexist and how edits/favourites survive catalogue updates.
 
 ## Photo choices
 

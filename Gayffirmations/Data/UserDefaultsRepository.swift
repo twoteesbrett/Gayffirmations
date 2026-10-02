@@ -14,21 +14,25 @@ final class UserDefaultsRepository:
         static let affirmationSelection = "gayffirmations.affirmationSelection"
         static let contentRebuildRevision = "gayffirmations.contentRebuildRevision"
         static let contentBeforeRebuild = "gayffirmations.contentBeforeRebuild"
+        static let initialAffirmationsSeeded = "gayffirmations.initialAffirmationsSeeded"
         static let retiredPhotoPreference = "gayffirmations.themePhotosEnabled"
     }
 
     private let userDefaults: UserDefaults
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
+    private let initialAffirmations: [Affirmation]
 
     init(
         userDefaults: UserDefaults = .standard,
         encoder: JSONEncoder = JSONEncoder(),
-        decoder: JSONDecoder = JSONDecoder()
+        decoder: JSONDecoder = JSONDecoder(),
+        initialAffirmations: [Affirmation] = []
     ) {
         self.userDefaults = userDefaults
         self.encoder = encoder
         self.decoder = decoder
+        self.initialAffirmations = initialAffirmations
     }
 
     /// This deliberate content reset runs once; later launches preserve new work.
@@ -49,7 +53,22 @@ final class UserDefaultsRepository:
     }
 
     func loadAffirmations() throws -> [Affirmation]? {
-        try load([Affirmation].self, forKey: Key.affirmations)
+        let saved = try load([Affirmation].self, forKey: Key.affirmations)
+        guard !initialAffirmations.isEmpty,
+              !userDefaults.bool(forKey: Key.initialAffirmationsSeeded) else { return saved }
+
+        let existing = saved ?? []
+        let additions = initialAffirmations.filter { starter in
+            !existing.contains { affirmation in
+                affirmation.id == starter.id || affirmation.text
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .compare(starter.text, options: .caseInsensitive) == .orderedSame
+            }
+        }
+        let seeded = existing + additions
+        try saveAffirmations(seeded)
+        userDefaults.set(true, forKey: Key.initialAffirmationsSeeded)
+        return seeded
     }
 
     func saveAffirmations(_ affirmations: [Affirmation]) throws {

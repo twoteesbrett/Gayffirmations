@@ -73,6 +73,43 @@ struct PersistenceRepositoryTests {
         #expect(try restartedRepository.loadAffirmationSelection() == .favourites)
     }
 
+    @Test("Initial content seeds the empty baseline once and preserves edits and deletions")
+    func seedsInitialContentOnce() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        try fixture.repository.saveAffirmations([])
+        let seeded = UserDefaultsRepository(userDefaults: fixture.userDefaults,
+                                           initialAffirmations: Affirmation.starterAffirmations)
+        #expect(try seeded.loadAffirmations() == Affirmation.starterAffirmations)
+
+        var edited = Affirmation.starterAffirmations[0]
+        edited.text = "Edited"
+        edited.isFavorite = true
+        try seeded.saveAffirmations([edited])
+        let restarted = UserDefaultsRepository(userDefaults: fixture.userDefaults,
+                                               initialAffirmations: Affirmation.starterAffirmations)
+        #expect(try restarted.loadAffirmations() == [edited])
+        try restarted.saveAffirmations([])
+        #expect(try restarted.loadAffirmations() == [])
+    }
+
+    @Test("Initial seeding preserves custom content and does not duplicate existing starters")
+    func seedingPreservesExistingContent() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let custom = Affirmation(text: "Custom", isFavorite: true, tags: ["Custom tag"])
+        var edited = Affirmation.starterAffirmations[0]
+        edited.text = "Edited starter"
+        let sameText = Affirmation(text: Affirmation.starterAffirmations[1].text)
+        try fixture.repository.saveAffirmations([custom, edited, sameText])
+        let seeded = UserDefaultsRepository(userDefaults: fixture.userDefaults,
+                                           initialAffirmations: Affirmation.starterAffirmations)
+        let saved = try seeded.loadAffirmations()
+        let loaded = try #require(saved)
+        #expect(Array(loaded.prefix(3)) == [custom, edited, sameText])
+        #expect(loaded.count == 16)
+    }
+
     @Test("Missing saved data is reported as absent")
     func missingData() throws {
         let fixture = RepositoryFixture()

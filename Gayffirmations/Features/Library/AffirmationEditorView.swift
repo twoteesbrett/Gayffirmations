@@ -71,7 +71,7 @@ struct AffirmationEditorView: View {
     }
 
     private var tagChoices: [String] {
-        TagChoices.sortedUnique(selectedTags + availableTags)
+        TagChoices.sortedUnique(selectedTags + availableTags + AffirmationTag.allCases.map(\.rawValue))
     }
 
     private var tagSection: some View {

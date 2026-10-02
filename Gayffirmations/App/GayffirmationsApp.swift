@@ -16,7 +16,7 @@ struct GayffirmationsApp: App {
     private let resetCoordinator: AppDataResetCoordinator
 
     init() {
-        let repository = UserDefaultsRepository()
+        let repository = UserDefaultsRepository(initialAffirmations: Affirmation.starterAffirmations)
         repository.prepareForContentRebuild()
         let affirmationStore = AffirmationStore(
             repository: repository,

@@ -8,24 +8,21 @@ struct TagSelectionSection: View {
 
     var body: some View {
         Section {
-            Button("Clear all selections") {
-                onChange(.all)
+            Button("Clear tags") {
+                onChange(.sources(favourites: selection.includesFavourites, tags: []))
             }
+            .disabled(selection.selectedTags.isEmpty)
 
             ForEach(tags, id: \.self) { tag in
                 Toggle(isOn: Binding(
                     get: { selection.containsTag(tag) },
                     set: { onChange(selection.selectingTag(tag, included: $0)) }
                 )) {
-                    Text(tag.lowercased())
+                    Text(AffirmationTag(rawValue: tag)?.name ?? tag.lowercased())
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
-            Button("Clear tags") {
-                onChange(.sources(favourites: selection.includesFavourites, tags: []))
-            }
-            .disabled(selection.selectedTags.isEmpty)
         } header: {
             Text("Tags")
         } footer: {

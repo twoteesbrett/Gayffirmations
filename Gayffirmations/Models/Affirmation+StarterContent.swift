@@ -1,6 +1,55 @@
 import Foundation
 
 extension Affirmation {
-    // The starter catalogue is intentionally empty while the content is rebuilt.
-    static let starterAffirmations: [Affirmation] = []
+    static let starterAffirmations: [Affirmation] = [
+        starter("B7E77000-0000-4000-8000-000000000001",
+                "Hey handsome, the pantry isn't going anywhere.",
+                [.food, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000002",
+                "A craving called. You don't have to answer.",
+                [.food, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000003",
+                "Your body deserves kindness, not another guilt trip.",
+                [.body, .food, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000004",
+                "One treat is a treat. It doesn't need a sequel.",
+                [.food, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000005",
+                "You've got this. Yes, even with biscuits in the house.",
+                [.food, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000006",
+                "Gay looks good on you.",
+                [.gay, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000007",
+                "You don't have to follow the straight instruction manual.",
+                [.gay, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000008",
+                "There's no dress code for being a gay man.",
+                [.gay, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000009",
+                "You like men. Excellent taste.",
+                [.gay, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000010",
+                "Be as gay as you damn well please.",
+                [.gay, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000011",
+                "Hey handsome. Yes, I'm talking to you.",
+                [.body, .confidence]),
+        starter("B7E77000-0000-4000-8000-000000000012",
+                "Your body isn't auditioning for anyone.",
+                [.body, .confidence, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000013",
+                "You don't need a six-pack to be a whole snack.",
+                [.body, .confidence, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000014",
+                "Grey hairs? You've earned the highlights.",
+                [.body, .confidence, .selfKindness]),
+        starter("B7E77000-0000-4000-8000-000000000015",
+                "Stop comparing. You're the only Brett in the room.",
+                [.confidence, .selfKindness]),
+    ]
+
+    private static func starter(_ id: String, _ text: String, _ tags: [AffirmationTag]) -> Affirmation {
+        Affirmation(id: UUID(uuidString: id)!, text: text, tags: tags.map(\.rawValue))
+    }
 }
