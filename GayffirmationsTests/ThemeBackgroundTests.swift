@@ -44,7 +44,7 @@ struct ThemeBackgroundTests {
         let data = Data(#"{"usesPhoto":true,"photoID":"removed"}"#.utf8)
         let choice = try JSONDecoder().decode(ThemeBackgroundChoice.self, from: data)
         #expect(choice.usesPhoto)
-        let store = ThemeStore(selectedTheme: .nature)
+        let store = ThemeStore(selectedTheme: .refined)
         try store.setUsesPhoto(true)
         #expect(store.selectedPhoto == nil)
         #expect(!store.backgroundChoice.usesPhoto)
@@ -52,7 +52,7 @@ struct ThemeBackgroundTests {
 
     @Test("Enabling photos after viewing a theme without photos advances on the next affirmation")
     func enablesAfterColours() throws {
-        let store = ThemeStore(selectedTheme: .nature)
+        let store = ThemeStore(selectedTheme: .refined)
         store.updateDisplayedAffirmation(UUID())
         try store.select(.steel)
         try store.setUsesPhoto(true)
@@ -97,11 +97,30 @@ struct ThemeBackgroundTests {
         #expect(rotation.photoIndex == 0)
     }
 
-    @Test("Every Steel photo has a bundled image")
+    @Test("Every theme photo has a bundled image")
     func bundledPhotos() {
-        for photo in AppTheme.steel.photos {
+        for photo in AppTheme.allCases.flatMap({ $0.photos }) {
             #expect(UIImage(named: photo.id) != nil)
         }
+    }
+
+    @Test("Nature and Steel save independent photo modes and rotate within their own collection")
+    func independentThemeModes() throws {
+        let store = ThemeStore(selectedTheme: .nature)
+        try store.setUsesPhoto(true)
+        let first = UUID()
+        store.updateDisplayedAffirmation(first)
+        #expect(store.selectedPhoto?.id == AppTheme.nature.photos.first?.id)
+        store.updateDisplayedAffirmation(UUID())
+        #expect(store.selectedPhoto?.id == AppTheme.nature.photos[1].id)
+        try store.select(.steel)
+        #expect(store.selectedPhoto == nil)
+        try store.setUsesPhoto(true)
+        #expect(store.selectedPhoto?.id.hasPrefix("steel-") == true)
+        try store.setUsesPhoto(false)
+        try store.select(.nature)
+        #expect(store.backgroundChoice.usesPhoto)
+        #expect(store.selectedPhoto?.id.hasPrefix("nature-") == true)
     }
 
     @Test("A failed background save preserves the current choice")
