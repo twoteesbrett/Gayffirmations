@@ -16,7 +16,7 @@ struct AffirmationSelectionTests {
         let cleared = AffirmationSelection.favourites.selectingFavourites(false)
         #expect(cleared.usingAllWhenEmpty == .all)
         // Empty selections remain available to the editor and existing saved data.
-        #expect(cleared.matchingAffirmations(in: Affirmation.samples).isEmpty)
+        #expect(cleared.matchingAffirmations(in: [Affirmation(text: "Example", isFavorite: true, tags: ["Example tag"])]).isEmpty)
     }
 
     @Test("Combined choices include favourites or any selected tag, without duplicates")
@@ -39,7 +39,7 @@ struct AffirmationSelectionTests {
         let tagsOnly = selection.selectingFavourites(false)
         #expect(tagsOnly.selectedTags == ["Confidence"])
         let empty = tagsOnly.selectingTag("CONFIDENCE", included: false)
-        #expect(empty.matchingAffirmations(in: Affirmation.samples).isEmpty)
+        #expect(empty.matchingAffirmations(in: [Affirmation(text: "Example", isFavorite: true, tags: ["Example tag"])]).isEmpty)
         #expect(empty.name == "None selected")
         let fromAll = AffirmationSelection.all.selectingTag("Work", included: true)
         #expect(fromAll.selectedTags == ["Work"])

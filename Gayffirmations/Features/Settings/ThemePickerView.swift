@@ -3,20 +3,10 @@ import SwiftUI
 struct ThemePickerView: View {
     let store: ThemeStore
 
-    @AppStorage("gayffirmations.themePhotosEnabled") private var usesPhotoBackground = true
-
     @State private var errorMessage: String?
 
     var body: some View {
         List {
-            if store.selectedTheme.backgroundPhotoName != nil {
-                Section {
-                    Toggle("Use photo background", isOn: $usesPhotoBackground)
-                } footer: {
-                    Text("Turn off to use the theme’s colours on Today.")
-                }
-            }
-
             Section {
                 ForEach(AppTheme.allCases) { theme in
                     Button {
@@ -24,8 +14,7 @@ struct ThemePickerView: View {
                     } label: {
                         ThemePreviewRow(
                             theme: theme,
-                            isSelected: store.selectedTheme == theme,
-                            usesPhoto: usesPhotoBackground
+                            isSelected: store.selectedTheme == theme
                         )
                     }
                     .buttonStyle(.plain)
@@ -63,7 +52,6 @@ struct ThemePickerView: View {
 private struct ThemePreviewRow: View {
     let theme: AppTheme
     let isSelected: Bool
-    let usesPhoto: Bool
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -91,7 +79,7 @@ private struct ThemePreviewRow: View {
     }
 
     private var artwork: some View {
-        ThemeBackground(theme: theme, usesPhoto: usesPhoto)
+        ThemeBackground(theme: theme)
             .overlay {
                 Text("Aa")
                     .font(.system(.title2, design: theme.fontDesign, weight: .medium))

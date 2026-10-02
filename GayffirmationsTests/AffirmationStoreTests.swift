@@ -242,7 +242,7 @@ struct AffirmationStoreTests {
         let repository = FailingAffirmationRepository()
         let store = AffirmationStore(
             repository: repository,
-            defaultAffirmations: Affirmation.samples
+            defaultAffirmations: [Affirmation(text: "Fallback")]
         )
         let affirmation = store.affirmations[0]
 

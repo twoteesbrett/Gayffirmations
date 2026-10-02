@@ -6,15 +6,7 @@ struct TagPreset: Identifiable {
 
     var id: String { name }
 
-    static let predefined: [TagPreset] = [
-        TagPreset(name: "Feel Good", tags: ["self-worth", "confidence", "joy"]),
-        TagPreset(name: "Playful", tags: ["playful"]),
-        TagPreset(name: "Being Me", tags: ["gay identity", "pride", "authenticity", "shame"]),
-        TagPreset(name: "My Body", tags: ["body image", "appearance", "masculinity", "ageing"]),
-        TagPreset(name: "Love & Dating", tags: ["dating", "relationships", "rejection", "intimacy"]),
-        TagPreset(name: "Connection", tags: ["friends", "chosen family", "belonging", "loneliness"]),
-        TagPreset(name: "Tough Days", tags: ["anxiety", "setbacks", "uncertainty", "starting again"])
-    ]
+    static let predefined: [TagPreset] = []
 
     /// Keeps existing spelling and adds built-in choices only in the editor.
     static func tagChoices(from tags: [String], includePredefined: Bool = false) -> [String] {

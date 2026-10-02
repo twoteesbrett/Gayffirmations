@@ -6,8 +6,6 @@ struct TodayView: View {
     let scheduleStore: ScheduleStore
     let isUpdating: Bool
 
-    @AppStorage("gayffirmations.themePhotosEnabled") private var usesPhotoBackground = true
-
     @State private var errorMessage: String?
     @State private var manualSelection: ManualSelection?
     @State private var browsingForward = true
@@ -43,10 +41,10 @@ struct TodayView: View {
                                 .transition(messageTransition(width: geometry.size.width))
                         } else {
                             ContentUnavailableView {
-                                Label("No Matching Affirmations", systemImage: "text.quote")
+                                Label(store.affirmations.isEmpty ? "No Affirmations" : "No Matching Affirmations", systemImage: "text.quote")
                                     .foregroundStyle(appTheme.textColor)
                             } description: {
-                                Text(selectionStore.selection.emptyMessage)
+                                Text(store.affirmations.isEmpty ? "Open Library from the menu to add your first affirmation." : selectionStore.selection.emptyMessage)
                                     .foregroundStyle(appTheme.textColor.opacity(0.85))
                             }
                         }
@@ -79,7 +77,7 @@ struct TodayView: View {
         .tint(appTheme.textColor)
         .toolbarBackground(.hidden, for: .navigationBar)
         .background {
-            ThemeBackground(theme: appTheme, usesPhoto: usesPhotoBackground)
+            ThemeBackground(theme: appTheme)
                 .ignoresSafeArea()
         }
         .onChange(of: scenePhase) { _, phase in
@@ -203,68 +201,4 @@ struct TodayView: View {
         selectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
     )
     .environment(\.dynamicTypeSize, .accessibility5)
-}
-
-#Preview("Warm Coast — light") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .warm)
-        .tint(AppTheme.warm.accentColor)
-        .fontDesign(AppTheme.warm.fontDesign)
-        .preferredColorScheme(.light)
-}
-
-#Preview("Warm Coast — dark") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .warm)
-        .tint(AppTheme.warm.accentColor)
-        .fontDesign(AppTheme.warm.fontDesign)
-        .preferredColorScheme(.dark)
-}
-
-#Preview("Midnight — light") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .midnight)
-        .tint(AppTheme.midnight.accentColor)
-        .fontDesign(AppTheme.midnight.fontDesign)
-        .preferredColorScheme(.light)
-}
-
-#Preview("Midnight — dark") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .midnight)
-        .tint(AppTheme.midnight.accentColor)
-        .fontDesign(AppTheme.midnight.fontDesign)
-        .preferredColorScheme(.dark)
-}
-
-#Preview("Playful Pop — light") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .playful)
-        .tint(AppTheme.playful.accentColor)
-        .fontDesign(AppTheme.playful.fontDesign)
-        .preferredColorScheme(.light)
-}
-
-#Preview("Playful Pop — dark") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .playful)
-        .tint(AppTheme.playful.accentColor)
-        .fontDesign(AppTheme.playful.fontDesign)
-        .preferredColorScheme(.dark)
-}
-
-#Preview("Quiet Linen — light") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .refined)
-        .tint(AppTheme.refined.accentColor)
-        .fontDesign(AppTheme.refined.fontDesign)
-        .preferredColorScheme(.light)
-}
-
-#Preview("Quiet Linen — dark") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
-        .environment(\.appTheme, .refined)
-        .tint(AppTheme.refined.accentColor)
-        .fontDesign(AppTheme.refined.fontDesign)
-        .preferredColorScheme(.dark)
 }

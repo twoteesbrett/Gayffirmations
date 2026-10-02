@@ -151,7 +151,7 @@ struct NotificationCoordinatorTests {
         let schedule = ScheduleStore(schedule: AffirmationSchedule(isEnabled: true))
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
-            affirmationStore: AffirmationStore(affirmations: Affirmation.samples),
+            affirmationStore: AffirmationStore(affirmations: [Affirmation(text: "Fallback")]),
             scheduleStore: schedule, scheduler: scheduler,
             selectionStore: AffirmationSelectionStore(repository: repository)
         )

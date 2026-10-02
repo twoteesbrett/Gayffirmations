@@ -17,6 +17,7 @@ struct GayffirmationsApp: App {
 
     init() {
         let repository = UserDefaultsRepository()
+        repository.prepareForContentRebuild()
         let affirmationStore = AffirmationStore(
             repository: repository,
             defaultAffirmations: Affirmation.samples
@@ -27,7 +28,7 @@ struct GayffirmationsApp: App {
         )
         let themeStore = ThemeStore(
             repository: repository,
-            defaultTheme: .warm
+            defaultTheme: .neutral
         )
 
         _affirmationStore = State(initialValue: affirmationStore)

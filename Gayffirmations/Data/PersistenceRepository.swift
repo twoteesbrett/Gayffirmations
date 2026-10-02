@@ -55,6 +55,23 @@ final class UserDefaultsRepository: AffirmationRepository, ScheduleRepository, T
         self.decoder = decoder
     }
 
+    /// This deliberate content reset runs once; later launches preserve new work.
+    func prepareForContentRebuild() {
+        let revisionKey = "gayffirmations.contentRebuildRevision"
+        guard userDefaults.integer(forKey: revisionKey) < 1 else { return }
+        let contentKeys = [Key.affirmations, Key.theme, Key.affirmationSelection,
+                           "gayffirmations.themePhotosEnabled"]
+        var backup: [String: Any] = [:]
+        for key in contentKeys {
+            if let value = userDefaults.object(forKey: key) { backup[key] = value }
+        }
+        if !backup.isEmpty {
+            userDefaults.set(backup, forKey: "gayffirmations.contentBeforeRebuild")
+        }
+        for key in contentKeys { userDefaults.removeObject(forKey: key) }
+        userDefaults.set(1, forKey: revisionKey)
+    }
+
     func loadAffirmations() throws -> [Affirmation]? {
         try load([Affirmation].self, forKey: Key.affirmations)
     }

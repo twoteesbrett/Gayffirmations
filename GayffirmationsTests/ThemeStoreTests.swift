@@ -5,32 +5,32 @@ import Testing
 struct ThemeStoreTests {
     @Test("A saved theme is loaded when a store is created")
     func loadsSavedTheme() {
-        let repository = InMemoryThemeRepository(theme: .midnight)
+        let repository = InMemoryThemeRepository(theme: .neutral)
 
-        let store = ThemeStore(repository: repository, defaultTheme: .warm)
+        let store = ThemeStore(repository: repository, defaultTheme: .neutral)
 
-        #expect(store.selectedTheme == .midnight)
+        #expect(store.selectedTheme == .neutral)
     }
 
     @Test("The default theme is saved on first launch")
     func savesDefaultTheme() {
         let repository = InMemoryThemeRepository()
 
-        let store = ThemeStore(repository: repository, defaultTheme: .warm)
+        let store = ThemeStore(repository: repository, defaultTheme: .neutral)
 
-        #expect(store.selectedTheme == .warm)
-        #expect(repository.theme == .warm)
+        #expect(store.selectedTheme == .neutral)
+        #expect(repository.theme == .neutral)
     }
 
     @Test("A theme selection survives recreating the store", arguments: AppTheme.allCases)
     func selectionSurvivesRestart(theme: AppTheme) throws {
         let repository = InMemoryThemeRepository()
-        let firstStore = ThemeStore(repository: repository, defaultTheme: .warm)
+        let firstStore = ThemeStore(repository: repository, defaultTheme: .neutral)
 
         try firstStore.select(theme)
         let restartedStore = ThemeStore(
             repository: repository,
-            defaultTheme: .warm
+            defaultTheme: .neutral
         )
 
         #expect(restartedStore.selectedTheme == theme)
@@ -39,25 +39,25 @@ struct ThemeStoreTests {
     @Test("Reset restores and saves the default theme")
     func reset() throws {
         let repository = InMemoryThemeRepository()
-        let store = ThemeStore(repository: repository, defaultTheme: .warm)
+        let store = ThemeStore(repository: repository, defaultTheme: .neutral)
 
-        try store.select(.refined)
+        try store.select(.neutral)
         try store.reset()
 
-        #expect(store.selectedTheme == .warm)
-        #expect(repository.theme == .warm)
+        #expect(store.selectedTheme == .neutral)
+        #expect(repository.theme == .neutral)
     }
 
     @Test("A load failure prevents the theme from being overwritten")
     func loadFailurePreventsOverwrite() {
         let repository = FailingThemeRepository()
-        let store = ThemeStore(repository: repository, defaultTheme: .warm)
+        let store = ThemeStore(repository: repository, defaultTheme: .neutral)
 
         #expect(store.persistenceErrorMessage != nil)
         #expect(throws: PersistenceUnavailableError.self) {
-            try store.select(.midnight)
+            try store.select(.neutral)
         }
-        #expect(store.selectedTheme == .warm)
+        #expect(store.selectedTheme == .neutral)
         #expect(repository.saveCallCount == 0)
     }
 }

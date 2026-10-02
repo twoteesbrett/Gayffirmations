@@ -42,6 +42,37 @@ struct PersistenceRepositoryTests {
         #expect(fixture.userDefaults.string(forKey: "gayffirmations.affirmations") == "unexpected saved content")
     }
 
+    @Test("Content rebuild clears saved content once and preserves the reminder schedule")
+    func contentRebuildRunsOnce() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let old = [Affirmation(text: "Old", isFavorite: true, tags: ["Old tag"])]
+        let schedule = AffirmationSchedule(notificationsPerDay: 6)
+        try fixture.repository.saveAffirmations(old)
+        try fixture.repository.saveTheme(.neutral)
+        try fixture.repository.saveAffirmationSelection(.favourites)
+        try fixture.repository.saveSchedule(schedule)
+        fixture.userDefaults.set(true, forKey: "gayffirmations.themePhotosEnabled")
+
+        fixture.repository.prepareForContentRebuild()
+
+        #expect(try fixture.repository.loadAffirmations() == nil)
+        #expect(try fixture.repository.loadTheme() == nil)
+        #expect(try fixture.repository.loadAffirmationSelection() == nil)
+        #expect(fixture.userDefaults.object(forKey: "gayffirmations.themePhotosEnabled") == nil)
+        #expect(try fixture.repository.loadSchedule() == schedule)
+        let backup = fixture.userDefaults.dictionary(forKey: "gayffirmations.contentBeforeRebuild")
+        #expect(backup?["gayffirmations.affirmations"] as? Data == (try JSONEncoder().encode(old)))
+
+        let new = [Affirmation(text: "New", tags: ["New tag"])]
+        try fixture.repository.saveAffirmations(new)
+        try fixture.repository.saveAffirmationSelection(.favourites)
+        let restartedRepository = UserDefaultsRepository(userDefaults: fixture.userDefaults)
+        restartedRepository.prepareForContentRebuild()
+        #expect(try restartedRepository.loadAffirmations() == new)
+        #expect(try restartedRepository.loadAffirmationSelection() == .favourites)
+    }
+
     @Test("Missing saved data is reported as absent")
     func missingData() throws {
         let fixture = RepositoryFixture()
@@ -104,10 +135,10 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let affirmations = [Affirmation(text: "Reset")]
         let schedule = AffirmationSchedule()
-        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .warm, selection: .favourites)
+        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .neutral, selection: .favourites)
         #expect(try fixture.repository.loadAffirmations() == affirmations)
         #expect(try fixture.repository.loadSchedule() == schedule)
-        #expect(try fixture.repository.loadTheme() == .warm)
+        #expect(try fixture.repository.loadTheme() == .neutral)
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
@@ -116,9 +147,9 @@ struct PersistenceRepositoryTests {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
 
-        try fixture.repository.saveTheme(.midnight)
+        try fixture.repository.saveTheme(.neutral)
 
-        #expect(try fixture.repository.loadTheme() == .midnight)
+        #expect(try fixture.repository.loadTheme() == .neutral)
     }
 }
 

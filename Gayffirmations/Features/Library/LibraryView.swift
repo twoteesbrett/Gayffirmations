@@ -353,8 +353,8 @@ private enum EditorDestination: Identifiable {
 
 #Preview("Midnight") {
     libraryPreview()
-        .environment(\.appTheme, .midnight)
-        .tint(AppTheme.midnight.accentColor)
+        .environment(\.appTheme, .neutral)
+        .tint(AppTheme.neutral.accentColor)
         .preferredColorScheme(.dark)
 }
 
