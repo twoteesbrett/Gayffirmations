@@ -77,8 +77,10 @@ struct ContentView: View {
             }
             .sheet(item: $destination) { destination in
                 destinationView(destination)
+                    .themeAppearance(themeStore.selectedTheme)
             }
         }
+        .themeAppearance(themeStore.selectedTheme)
         .task {
             await notificationCoordinator.reconcileOnLaunch()
         }

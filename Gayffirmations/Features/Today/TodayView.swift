@@ -109,7 +109,7 @@ struct TodayView: View {
     private func affirmationMessage(_ affirmation: Affirmation) -> some View {
         Text(affirmation.text)
             .font(appTheme.affirmationFont)
-            .lineSpacing(6)
+            .lineSpacing(appTheme.affirmationLineSpacing)
             .frame(maxWidth: 560)
             .multilineTextAlignment(.center)
             .accessibilityLabel("Affirmation: \(affirmation.text)")
@@ -190,8 +190,24 @@ struct TodayView: View {
 }
 
 #if DEBUG
-#Preview("With affirmations") {
+#Preview("Nature") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.nature)
+}
+
+#Preview("Steel") {
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.steel)
+}
+
+#Preview("Refined") {
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.refined)
+}
+
+#Preview("Disco") {
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.disco)
 }
 
 #Preview("Empty") {

@@ -49,7 +49,7 @@ struct PersistenceRepositoryTests {
         let old = [Affirmation(text: "Old", isFavorite: true, tags: ["Old tag"])]
         let schedule = AffirmationSchedule(notificationsPerDay: 6)
         try fixture.repository.saveAffirmations(old)
-        try fixture.repository.saveTheme(.neutral)
+        try fixture.repository.saveTheme(.nature)
         try fixture.repository.saveAffirmationSelection(.favourites)
         try fixture.repository.saveSchedule(schedule)
         fixture.userDefaults.set(true, forKey: "gayffirmations.themePhotosEnabled")
@@ -172,10 +172,10 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let affirmations = [Affirmation(text: "Reset")]
         let schedule = AffirmationSchedule()
-        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .neutral, selection: .favourites)
+        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .nature, selection: .favourites)
         #expect(try fixture.repository.loadAffirmations() == affirmations)
         #expect(try fixture.repository.loadSchedule() == schedule)
-        #expect(try fixture.repository.loadTheme() == .neutral)
+        #expect(try fixture.repository.loadTheme() == .nature)
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
@@ -184,9 +184,9 @@ struct PersistenceRepositoryTests {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
 
-        try fixture.repository.saveTheme(.neutral)
+        try fixture.repository.saveTheme(.nature)
 
-        #expect(try fixture.repository.loadTheme() == .neutral)
+        #expect(try fixture.repository.loadTheme() == .nature)
     }
 }
 

@@ -28,7 +28,7 @@ struct GayffirmationsApp: App {
         )
         let themeStore = ThemeStore(
             repository: repository,
-            defaultTheme: .neutral
+            defaultTheme: .nature
         )
 
         _affirmationStore = State(initialValue: affirmationStore)
@@ -59,9 +59,6 @@ struct GayffirmationsApp: App {
                 notificationCoordinator: notificationCoordinator,
                 resetCoordinator: resetCoordinator
             )
-            .environment(\.appTheme, themeStore.selectedTheme)
-            .tint(themeStore.selectedTheme.accentColor)
-            .fontDesign(themeStore.selectedTheme.fontDesign)
         }
     }
 }

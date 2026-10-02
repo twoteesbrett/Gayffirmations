@@ -2,11 +2,11 @@
 
 ## Current baseline
 
-The shipped catalogue has one Neutral theme, 15 initial affirmations, five initial tags (body, food, confidence, gay, and self-kindness), and no theme photos. Library editing, custom tags, favourites, selections, scheduling, persistence, and accessibility remain available.
+The shipped catalogue has four visual themes (Nature, Steel, Refined, and Disco), 15 initial affirmations, five initial tags (body, food, confidence, gay, and self-kindness), and no theme photos. Library editing, custom tags, favourites, selections, scheduling, persistence, and accessibility remain available.
 
 On the next launch, a one-time content revision clears saved affirmations (including favourites and tags), the selected theme, source selections, and the old photo toggle. Reminder schedules remain saved; launch reconciliation removes reminders when there are no eligible affirmations. New content created after that launch is preserved. The initial affirmation catalogue is seeded once, including into an empty library saved by the baseline version. Stable IDs and matching text prevent duplicate starters; subsequent edits and deletions are preserved. Before clearing preferences, the repository saves the old content in `gayffirmations.contentBeforeRebuild`. Removed bundled content is also backed up outside the project at `/private/tmp/gayffirmations-content-before-reset.zip`.
 
-Retired theme identifiers decode as Neutral. Unknown or malformed saved data still reports an error. Retired identifiers are retained only for migration.
+Neutral and retired theme identifiers decode as Nature. Current theme identifiers retain their identity. Unknown or malformed saved data still reports an error. Retired identifiers are retained only for migration.
 
 ## Recommended content structure
 

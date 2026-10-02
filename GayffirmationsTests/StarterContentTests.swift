@@ -35,14 +35,20 @@ struct StarterContentTests {
         #expect(entries.last?.id.uuidString == "B7E77000-0000-4000-8000-000000000015")
     }
 
-    @Test("Retired themes load as neutral", arguments: [
-        "ember", "warm", "midnight", "pop", "playful", "refined", "paper",
+    @Test("Retired themes load as Nature", arguments: [
+        "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
         "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
-        "bubblegum", "daydream", "steel", "muscle", "disco", "spectrum"
+        "bubblegum", "daydream", "muscle", "spectrum"
     ])
     func migratesRetiredTheme(name: String) throws {
         let data = try JSONEncoder().encode(name)
-        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == .neutral)
+        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == .nature)
+    }
+
+    @Test("Current themes preserve their identity", arguments: AppTheme.allCases)
+    func themeRoundTrip(theme: AppTheme) throws {
+        let data = try JSONEncoder().encode(theme)
+        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == theme)
     }
 
     @Test("Unknown theme data still reports corruption")

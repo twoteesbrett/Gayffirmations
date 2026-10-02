@@ -11,7 +11,7 @@ final class ThemeStore {
     let defaultTheme: AppTheme
 
     init(
-        selectedTheme: AppTheme = .neutral,
+        selectedTheme: AppTheme = .nature,
         repository: (any ThemeRepository)? = nil
     ) {
         self.selectedTheme = selectedTheme

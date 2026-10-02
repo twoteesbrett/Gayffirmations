@@ -1,36 +1,88 @@
 import SwiftUI
-import UIKit
 
 extension AppTheme {
-    var accentColor: Color { adaptiveColor(light: 0x4D5865, dark: 0xBBC5D0) }
-    var textColor: Color { adaptiveColor(light: 0x292929, dark: 0xF3F3F3) }
-
-    var backgroundGradient: LinearGradient {
-        LinearGradient(
-            colors: [adaptiveColor(light: 0xF5F5F3, dark: 0x202123),
-                     adaptiveColor(light: 0xE9E9E6, dark: 0x282A2D)],
-            startPoint: .topLeading, endPoint: .bottomTrailing
-        )
+    var colorScheme: ColorScheme {
+        switch self {
+        case .nature, .refined: .light
+        case .steel, .disco: .dark
+        }
     }
 
-    var fontDesign: Font.Design { .default }
-    var affirmationFont: Font { .system(.largeTitle, design: fontDesign) }
+    var accentColor: Color {
+        switch self {
+        case .nature: Color(hex: 0x286B65)
+        case .steel: Color(hex: 0xA7C9E0)
+        case .refined: Color(hex: 0x806039)
+        case .disco: Color(hex: 0xFFB276)
+        }
+    }
 
-    private func adaptiveColor(light: UInt32, dark: UInt32) -> Color {
-        Color(uiColor: UIColor { traits in
-            let hex = traits.userInterfaceStyle == .dark ? dark : light
-            return UIColor(
-                red: CGFloat((hex >> 16) & 0xFF) / 255,
-                green: CGFloat((hex >> 8) & 0xFF) / 255,
-                blue: CGFloat(hex & 0xFF) / 255,
-                alpha: 1
-            )
-        })
+    var textColor: Color {
+        switch self {
+        case .nature: Color(hex: 0x203D38)
+        case .steel: Color(hex: 0xF0F4F7)
+        case .refined: Color(hex: 0x49362D)
+        case .disco: Color(hex: 0xFFF2FA)
+        }
+    }
+
+    var backgroundGradient: LinearGradient {
+        switch self {
+        case .nature:
+            LinearGradient(colors: [Color(hex: 0xF0F3E9), Color(hex: 0xC9E4DD)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .steel:
+            LinearGradient(colors: [Color(hex: 0x202830), Color(hex: 0x354350)],
+                           startPoint: .top, endPoint: .bottom)
+        case .refined:
+            LinearGradient(colors: [Color(hex: 0xFAF0DE), Color(hex: 0xDEC8AE)],
+                           startPoint: .top, endPoint: .bottomTrailing)
+        case .disco:
+            LinearGradient(colors: [Color(hex: 0x17285D), Color(hex: 0x532478), Color(hex: 0x872C68)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
+
+    var fontDesign: Font.Design {
+        switch self {
+        case .nature, .steel: .default
+        case .refined: .serif
+        case .disco: .rounded
+        }
+    }
+
+    var affirmationWeight: Font.Weight {
+        switch self {
+        case .nature, .refined: .regular
+        case .steel: .bold
+        case .disco: .semibold
+        }
+    }
+
+    var affirmationLineSpacing: CGFloat {
+        switch self {
+        case .nature: 8
+        case .steel: 4
+        case .refined: 10
+        case .disco: 6
+        }
+    }
+
+    var affirmationFont: Font {
+        .system(.largeTitle, design: fontDesign, weight: affirmationWeight)
+    }
+}
+
+private extension Color {
+    init(hex: UInt32) {
+        self.init(.sRGB, red: Double((hex >> 16) & 0xFF) / 255,
+                  green: Double((hex >> 8) & 0xFF) / 255,
+                  blue: Double(hex & 0xFF) / 255, opacity: 1)
     }
 }
 
 private struct AppThemeKey: EnvironmentKey {
-    static let defaultValue: AppTheme = .neutral
+    static let defaultValue: AppTheme = .nature
 }
 
 extension EnvironmentValues {
@@ -41,6 +93,13 @@ extension EnvironmentValues {
 }
 
 extension View {
+    func themeAppearance(_ theme: AppTheme) -> some View {
+        environment(\.appTheme, theme)
+            .environment(\.colorScheme, theme.colorScheme)
+            .tint(theme.accentColor)
+            .fontDesign(theme.fontDesign)
+    }
+
     func themedBackground() -> some View {
         modifier(ThemedBackground())
     }

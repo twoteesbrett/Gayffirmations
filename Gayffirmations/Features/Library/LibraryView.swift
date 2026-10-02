@@ -263,7 +263,7 @@ struct LibraryView: View {
                 Button("Edit", systemImage: "pencil") {
                     editorDestination = .edit(affirmation)
                 }
-                .tint(.blue)
+                .tint(appTheme.accentColor)
             }
             .swipeActions(edge: .trailing) {
                 Button("Delete", systemImage: "trash", role: .destructive) {
@@ -354,8 +354,8 @@ private enum EditorDestination: Identifiable {
 
 #Preview("Dark appearance") {
     libraryPreview()
-        .environment(\.appTheme, .neutral)
-        .tint(AppTheme.neutral.accentColor)
+        .environment(\.appTheme, .nature)
+        .tint(AppTheme.nature.accentColor)
         .preferredColorScheme(.dark)
 }
 

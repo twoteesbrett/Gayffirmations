@@ -82,7 +82,7 @@ private struct ThemePreviewRow: View {
         theme.backgroundGradient
             .overlay {
                 Text("Aa")
-                    .font(.system(.title2, design: theme.fontDesign, weight: .medium))
+                    .font(.system(.title2, design: theme.fontDesign, weight: theme.affirmationWeight))
                     .foregroundStyle(theme.textColor)
             }
             .frame(width: 72, height: 58)
@@ -121,20 +121,16 @@ private struct ThemePreviewRow: View {
     NavigationStack {
         ThemePickerView(store: store)
     }
-    .environment(\.appTheme, store.selectedTheme)
-    .tint(store.selectedTheme.accentColor)
-    .fontDesign(store.selectedTheme.fontDesign)
+    .themeAppearance(store.selectedTheme)
 }
 
-#Preview("Largest text size in dark mode") {
-    let store = ThemeStore()
+#Preview("Disco with largest text size") {
+    let store = ThemeStore(selectedTheme: .disco)
     NavigationStack {
         ThemePickerView(store: store)
     }
-    .environment(\.appTheme, store.selectedTheme)
-    .tint(store.selectedTheme.accentColor)
-    .fontDesign(store.selectedTheme.fontDesign)
+    .themeAppearance(store.selectedTheme)
     .environment(\.dynamicTypeSize, .accessibility5)
-    .preferredColorScheme(.dark)
+
 }
 #endif
