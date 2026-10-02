@@ -6,36 +6,11 @@ struct TagSelectionSection: View {
     let selection: AffirmationSelection
     let onChange: (AffirmationSelection) -> Void
 
-    private var presets: [TagPreset] {
-        TagPreset.presets(for: tags)
-    }
-
-    private var presetLabel: String {
-        if selection.selectedTags.isEmpty { return "Choose a preset" }
-        return presets.first { $0.matchesSelection(selection) }?.name ?? "Custom selection"
-    }
-
     var body: some View {
         Section {
-            Menu {
-                Button("Clear all") {
-                    onChange(.all)
-                }
-                if !presets.isEmpty {
-                    Divider()
-                    ForEach(presets) { preset in
-                        Button(preset.name) {
-                            onChange(preset.applying(to: selection))
-                        }
-                    }
-                }
-            } label: {
-                LabeledContent("Presets") {
-                    Text(presetLabel)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+            Button("Clear all selections") {
+                onChange(.all)
             }
-            .accessibilityHint("Choose a preset or clear all selections")
 
             ForEach(tags, id: \.self) { tag in
                 Toggle(isOn: Binding(
@@ -54,7 +29,7 @@ struct TagSelectionSection: View {
         } header: {
             Text("Tags")
         } footer: {
-            Text("A preset selects its available tags. You can then adjust individual tags.")
+            Text("Choose tags to include matching affirmations.")
         }
     }
 }
@@ -62,8 +37,8 @@ struct TagSelectionSection: View {
 #Preview("Custom tags at largest text size") {
     Form {
         TagSelectionSection(
-            tags: ["A long custom tag with no matching preset"],
-            selection: .tag("A long custom tag with no matching preset")
+            tags: ["A long custom tag"],
+            selection: .tag("A long custom tag")
         ) { _ in }
     }
     .environment(\.dynamicTypeSize, .accessibility5)

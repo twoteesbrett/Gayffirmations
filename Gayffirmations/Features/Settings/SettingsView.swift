@@ -161,8 +161,9 @@ private enum ResetAction {
     }
 }
 
+#if DEBUG
 #Preview {
-    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
     let scheduleStore = ScheduleStore()
     let themeStore = ThemeStore()
     let notificationCoordinator = NotificationCoordinator(
@@ -188,3 +189,4 @@ private enum ResetAction {
         resetCoordinator: resetCoordinator
     )
 }
+#endif

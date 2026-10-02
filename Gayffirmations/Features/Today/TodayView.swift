@@ -40,13 +40,7 @@ struct TodayView: View {
                                 .id(affirmation.id)
                                 .transition(messageTransition(width: geometry.size.width))
                         } else {
-                            ContentUnavailableView {
-                                Label(store.affirmations.isEmpty ? "No Affirmations" : "No Matching Affirmations", systemImage: "text.quote")
-                                    .foregroundStyle(appTheme.textColor)
-                            } description: {
-                                Text(store.affirmations.isEmpty ? "Open Library from the menu to add your first affirmation." : selectionStore.selection.emptyMessage)
-                                    .foregroundStyle(appTheme.textColor.opacity(0.85))
-                            }
+                            emptyState
                         }
                     }
                     .padding(.horizontal, 28)
@@ -77,7 +71,7 @@ struct TodayView: View {
         .tint(appTheme.textColor)
         .toolbarBackground(.hidden, for: .navigationBar)
         .background {
-            ThemeBackground(theme: appTheme)
+            appTheme.backgroundGradient
                 .ignoresSafeArea()
         }
         .onChange(of: scenePhase) { _, phase in
@@ -96,6 +90,19 @@ struct TodayView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage ?? "Please try again.")
+        }
+    }
+
+    private var emptyState: some View {
+        let libraryIsEmpty = store.affirmations.isEmpty
+        return ContentUnavailableView {
+            Label(libraryIsEmpty ? "No Affirmations" : "No Matching Affirmations", systemImage: "text.quote")
+                .foregroundStyle(appTheme.textColor)
+        } description: {
+            Text(libraryIsEmpty
+                 ? "Open Library from the menu to add your first affirmation."
+                 : selectionStore.selection.emptyMessage)
+                .foregroundStyle(appTheme.textColor.opacity(0.85))
         }
     }
 
@@ -182,8 +189,9 @@ struct TodayView: View {
     }
 }
 
+#if DEBUG
 #Preview("With affirmations") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
 }
 
 #Preview("Empty") {
@@ -191,14 +199,15 @@ struct TodayView: View {
 }
 
 #Preview("Accessibility text size") {
-    TodayView(store: AffirmationStore(affirmations: Affirmation.samples))
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
         .environment(\.dynamicTypeSize, .accessibility5)
 }
 
 #Preview("Empty selection at largest text size") {
     TodayView(
-        store: AffirmationStore(affirmations: Affirmation.samples),
+        store: AffirmationStore(affirmations: PreviewContent.affirmations),
         selectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
     )
     .environment(\.dynamicTypeSize, .accessibility5)
 }
+#endif

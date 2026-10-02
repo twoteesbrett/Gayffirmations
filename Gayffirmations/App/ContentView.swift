@@ -14,8 +14,6 @@ struct ContentView: View {
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
 
-    @Environment(\.colorScheme) private var systemColorScheme
-
     @State private var startupPersistenceErrorMessage: String?
     @State private var destination: Destination?
 
@@ -79,10 +77,8 @@ struct ContentView: View {
             }
             .sheet(item: $destination) { destination in
                 destinationView(destination)
-                    .environment(\.colorScheme, resolvedColorScheme)
             }
         }
-        .environment(\.colorScheme, resolvedColorScheme)
         .task {
             await notificationCoordinator.reconcileOnLaunch()
         }
@@ -107,12 +103,6 @@ struct ContentView: View {
                     + (startupPersistenceErrorMessage ?? "")
             )
         }
-    }
-
-    // Override view appearance without changing the window's system appearance.
-    // Explicitly update sheets too, including when a theme returns to system mode.
-    private var resolvedColorScheme: ColorScheme {
-        themeStore.selectedTheme.preferredColorScheme ?? systemColorScheme
     }
 
     @ViewBuilder
@@ -148,8 +138,9 @@ private enum Destination: Identifiable {
     var id: Self { self }
 }
 
+#if DEBUG
 #Preview {
-    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
     let scheduleStore = ScheduleStore()
     let themeStore = ThemeStore()
     let notificationCoordinator = NotificationCoordinator(
@@ -175,3 +166,4 @@ private enum Destination: Identifiable {
         resetCoordinator: resetCoordinator
     )
 }
+#endif

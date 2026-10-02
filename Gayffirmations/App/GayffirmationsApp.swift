@@ -20,7 +20,7 @@ struct GayffirmationsApp: App {
         repository.prepareForContentRebuild()
         let affirmationStore = AffirmationStore(
             repository: repository,
-            defaultAffirmations: Affirmation.samples
+            defaultAffirmations: Affirmation.starterAffirmations
         )
         let scheduleStore = ScheduleStore(
             repository: repository,

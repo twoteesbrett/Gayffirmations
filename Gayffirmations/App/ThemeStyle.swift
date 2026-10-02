@@ -2,9 +2,9 @@ import SwiftUI
 import UIKit
 
 extension AppTheme {
-    var preferredColorScheme: ColorScheme? { nil }
     var accentColor: Color { adaptiveColor(light: 0x4D5865, dark: 0xBBC5D0) }
     var textColor: Color { adaptiveColor(light: 0x292929, dark: 0xF3F3F3) }
+
     var backgroundGradient: LinearGradient {
         LinearGradient(
             colors: [adaptiveColor(light: 0xF5F5F3, dark: 0x202123),
@@ -12,6 +12,7 @@ extension AppTheme {
             startPoint: .topLeading, endPoint: .bottomTrailing
         )
     }
+
     var fontDesign: Font.Design { .default }
     var affirmationFont: Font { .system(.largeTitle, design: fontDesign) }
 

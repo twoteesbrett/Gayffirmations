@@ -32,7 +32,7 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         fixture.userDefaults.set("unexpected saved content", forKey: "gayffirmations.affirmations")
 
-        let store = AffirmationStore(repository: fixture.repository, defaultAffirmations: Affirmation.samples)
+        let store = AffirmationStore(repository: fixture.repository, defaultAffirmations: Affirmation.starterAffirmations)
 
         #expect(store.persistenceErrorMessage != nil)
         #expect(fixture.userDefaults.string(forKey: "gayffirmations.affirmations") == "unexpected saved content")

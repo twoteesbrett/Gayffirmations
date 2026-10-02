@@ -127,7 +127,7 @@ struct LibraryView: View {
     }
 
     private var tagChoices: [String] {
-        TagPreset.tagChoices(from: selection.selectedTags + store.availableTags)
+        TagChoices.sortedUnique(selection.selectedTags + store.availableTags)
     }
 
     private var tagPicker: some View {
@@ -323,6 +323,7 @@ private enum EditorDestination: Identifiable {
     }
 }
 
+#if DEBUG
 #Preview("All affirmations") {
     libraryPreview()
 }
@@ -347,11 +348,11 @@ private enum EditorDestination: Identifiable {
 }
 
 #Preview("All selected tags at largest text size") {
-    libraryPreview(selection: .sources(favourites: false, tags: TagPreset.predefined.flatMap(\.tags)))
+    libraryPreview(selection: .sources(favourites: false, tags: ["Example", "Another tag"]))
         .environment(\.dynamicTypeSize, .accessibility5)
 }
 
-#Preview("Midnight") {
+#Preview("Dark appearance") {
     libraryPreview()
         .environment(\.appTheme, .neutral)
         .tint(AppTheme.neutral.accentColor)
@@ -363,7 +364,7 @@ private func libraryPreview(
     affirmations: [Affirmation]? = nil,
     selection: AffirmationSelection = .all
 ) -> LibraryView {
-    let store = AffirmationStore(affirmations: affirmations ?? Affirmation.samples)
+    let store = AffirmationStore(affirmations: affirmations ?? PreviewContent.affirmations)
     let coordinator = NotificationCoordinator(
         affirmationStore: store,
         scheduleStore: ScheduleStore(),
@@ -372,3 +373,4 @@ private func libraryPreview(
     )
     return LibraryView(store: store, notificationCoordinator: coordinator)
 }
+#endif

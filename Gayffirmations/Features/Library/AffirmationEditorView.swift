@@ -71,7 +71,7 @@ struct AffirmationEditorView: View {
     }
 
     private var tagChoices: [String] {
-        TagPreset.tagChoices(from: selectedTags + availableTags, includePredefined: true)
+        TagChoices.sortedUnique(selectedTags + availableTags)
     }
 
     private var tagSection: some View {
@@ -94,7 +94,7 @@ struct AffirmationEditorView: View {
             } header: {
                 Text("Your own tags")
             } footer: {
-                Text("Tags are optional. Choose a preset, adjust individual tags, or add your own.")
+                Text("Tags are optional. Choose existing tags or add your own.")
             }
         }
     }
@@ -123,9 +123,11 @@ struct AffirmationEditorView: View {
     }
 }
 
+#if DEBUG
 #Preview("Tag editor") {
     AffirmationEditorView(
         affirmation: Affirmation(text: "My effort matters.", tags: ["Work"]),
         availableTags: ["Calm", "Confidence", "Work"]
     ) { _, _ in }
 }
+#endif

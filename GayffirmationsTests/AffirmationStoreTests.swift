@@ -161,7 +161,7 @@ struct AffirmationStoreTests {
 
         let store = AffirmationStore(
             repository: repository,
-            defaultAffirmations: Affirmation.samples
+            defaultAffirmations: Affirmation.starterAffirmations
         )
 
         #expect(store.affirmations == savedAffirmations)
@@ -173,11 +173,11 @@ struct AffirmationStoreTests {
 
         let store = AffirmationStore(
             repository: repository,
-            defaultAffirmations: Affirmation.samples
+            defaultAffirmations: Affirmation.starterAffirmations
         )
 
-        #expect(store.affirmations == Affirmation.samples)
-        #expect(repository.affirmations == Affirmation.samples)
+        #expect(store.affirmations == Affirmation.starterAffirmations)
+        #expect(repository.affirmations == Affirmation.starterAffirmations)
     }
 
     @Test("A favorite survives recreating the store")

@@ -79,7 +79,7 @@ private struct ThemePreviewRow: View {
     }
 
     private var artwork: some View {
-        ThemeBackground(theme: theme)
+        theme.backgroundGradient
             .overlay {
                 Text("Aa")
                     .font(.system(.title2, design: theme.fontDesign, weight: .medium))
@@ -115,6 +115,7 @@ private struct ThemePreviewRow: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let store = ThemeStore()
     NavigationStack {
@@ -136,3 +137,4 @@ private struct ThemePreviewRow: View {
     .environment(\.dynamicTypeSize, .accessibility5)
     .preferredColorScheme(.dark)
 }
+#endif

@@ -192,8 +192,16 @@ struct ScheduleView: View {
     }
 }
 
+private struct PresentedError: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+    let offersSettings: Bool
+}
+
+#if DEBUG
 #Preview {
-    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
     let scheduleStore = ScheduleStore()
 
     NavigationStack {
@@ -209,7 +217,7 @@ struct ScheduleView: View {
 }
 
 #Preview("Accessibility text size") {
-    let affirmationStore = AffirmationStore(affirmations: Affirmation.samples)
+    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
     let scheduleStore = ScheduleStore()
 
     NavigationStack {
@@ -225,9 +233,5 @@ struct ScheduleView: View {
     }
 }
 
-private struct PresentedError: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-    let offersSettings: Bool
-}
+
+#endif

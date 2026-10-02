@@ -6,8 +6,7 @@ struct StarterContentTests {
     @Test("A fresh catalogue has one neutral theme and no starter content")
     func cleanCatalogue() {
         #expect(AppTheme.allCases == [.neutral])
-        #expect(Affirmation.samples.isEmpty)
-        #expect(TagPreset.predefined.isEmpty)
+        #expect(Affirmation.starterAffirmations.isEmpty)
     }
 
     @Test("Retired themes load as neutral", arguments: [
