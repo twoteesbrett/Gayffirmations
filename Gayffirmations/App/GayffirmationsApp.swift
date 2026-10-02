@@ -28,7 +28,8 @@ struct GayffirmationsApp: App {
         )
         let themeStore = ThemeStore(
             repository: repository,
-            defaultTheme: .nature
+            defaultTheme: .nature,
+            backgroundRepository: repository
         )
 
         _affirmationStore = State(initialValue: affirmationStore)

@@ -4,12 +4,14 @@ final class UserDefaultsRepository:
     AffirmationRepository,
     ScheduleRepository,
     ThemeRepository,
+    ThemeBackgroundRepository,
     AffirmationSelectionRepository,
     AppDataRepository
 {
     private enum Key {
         static let affirmations = "gayffirmations.affirmations"
         static let schedule = "gayffirmations.schedule"
+        static let themeBackgrounds = "gayffirmations.themeBackgrounds"
         static let theme = "gayffirmations.theme"
         static let affirmationSelection = "gayffirmations.affirmationSelection"
         static let contentRebuildRevision = "gayffirmations.contentRebuildRevision"
@@ -91,6 +93,14 @@ final class UserDefaultsRepository:
         try save(theme, forKey: Key.theme)
     }
 
+    func loadThemeBackgrounds() throws -> [String: ThemeBackgroundChoice] {
+        try load([String: ThemeBackgroundChoice].self, forKey: Key.themeBackgrounds) ?? [:]
+    }
+
+    func saveThemeBackgrounds(_ backgrounds: [String: ThemeBackgroundChoice]) throws {
+        try save(backgrounds, forKey: Key.themeBackgrounds)
+    }
+
     func loadAffirmationSelection() throws -> AffirmationSelection? {
         try load(AffirmationSelection.self, forKey: Key.affirmationSelection)
     }
@@ -114,6 +124,7 @@ final class UserDefaultsRepository:
         userDefaults.set(scheduleData, forKey: Key.schedule)
         userDefaults.set(themeData, forKey: Key.theme)
         userDefaults.set(selectionData, forKey: Key.affirmationSelection)
+        userDefaults.removeObject(forKey: Key.themeBackgrounds)
     }
 
     private func load<Value: Decodable>(

@@ -5,11 +5,13 @@ struct TodayView: View {
     let selectionStore: AffirmationSelectionStore
     let scheduleStore: ScheduleStore
     let isUpdating: Bool
+    let themeStore: ThemeStore?
 
     @State private var errorMessage: String?
     @State private var manualSelection: ManualSelection?
     @State private var browsingForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.themePhoto) private var themePhoto
     @Environment(\.appTheme) private var appTheme
     @Environment(\.scenePhase) private var scenePhase
     @State private var refreshDate = Date.now
@@ -18,12 +20,14 @@ struct TodayView: View {
         store: AffirmationStore,
         selectionStore: AffirmationSelectionStore? = nil,
         scheduleStore: ScheduleStore? = nil,
-        isUpdating: Bool = false
+        isUpdating: Bool = false,
+        themeStore: ThemeStore? = nil
     ) {
         self.store = store
         self.selectionStore = selectionStore ?? AffirmationSelectionStore()
         self.scheduleStore = scheduleStore ?? ScheduleStore()
         self.isUpdating = isUpdating
+        self.themeStore = themeStore
     }
 
     var body: some View {
@@ -38,7 +42,7 @@ struct TodayView: View {
                         if let affirmation {
                             affirmationMessage(affirmation)
                                 .id(affirmation.id)
-                                .transition(messageTransition(width: geometry.size.width))
+                                .transition(browsingTransition(width: geometry.size.width))
                         } else {
                             emptyState
                         }
@@ -66,13 +70,19 @@ struct TodayView: View {
                 }
                 .iconOnlyBackground()
             }
+            .onChange(of: affirmation?.id, initial: true) { _, id in
+                themeStore?.updateDisplayedAffirmation(id)
+            }
         }
-        .foregroundStyle(appTheme.textColor)
-        .tint(appTheme.textColor)
+        .foregroundStyle(foregroundColor)
+        .tint(foregroundColor)
         .toolbarBackground(.hidden, for: .navigationBar)
         .background {
-            appTheme.backgroundGradient
-                .ignoresSafeArea()
+            ZStack {
+                appTheme.backgroundGradient
+                TransitioningPhotoBackground(photo: themePhoto, browsingForward: browsingForward)
+            }
+            .ignoresSafeArea()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }
@@ -93,16 +103,18 @@ struct TodayView: View {
         }
     }
 
+    private var foregroundColor: Color { themePhoto?.textColor ?? appTheme.textColor }
+
     private var emptyState: some View {
         let libraryIsEmpty = store.affirmations.isEmpty
         return ContentUnavailableView {
             Label(libraryIsEmpty ? "No Affirmations" : "No Matching Affirmations", systemImage: "text.quote")
-                .foregroundStyle(appTheme.textColor)
+                .foregroundStyle(foregroundColor)
         } description: {
             Text(libraryIsEmpty
                  ? "Open Library from the menu to add your first affirmation."
                  : selectionStore.selection.emptyMessage)
-                .foregroundStyle(appTheme.textColor.opacity(0.85))
+                .foregroundStyle(foregroundColor.opacity(0.85))
         }
     }
 
@@ -117,7 +129,7 @@ struct TodayView: View {
             .accessibilityAction(named: "Previous affirmation") { cycleAffirmation(by: -1) }
     }
 
-    private func messageTransition(width: CGFloat) -> AnyTransition {
+    private func browsingTransition(width: CGFloat) -> AnyTransition {
         guard !reduceMotion else { return .opacity }
         let distance = browsingForward ? width : -width
         return .asymmetric(
@@ -157,6 +169,7 @@ struct TodayView: View {
         let nextIndex = (index + offset + affirmations.count) % affirmations.count
         browsingForward = offset > 0
         withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.30)) {
+            themeStore?.updateDisplayedAffirmation(affirmations[nextIndex].id, direction: offset)
             manualSelection = ManualSelection(
                 id: affirmations[nextIndex].id,
                 expiresAt: TodayAffirmationResolver().nextChange(after: date, schedule: scheduleStore.schedule)
@@ -179,7 +192,7 @@ struct TodayView: View {
         } label: {
             Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
                 .font(.system(size: 22, weight: .regular))
-                .foregroundStyle(appTheme.textColor)
+                .foregroundStyle(foregroundColor)
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
         }
@@ -225,5 +238,23 @@ struct TodayView: View {
         selectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
     )
     .environment(\.dynamicTypeSize, .accessibility5)
+}
+#endif
+
+#if DEBUG
+#Preview("Steel · Strength") {
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.steel)
+        .environment(\.themePhoto, AppTheme.steel.photos[0])
+}
+#Preview("Steel · Presence") {
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.steel)
+        .environment(\.themePhoto, AppTheme.steel.photos[1])
+}
+#Preview("Steel · Release") {
+    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
+        .themeAppearance(.steel)
+        .environment(\.themePhoto, AppTheme.steel.photos[2])
 }
 #endif

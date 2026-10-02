@@ -23,6 +23,34 @@ struct ThemePickerView: View {
                     )
                 }
             }
+
+            if !store.selectedTheme.photos.isEmpty {
+                Section {
+                    Toggle("Use photos", isOn: Binding(
+                        get: { store.backgroundChoice.usesPhoto },
+                        set: { enabled in updateBackground { try store.setUsesPhoto(enabled) } }
+                    ))
+
+                    if store.backgroundChoice.usesPhoto {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 12)], spacing: 12) {
+                            ForEach(store.selectedTheme.photos) { photo in
+                                PhotoBackground(photo: photo)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 110)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .accessibilityHidden(false)
+                                    .accessibilityLabel(photo.accessibilityDescription)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Background")
+                } footer: {
+                    Text(store.backgroundChoice.usesPhoto
+                         ? "Photos rotate with each affirmation."
+                         : "Uses \(store.selectedTheme.name)’s colour background.")
+                }
+            }
         }
         .themedBackground()
         .navigationTitle("Theme")
@@ -38,6 +66,11 @@ struct ThemePickerView: View {
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )
+    }
+
+    private func updateBackground(_ change: () throws -> Void) {
+        do { try change() }
+        catch { errorMessage = error.localizedDescription }
     }
 
     private func select(_ theme: AppTheme) {
@@ -132,5 +165,14 @@ private struct ThemePreviewRow: View {
     .themeAppearance(store.selectedTheme)
     .environment(\.dynamicTypeSize, .accessibility5)
 
+}
+#endif
+
+#if DEBUG
+#Preview("Steel photos") {
+    let store = ThemeStore(selectedTheme: .steel)
+    let _ = try? store.setUsesPhoto(true)
+    NavigationStack { ThemePickerView(store: store) }
+        .themeAppearance(.steel)
 }
 #endif

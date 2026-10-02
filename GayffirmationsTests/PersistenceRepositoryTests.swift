@@ -62,7 +62,8 @@ struct PersistenceRepositoryTests {
         #expect(fixture.userDefaults.object(forKey: "gayffirmations.themePhotosEnabled") == nil)
         #expect(try fixture.repository.loadSchedule() == schedule)
         let backup = fixture.userDefaults.dictionary(forKey: "gayffirmations.contentBeforeRebuild")
-        #expect(backup?["gayffirmations.affirmations"] as? Data == (try JSONEncoder().encode(old)))
+        let backupData = try #require(backup?["gayffirmations.affirmations"] as? Data)
+        #expect(try JSONDecoder().decode([Affirmation].self, from: backupData) == old)
 
         let new = [Affirmation(text: "New", tags: ["New tag"])]
         try fixture.repository.saveAffirmations(new)

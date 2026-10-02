@@ -37,3 +37,8 @@ protocol AppDataRepository {
         selection: AffirmationSelection
     ) throws
 }
+
+protocol ThemeBackgroundRepository {
+    func loadThemeBackgrounds() throws -> [String: ThemeBackgroundChoice]
+    func saveThemeBackgrounds(_ backgrounds: [String: ThemeBackgroundChoice]) throws
+}

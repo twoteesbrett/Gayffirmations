@@ -1,18 +1,12 @@
-# Theme background photos
+# Photo sources
 
-Today uses one fixed scenery asset per theme, independent of affirmation tags.
-The theme picker previews the same assets.
+Steel uses the following user-supplied photographs. Originals remain in Downloads; bundled JPEGs preserve their aspect ratios and are kept at their supplied resolution or reduced to a maximum dimension of 3000 pixels.
 
-| Theme | Asset | Original Pexels filename |
+| Photo | Source filename identifier | Original file / source ID |
 | --- | --- | --- |
-| Warm Coast | theme-warm | pexels-theladofalps-290430173-29328298.jpg |
-| Midnight | theme-midnight | pexels-theladofalps-290430173-29328298.jpg |
-| Playful Pop | theme-playful | pexels-sargonsama-38440480.jpg |
-| Quiet Linen | theme-refined | pexels-sargonsama-38440480.jpg |
+| Strength | dreamlensproduction | pexels-dreamlensproduction-896058.jpg / 896058 |
+| Presence | timadoes | pexels-timadoes-11385974.jpg / 11385974 |
+| Release | michal-packo | pexels-michal-packo-663414463-20201303.jpg / 20201303 |
+| Water | Source not supplied | 2701-2019-07076563159126514990.webp |
 
-Two user-supplied scenery photos are reused in four separate theme slots pending
-final photo choices. No people appear in these backgrounds. The unused tag-based
-photo candidates have been removed from the asset catalog.
-
-Distribution rights have not yet been verified. Before release, verify source
-licences and optimise image size and metadata.
+Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.

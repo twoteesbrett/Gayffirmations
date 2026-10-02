@@ -58,8 +58,10 @@ struct ContentView: View {
                 store: affirmationStore,
                 selectionStore: notificationCoordinator.selectionStore,
                 scheduleStore: scheduleStore,
-                isUpdating: notificationCoordinator.isUpdating
+                isUpdating: notificationCoordinator.isUpdating,
+                themeStore: themeStore
             )
+            .environment(\.themePhoto, themeStore.selectedPhoto)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
@@ -68,7 +70,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "line.3.horizontal")
                             .font(.system(size: 22, weight: .regular))
-                            .foregroundStyle(themeStore.selectedTheme.textColor)
+                            .foregroundStyle(themeStore.selectedPhoto?.textColor ?? themeStore.selectedTheme.textColor)
                             .frame(minWidth: 44, minHeight: 44)
                     }
                     .accessibilityLabel("Menu")
