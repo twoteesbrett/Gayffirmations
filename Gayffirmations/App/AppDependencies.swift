@@ -11,7 +11,6 @@ final class AppDependencies {
 
     init() {
         let repository = UserDefaultsRepository(initialAffirmations: Affirmation.starterAffirmations)
-        repository.prepareForContentRebuild()
         let affirmationStore = AffirmationStore(
             repository: repository,
             defaultAffirmations: Affirmation.starterAffirmations

@@ -14,10 +14,7 @@ final class UserDefaultsRepository:
         static let themeBackgrounds = "gayffirmations.themeBackgrounds"
         static let theme = "gayffirmations.theme"
         static let affirmationSelection = "gayffirmations.affirmationSelection"
-        static let contentRebuildRevision = "gayffirmations.contentRebuildRevision"
-        static let contentBeforeRebuild = "gayffirmations.contentBeforeRebuild"
         static let initialAffirmationsSeeded = "gayffirmations.initialAffirmationsSeeded"
-        static let retiredPhotoPreference = "gayffirmations.themePhotosEnabled"
     }
 
     private let userDefaults: UserDefaults
@@ -35,23 +32,6 @@ final class UserDefaultsRepository:
         self.encoder = encoder
         self.decoder = decoder
         self.initialAffirmations = initialAffirmations
-    }
-
-    /// This deliberate content reset runs once; later launches preserve new work.
-    func prepareForContentRebuild() {
-        guard userDefaults.integer(forKey: Key.contentRebuildRevision) < 1 else { return }
-        let contentKeys = [
-            Key.affirmations, Key.theme, Key.affirmationSelection, Key.retiredPhotoPreference
-        ]
-        var backup: [String: Any] = [:]
-        for key in contentKeys {
-            if let value = userDefaults.object(forKey: key) { backup[key] = value }
-        }
-        if !backup.isEmpty {
-            userDefaults.set(backup, forKey: Key.contentBeforeRebuild)
-        }
-        for key in contentKeys { userDefaults.removeObject(forKey: key) }
-        userDefaults.set(1, forKey: Key.contentRebuildRevision)
     }
 
     func loadAffirmations() throws -> [Affirmation]? {

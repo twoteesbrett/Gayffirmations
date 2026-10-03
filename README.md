@@ -86,7 +86,9 @@ Gayffirmations/
 ```
 
 Stores validate and persist their own state, updating observable values only after
-successful saves. Views send reminder-affecting schedule and source changes through
+successful saves. Startup preserves saved content and preferences. Initial starter
+content is added once without replacing existing entries; later launches preserve
+edits and deletions. Views send reminder-affecting schedule and source changes through
 `NotificationCoordinator`, which serializes updates and restores prior reminders
 when a save or replacement fails. Library edits notify that same coordinator through
 store callbacks. `AppDataResetCoordinator` handles resets across all stores.

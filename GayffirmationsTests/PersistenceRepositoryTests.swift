@@ -42,36 +42,45 @@ struct PersistenceRepositoryTests {
         #expect(fixture.userDefaults.string(forKey: "gayffirmations.affirmations") == "unexpected saved content")
     }
 
-    @Test("Content rebuild clears saved content once and preserves the reminder schedule")
-    func contentRebuildRunsOnce() throws {
+    @Test("Launching preserves saved content and preferences with or without an old rebuild marker",
+          arguments: [0, 1])
+    func launchPreservesSavedData(rebuildRevision: Int) throws {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
-        let old = [Affirmation(text: "Old", isFavorite: true, tags: ["Old tag"])]
-        let schedule = AffirmationSchedule(notificationsPerDay: 6)
-        try fixture.repository.saveAffirmations(old)
-        try fixture.repository.saveTheme(.nature)
+        let saved = [Affirmation(text: "My custom affirmation", isFavorite: true, tags: ["Work"])]
+        let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 6)
+        let backgrounds = [AppTheme.steel.rawValue: ThemeBackgroundChoice(usesPhoto: false)]
+        try fixture.repository.saveAffirmations(saved)
+        try fixture.repository.saveTheme(.steel)
+        try fixture.repository.saveThemeBackgrounds(backgrounds)
         try fixture.repository.saveAffirmationSelection(.favourites)
         try fixture.repository.saveSchedule(schedule)
-        fixture.userDefaults.set(true, forKey: "gayffirmations.themePhotosEnabled")
+        fixture.userDefaults.set(rebuildRevision, forKey: "gayffirmations.contentRebuildRevision")
 
-        fixture.repository.prepareForContentRebuild()
+        // Use the same repository configuration and store loading as app startup.
+        let repository = UserDefaultsRepository(
+            userDefaults: fixture.userDefaults,
+            initialAffirmations: Affirmation.starterAffirmations
+        )
+        let library = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
+        let theme = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
+        let selection = AffirmationSelectionStore(repository: repository)
+        let reminders = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
 
-        #expect(try fixture.repository.loadAffirmations() == nil)
-        #expect(try fixture.repository.loadTheme() == nil)
-        #expect(try fixture.repository.loadAffirmationSelection() == nil)
-        #expect(fixture.userDefaults.object(forKey: "gayffirmations.themePhotosEnabled") == nil)
-        #expect(try fixture.repository.loadSchedule() == schedule)
-        let backup = fixture.userDefaults.dictionary(forKey: "gayffirmations.contentBeforeRebuild")
-        let backupData = try #require(backup?["gayffirmations.affirmations"] as? Data)
-        #expect(try JSONDecoder().decode([Affirmation].self, from: backupData) == old)
+        #expect(library.affirmations.first == saved[0])
+        #expect(theme.selectedTheme == .steel)
+        #expect(theme.backgrounds == backgrounds)
+        #expect(selection.selection == .favourites)
+        #expect(reminders.schedule == schedule)
+        #expect(fixture.userDefaults.object(forKey: "gayffirmations.contentBeforeRebuild") == nil)
 
-        let new = [Affirmation(text: "New", tags: ["New tag"])]
-        try fixture.repository.saveAffirmations(new)
-        try fixture.repository.saveAffirmationSelection(.favourites)
-        let restartedRepository = UserDefaultsRepository(userDefaults: fixture.userDefaults)
-        restartedRepository.prepareForContentRebuild()
-        #expect(try restartedRepository.loadAffirmations() == new)
-        #expect(try restartedRepository.loadAffirmationSelection() == .favourites)
+        let restarted = UserDefaultsRepository(
+            userDefaults: fixture.userDefaults,
+            initialAffirmations: Affirmation.starterAffirmations
+        )
+        #expect(try restarted.loadAffirmations() == library.affirmations)
+        #expect(try restarted.loadTheme() == .steel)
+        #expect(try restarted.loadAffirmationSelection() == .favourites)
     }
 
     @Test("Initial content seeds the empty baseline once and preserves edits and deletions")
