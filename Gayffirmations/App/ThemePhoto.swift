@@ -40,7 +40,29 @@ extension AppTheme {
                 ThemePhoto(id: "together-coast", name: "Coast", focalPoint: .center,
                            overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple embracing beside the sea at sunset", textColor: .white)
             ]
-        case .refined, .disco:
+        case .fruity:
+            return [
+                ThemePhoto(id: "fruity-cherry", name: "Cherry", focalPoint: .center,
+                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii cherry against a dreamy pastel background", textColor: .white),
+                ThemePhoto(id: "fruity-aubergine", name: "Aubergine", focalPoint: .center,
+                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii aubergine against a dreamy pastel background", textColor: .white),
+                ThemePhoto(id: "fruity-banana", name: "Banana", focalPoint: .center,
+                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii banana against a dreamy pastel background", textColor: .white),
+                ThemePhoto(id: "fruity-peach", name: "Peach", focalPoint: .center,
+                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii peach against a dreamy pastel background", textColor: .white),
+                ThemePhoto(id: "fruity-coconut", name: "Coconut", focalPoint: .center,
+                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii coconut against a dreamy pastel background", textColor: .white)
+            ]
+        case .disco:
+            return [
+                ThemePhoto(id: "disco-aviators", name: "Aviators", focalPoint: .center,
+                           overlayOpacity: 0.38, accessibilityDescription: "Aviator sunglasses on marble reflecting a mirrorball and pink and blue disco lights", textColor: .white),
+                ThemePhoto(id: "disco-portrait", name: "Neon Portrait", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A shirtless man lit by pink and blue neon against vibrant bokeh", textColor: .white),
+                ThemePhoto(id: "disco-mirrorball", name: "Mirrorball", focalPoint: UnitPoint(x: 0.60, y: 0.5),
+                           overlayOpacity: 0.50, accessibilityDescription: "A mirrorball glowing under pink and blue disco spotlights", textColor: .white)
+            ]
+        case .refined:
             return []
         }
     }

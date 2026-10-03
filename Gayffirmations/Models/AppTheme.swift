@@ -1,7 +1,7 @@
 import Foundation
 
 enum AppTheme: String, Codable, CaseIterable, Identifiable {
-    case nature, steel, refined, disco, together
+    case nature, steel, refined, disco, together, fruity
 
     var id: Self { self }
     var name: String { rawValue.capitalized }
@@ -12,6 +12,7 @@ enum AppTheme: String, Codable, CaseIterable, Identifiable {
         case .refined: "Warm cream. A little sophistication."
         case .disco: "Electric colour. Permission to play."
         case .together: "Warm moments. The joy of connection."
+        case .fruity: "Sweet pastels. A cheeky little wink."
         }
     }
 

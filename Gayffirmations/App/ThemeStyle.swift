@@ -3,7 +3,7 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .nature, .refined, .together: .light
+        case .nature, .refined, .together, .fruity: .light
         case .steel, .disco: .dark
         }
     }
@@ -15,6 +15,7 @@ extension AppTheme {
         case .refined: Color(hex: 0x806039)
         case .disco: Color(hex: 0xFFB276)
         case .together: Color(hex: 0x955C58)
+        case .fruity: Color(hex: 0xA33E58)
         }
     }
 
@@ -25,6 +26,7 @@ extension AppTheme {
         case .refined: Color(hex: 0x49362D)
         case .disco: Color(hex: 0xFFF2FA)
         case .together: Color(hex: 0x4B3531)
+        case .fruity: Color(hex: 0x59332E)
         }
     }
 
@@ -42,6 +44,9 @@ extension AppTheme {
         case .together:
             LinearGradient(colors: [Color(hex: 0xFAF0E5), Color(hex: 0xE7C7BD)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .fruity:
+            LinearGradient(colors: [Color(hex: 0xFFF1DC), Color(hex: 0xF8C4B4)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
         case .disco:
             LinearGradient(colors: [Color(hex: 0x17285D), Color(hex: 0x532478), Color(hex: 0x872C68)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -52,7 +57,7 @@ extension AppTheme {
         switch self {
         case .nature, .steel: .default
         case .refined: .serif
-        case .disco, .together: .rounded
+        case .disco, .together, .fruity: .rounded
         }
     }
 
@@ -60,7 +65,7 @@ extension AppTheme {
         switch self {
         case .nature, .refined, .together: .regular
         case .steel: .bold
-        case .disco: .semibold
+        case .disco, .fruity: .semibold
         }
     }
 
@@ -69,7 +74,7 @@ extension AppTheme {
         case .nature, .together: 8
         case .steel: 4
         case .refined: 10
-        case .disco: 6
+        case .disco, .fruity: 6
         }
     }
 
