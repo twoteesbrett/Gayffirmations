@@ -3,6 +3,18 @@ import Testing
 
 @MainActor
 struct ScheduleStoreTests {
+    @Test("Invalid reminder counts leave both saved and visible schedules unchanged", arguments: [-1, 13, Int.max])
+    func invalidCountPreservesSchedule(count: Int) {
+        let repository = InMemoryScheduleRepository()
+        let store = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        let original = store.schedule
+        #expect(throws: ScheduleCalculatorError.invalidReminderCount) {
+            try store.setNotificationsPerDay(count)
+        }
+        #expect(store.schedule == original)
+        #expect(repository.schedule == original)
+    }
+
     @Test("A saved schedule is loaded when a store is created")
     func loadsSavedSchedule() {
         let savedSchedule = AffirmationSchedule(

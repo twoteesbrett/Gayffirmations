@@ -1,6 +1,6 @@
 import Foundation
 
-enum AppTheme: String, Codable, CaseIterable, Identifiable {
+nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
     case nature, steel, refined, disco, together, fruity
 
     var id: Self { self }

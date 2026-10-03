@@ -29,13 +29,7 @@ final class AffirmationStore {
     let defaultAffirmations: [Affirmation]
 
     var availableTags: [String] {
-        var names: [String] = []
-        for tag in affirmations.flatMap(\.tags) {
-            if !names.contains(where: { tagsMatch($0, tag) }) {
-                names.append(tag)
-            }
-        }
-        return names.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+        TagChoices.sortedUnique(affirmations.flatMap(\.tags))
     }
 
     func affirmations(tagged tag: String) -> [Affirmation] {
@@ -133,6 +127,7 @@ final class AffirmationStore {
     }
 
     private func normalizedTags(_ tags: [String]) -> [String] {
+        let existingTags = availableTags
         var result: [String] = []
         for tag in tags {
             let name = tag.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -140,7 +135,7 @@ final class AffirmationStore {
             let isDuplicate = result.contains { tagsMatch($0, name) }
             if !isDuplicate {
                 // Reuse the spelling already used elsewhere in the library.
-                result.append(availableTags.first { tagsMatch($0, name) } ?? name)
+                result.append(existingTags.first { tagsMatch($0, name) } ?? name)
             }
         }
         return result

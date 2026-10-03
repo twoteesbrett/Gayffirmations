@@ -39,21 +39,23 @@ Today shows the most recent scheduled affirmation, keeping the final reminder
 current overnight. With reminders off, it rotates once per local calendar day.
 The menu opens Library and Settings. Swiping left anywhere in the affirmation area advances to the
 next affirmation; swiping right goes back. Message text slides in the swipe direction
-while the background stays fixed, or crossfades when Reduce Motion is enabled.
+and optional photos transition with it. Reduce Motion uses crossfades.
 These temporary choices expire at
 the next reminder, or at midnight without reminders. Changing the schedule or
 source selection clears the temporary choice. VoiceOver exposes equivalent
 Next and Previous actions.
 
-Today uses one scenery photo per theme, independent of affirmation tags or source
-selection. The background stays fixed when browsing affirmations. Theme previews
-show the same photo. Text stays centred with a dark overlay for readability;
-longer text stays within margins and can scroll.
+Themes with photos use them by default. Nature and Steel offer a photo switch,
+saved separately for each theme; turning it off uses the colour background. Photos rotate as affirmations change
+and follow the browsing direction; Reduce Motion uses a crossfade. The theme
+picker shows the available photos. Text stays centred with a dark overlay over
+photos for readability; longer text stays within margins and can scroll.
 
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be
 added later. Reminder combinations that round to duplicate delivery minutes
-are rejected; choose a longer period or fewer reminders.
+are rejected; choose a longer period or fewer reminders. Reminder counts must be
+between zero and twelve, including changes made outside the UI.
 
 ## Technical direction
 
@@ -93,7 +95,10 @@ store callbacks. `AppDataResetCoordinator` handles resets across all stores.
 `NotificationPlanner` combines those times with affirmation text; and
 `TodayAffirmationResolver` uses the same slot order. An empty matching collection
 produces no reminders. Clearing the final Library filter returns to All.
-`WrappingLayout` handles button placement without knowing about selections or storage.
+`WrappingLayout` handles button placement without knowing about selections or storage. `TodayBrowsingState` owns temporary browsing,
+wrapping, and expiry; `TodayView` owns gestures, animation, and presentation.
+`AppDependencies` creates and connects shared services at launch, keeping the app
+entry point focused on presenting its root view.
 
 ## Development approach
 

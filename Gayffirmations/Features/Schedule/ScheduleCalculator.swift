@@ -1,11 +1,14 @@
 import Foundation
 
 enum ScheduleCalculatorError: LocalizedError, Equatable {
+    case invalidReminderCount
     case endMustBeAfterStart
     case remindersTooClose
 
     var errorDescription: String? {
         switch self {
+        case .invalidReminderCount:
+            "Choose between \(AffirmationSchedule.notificationCountRange.lowerBound) and \(AffirmationSchedule.notificationCountRange.upperBound) reminders per day."
         case .endMustBeAfterStart:
             "End time must be later than start time."
         case .remindersTooClose:
@@ -18,6 +21,10 @@ struct ScheduleCalculator {
     func notificationTimes(
         for schedule: AffirmationSchedule
     ) throws -> [TimeOfDay] {
+        guard AffirmationSchedule.notificationCountRange.contains(schedule.notificationsPerDay) else {
+            throw ScheduleCalculatorError.invalidReminderCount
+        }
+
         guard schedule.notificationsPerDay > 0 else {
             return []
         }

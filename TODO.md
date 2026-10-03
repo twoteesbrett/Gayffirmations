@@ -194,6 +194,19 @@ empty selections and editor tag removal remain supported. The floating Clear
 button has been removed; All performs that reset. Clear tags remains available
 inside the tag picker and editor.
 
+## Code review — 3 October 2026
+
+- [x] Share the zero-to-twelve reminder limit across the schedule UI, calculator,
+      store, and notification service. Reject invalid counts before allocating
+      reminder times or replacing pending delivery.
+- [x] Cover negative, excessive, and extreme reminder counts, preservation of
+      saved schedule state, and the maximum supported schedule.
+- [x] Reuse tag-choice deduplication in the library store and compute existing
+      tags once per normalization operation.
+- [x] Make pure affirmation and theme models explicitly nonisolated so their
+      Codable and Equatable conformances do not inherit main-actor isolation.
+- [x] Update README behavior to describe optional rotating theme photos.
+
 ## Later ideas
 
 - [ ] Allow users to create and edit category presets. Initially use fixed presets:

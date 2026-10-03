@@ -43,7 +43,7 @@ struct ScheduleView: View {
                 Stepper(
                     "\(store.schedule.notificationsPerDay) per day",
                     value: notificationsPerDayBinding,
-                    in: 0...12
+                    in: AffirmationSchedule.notificationCountRange
                 )
             }
 

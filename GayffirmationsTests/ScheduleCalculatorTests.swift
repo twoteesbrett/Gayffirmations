@@ -5,6 +5,20 @@ import Testing
 struct ScheduleCalculatorTests {
     private let calculator = ScheduleCalculator()
 
+    @Test("Invalid reminder counts are rejected before calculating times", arguments: [-1, 13, Int.max])
+    func rejectsInvalidReminderCounts(count: Int) {
+        #expect(throws: ScheduleCalculatorError.invalidReminderCount) {
+            try calculator.notificationTimes(for: AffirmationSchedule(notificationsPerDay: count))
+        }
+    }
+
+    @Test("The maximum supported reminder count produces distinct times")
+    func maximumReminderCount() throws {
+        let times = try calculator.notificationTimes(for: AffirmationSchedule(notificationsPerDay: 12))
+        #expect(times.count == 12)
+        #expect(Set(times.map(\.minutesSinceMidnight)).count == 12)
+    }
+
     @Test("A narrow period cannot deliver several reminders at the same minute")
     func rejectsDuplicateTimes() {
         let schedule = AffirmationSchedule(

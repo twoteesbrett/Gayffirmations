@@ -3,14 +3,13 @@ import UserNotifications
 final class LocalNotificationService: NotificationScheduling {
     private enum Identifier {
         static let prefix = "gayffirmations.daily."
-        static let maximumReminderCount = 12
 
         static func reminder(at index: Int) -> String {
             prefix + String(index)
         }
 
         static var allReminders: [String] {
-            (0..<maximumReminderCount).map { prefix + String($0) }
+            (0..<AffirmationSchedule.notificationCountRange.upperBound).map { reminder(at: $0) }
         }
     }
 
@@ -42,6 +41,9 @@ final class LocalNotificationService: NotificationScheduling {
     func replacePendingNotifications(
         with reminders: [NotificationReminder]
     ) async throws {
+        guard AffirmationSchedule.notificationCountRange.contains(reminders.count) else {
+            throw ScheduleCalculatorError.invalidReminderCount
+        }
         removePendingNotifications()
 
         do {

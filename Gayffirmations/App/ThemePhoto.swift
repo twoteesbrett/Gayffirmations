@@ -27,7 +27,11 @@ extension AppTheme {
                 ThemePhoto(id: "steel-strength", name: "Strength", focalPoint: UnitPoint(x: 0.80, y: 0.5),
                            overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a barbell", textColor: .white),
                 ThemePhoto(id: "steel-release", name: "Release", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white)
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white),
+                ThemePhoto(id: "steel-curl", name: "Curl", focalPoint: UnitPoint(x: 0.70, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a seated man curling a dumbbell", textColor: .white),
+                ThemePhoto(id: "steel-deadlift", name: "Deadlift", focalPoint: UnitPoint(x: 0.52, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a man preparing to deadlift a barbell", textColor: .white)
             ]
         case .together:
             return [

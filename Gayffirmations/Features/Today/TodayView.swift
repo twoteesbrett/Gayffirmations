@@ -8,7 +8,7 @@ struct TodayView: View {
     let themeStore: ThemeStore?
 
     @State private var errorMessage: String?
-    @State private var manualSelection: ManualSelection?
+    @State private var browsingState = TodayBrowsingState()
     @State private var browsingForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.themePhoto) private var themePhoto
@@ -88,10 +88,10 @@ struct TodayView: View {
             if phase == .active { refreshDate = .now }
         }
         .onChange(of: scheduleStore.schedule) { _, _ in
-            manualSelection = nil
+            browsingState.reset()
         }
         .onChange(of: selectionStore.selection) { _, _ in
-            manualSelection = nil
+            browsingState.reset()
         }
         .alert("Unable to Save Favourite", isPresented: Binding(
             get: { errorMessage != nil },
@@ -143,12 +143,7 @@ struct TodayView: View {
     }
 
     private func currentAffirmation(at date: Date) -> Affirmation? {
-        if let manualSelection, date < manualSelection.expiresAt,
-           let affirmation = selectedAffirmations.first(where: { $0.id == manualSelection.id }) {
-            return affirmation
-        }
-
-        return TodayAffirmationResolver().affirmation(
+        browsingState.affirmation(
             at: date,
             schedule: scheduleStore.schedule,
             affirmations: selectedAffirmations
@@ -160,26 +155,19 @@ struct TodayView: View {
     }
 
     private func cycleAffirmation(by offset: Int) {
-        let date = Date.now
-        let affirmations = selectedAffirmations
-        guard affirmations.count > 1,
-              let current = currentAffirmation(at: date),
-              let index = affirmations.firstIndex(where: { $0.id == current.id }) else { return }
+        var updatedBrowsingState = browsingState
+        guard let next = updatedBrowsingState.cycle(
+            by: offset,
+            at: .now,
+            schedule: scheduleStore.schedule,
+            affirmations: selectedAffirmations
+        ) else { return }
 
-        let nextIndex = (index + offset + affirmations.count) % affirmations.count
         browsingForward = offset > 0
         withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.30)) {
-            themeStore?.updateDisplayedAffirmation(affirmations[nextIndex].id, direction: offset)
-            manualSelection = ManualSelection(
-                id: affirmations[nextIndex].id,
-                expiresAt: TodayAffirmationResolver().nextChange(after: date, schedule: scheduleStore.schedule)
-            )
+            themeStore?.updateDisplayedAffirmation(next.id, direction: offset)
+            browsingState = updatedBrowsingState
         }
-    }
-
-    private struct ManualSelection {
-        let id: Affirmation.ID
-        let expiresAt: Date
     }
 
     private func favoriteButton(for affirmation: Affirmation) -> some View {

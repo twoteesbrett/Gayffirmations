@@ -81,6 +81,10 @@ final class ScheduleStore {
         var updatedSchedule = schedule
         change(&updatedSchedule)
 
+        guard AffirmationSchedule.notificationCountRange.contains(updatedSchedule.notificationsPerDay) else {
+            throw ScheduleCalculatorError.invalidReminderCount
+        }
+
         try repository?.saveSchedule(updatedSchedule)
         schedule = updatedSchedule
     }

@@ -9,56 +9,16 @@ import SwiftUI
 
 @main
 struct GayffirmationsApp: App {
-    @State private var affirmationStore: AffirmationStore
-    @State private var scheduleStore: ScheduleStore
-    @State private var themeStore: ThemeStore
-    private let notificationCoordinator: NotificationCoordinator
-    private let resetCoordinator: AppDataResetCoordinator
-
-    init() {
-        let repository = UserDefaultsRepository(initialAffirmations: Affirmation.starterAffirmations)
-        repository.prepareForContentRebuild()
-        let affirmationStore = AffirmationStore(
-            repository: repository,
-            defaultAffirmations: Affirmation.starterAffirmations
-        )
-        let scheduleStore = ScheduleStore(
-            repository: repository,
-            defaultSchedule: AffirmationSchedule()
-        )
-        let themeStore = ThemeStore(
-            repository: repository,
-            defaultTheme: .nature,
-            backgroundRepository: repository
-        )
-
-        _affirmationStore = State(initialValue: affirmationStore)
-        _scheduleStore = State(initialValue: scheduleStore)
-        _themeStore = State(initialValue: themeStore)
-        let notificationCoordinator = NotificationCoordinator(
-            affirmationStore: affirmationStore,
-            scheduleStore: scheduleStore,
-            scheduler: LocalNotificationService(),
-            selectionStore: AffirmationSelectionStore(repository: repository)
-        )
-        self.notificationCoordinator = notificationCoordinator
-        resetCoordinator = AppDataResetCoordinator(
-            affirmationStore: affirmationStore,
-            scheduleStore: scheduleStore,
-            themeStore: themeStore,
-            notificationCoordinator: notificationCoordinator,
-            repository: repository
-        )
-    }
+    @State private var dependencies = AppDependencies()
 
     var body: some Scene {
         WindowGroup {
             ContentView(
-                affirmationStore: affirmationStore,
-                scheduleStore: scheduleStore,
-                themeStore: themeStore,
-                notificationCoordinator: notificationCoordinator,
-                resetCoordinator: resetCoordinator
+                affirmationStore: dependencies.affirmationStore,
+                scheduleStore: dependencies.scheduleStore,
+                themeStore: dependencies.themeStore,
+                notificationCoordinator: dependencies.notificationCoordinator,
+                resetCoordinator: dependencies.resetCoordinator
             )
         }
     }

@@ -12,7 +12,8 @@ struct ThemeBackgroundTests {
         defer { defaults.removePersistentDomain(forName: suite) }
         let repository = UserDefaultsRepository(userDefaults: defaults)
         let store = ThemeStore(repository: repository, defaultTheme: .steel, backgroundRepository: repository)
-        #expect(store.selectedPhoto == nil)
+        #expect(store.selectedPhoto != nil)
+        #expect(store.backgroundChoice.usesPhoto)
         try store.setUsesPhoto(true)
         let first = UUID()
         store.updateDisplayedAffirmation(first)
@@ -27,7 +28,7 @@ struct ThemeBackgroundTests {
         try store.setUsesPhoto(true)
         #expect(store.selectedPhoto?.id == rotatedPhoto)
         try store.select(.nature)
-        #expect(store.selectedPhoto == nil)
+        #expect(store.selectedPhoto != nil)
         try store.select(.steel)
         #expect(store.selectedPhoto?.id == rotatedPhoto)
         let restarted = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
@@ -37,6 +38,33 @@ struct ThemeBackgroundTests {
         store.applyPersistedDefaults()
         #expect(store.backgrounds.isEmpty)
         #expect(try repository.loadThemeBackgrounds().isEmpty)
+    }
+
+    @Test("Photo themes default to photos while an explicit opt-out survives switching and restart")
+    func defaultPhotoModePreservesOptOut() throws {
+        let suite = "gayffirmations.photos.defaults.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let store = ThemeStore(repository: repository, defaultTheme: .refined, backgroundRepository: repository)
+        for theme in AppTheme.allCases {
+            try store.select(theme)
+            #expect(store.backgroundChoice.usesPhoto == !theme.photos.isEmpty)
+            #expect((store.selectedPhoto != nil) == !theme.photos.isEmpty)
+        }
+        try store.select(.steel)
+        try store.setUsesPhoto(false)
+        try store.select(.nature)
+        #expect(store.backgroundChoice.usesPhoto)
+        try store.select(.steel)
+        #expect(!store.backgroundChoice.usesPhoto)
+        let restarted = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
+        #expect(restarted.selectedTheme == .steel)
+        #expect(!restarted.backgroundChoice.usesPhoto)
+        #expect(restarted.selectedPhoto == nil)
+        store.applyPersistedDefaults()
+        try store.select(.steel)
+        #expect(store.backgroundChoice.usesPhoto)
     }
 
     @Test("Old fixed photo preferences migrate to rotating photo mode")
@@ -114,7 +142,7 @@ struct ThemeBackgroundTests {
         store.updateDisplayedAffirmation(UUID())
         #expect(store.selectedPhoto?.id == AppTheme.nature.photos[1].id)
         try store.select(.steel)
-        #expect(store.selectedPhoto == nil)
+        #expect(store.selectedPhoto != nil)
         try store.setUsesPhoto(true)
         #expect(store.selectedPhoto?.id.hasPrefix("steel-") == true)
         try store.setUsesPhoto(false)
@@ -127,8 +155,9 @@ struct ThemeBackgroundTests {
     func failedSave() {
         let repository = UnavailableBackgroundRepository()
         let store = ThemeStore(selectedTheme: .steel, backgroundRepository: repository)
-        #expect(throws: BackgroundTestError.self) { try store.setUsesPhoto(true) }
-        #expect(store.selectedPhoto == nil)
+        #expect(throws: BackgroundTestError.self) { try store.setUsesPhoto(false) }
+        #expect(store.selectedPhoto != nil)
+        #expect(store.backgroundChoice.usesPhoto)
         #expect(store.backgrounds.isEmpty)
     }
 }

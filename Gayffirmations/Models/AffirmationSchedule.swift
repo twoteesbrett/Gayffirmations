@@ -1,6 +1,8 @@
 import Foundation
 
 struct AffirmationSchedule: Codable, Equatable {
+    static let notificationCountRange = 0...12
+
     var isEnabled: Bool
     var startTime: TimeOfDay
     var endTime: TimeOfDay

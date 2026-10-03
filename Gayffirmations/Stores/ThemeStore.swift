@@ -12,7 +12,8 @@ final class ThemeStore {
     private let backgroundRepository: (any ThemeBackgroundRepository)?
 
     var backgroundChoice: ThemeBackgroundChoice {
-        backgrounds[selectedTheme.rawValue] ?? ThemeBackgroundChoice()
+        backgrounds[selectedTheme.rawValue]
+            ?? ThemeBackgroundChoice(usesPhoto: !selectedTheme.photos.isEmpty)
     }
 
     var selectedPhoto: ThemePhoto? {
