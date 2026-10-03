@@ -247,14 +247,9 @@ struct TodayView: View {
         .themeAppearance(.steel)
         .environment(\.themePhoto, AppTheme.steel.photos[0])
 }
-#Preview("Steel · Presence") {
-    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
-        .themeAppearance(.steel)
-        .environment(\.themePhoto, AppTheme.steel.photos[1])
-}
 #Preview("Steel · Release") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
         .themeAppearance(.steel)
-        .environment(\.themePhoto, AppTheme.steel.photos[2])
+        .environment(\.themePhoto, AppTheme.steel.photos[1])
 }
 #endif

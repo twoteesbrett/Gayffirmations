@@ -1,13 +1,11 @@
 # Photo sources
 
-Nature and Steel use the following user-supplied photographs. Originals remain in Downloads; bundled JPEGs preserve their aspect ratios and are kept at their supplied resolution or reduced to a maximum dimension of 3000 pixels.
+Steel uses two user-supplied AI-generated images from `/Users/brett/Desktop/assets`. Bundled JPEGs preserve the supplied aspect ratios and resolution. The previous Steel photographs have been removed.
 
-| Photo | Source filename identifier | Original file / source ID |
+| Photo | Original file | Source |
 | --- | --- | --- |
-| Strength | dreamlensproduction | pexels-dreamlensproduction-896058.jpg / 896058 |
-| Presence | timadoes | pexels-timadoes-11385974.jpg / 11385974 |
-| Release | michal-packo | pexels-michal-packo-663414463-20201303.jpg / 20201303 |
-| Water | Source not supplied | 2701-2019-07076563159126514990.webp |
+| Strength | Monochrome Barbell Strength Portrait.png | User-supplied AI-generated image |
+| Release | Monochrome Kettlebell Roar.png | User-supplied AI-generated image |
 
 Nature photos:
 
@@ -20,3 +18,16 @@ Nature photos:
 Nature retains colour; Steel renders in greyscale.
 
 Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.
+
+## Together
+
+Four user-provided ChatGPT-generated images of happy couples, added October 3, 2026. Bundled PNGs preserve the original resolution and aspect ratio.
+
+| Photo | Original file |
+| --- | --- |
+| Park | ChatGPT Image Oct 3, 2026 at 05_00_08 PM-1.png |
+| Home | ChatGPT Image Oct 3, 2026 at 05_00_09 PM-2.png |
+| City | ChatGPT Image Oct 3, 2026 at 05_00_10 PM-3.png |
+| Coast | ChatGPT Image Oct 3, 2026 at 05_00_11 PM-4.png |
+
+Together retains colour, with dark overlays for white affirmation text.

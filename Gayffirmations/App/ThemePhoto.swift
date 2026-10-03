@@ -24,14 +24,21 @@ extension AppTheme {
             ]
         case .steel:
             return [
-                ThemePhoto(id: "steel-strength", name: "Strength", focalPoint: UnitPoint(x: 0.58, y: 0.5),
-                           overlayOpacity: 0.38, accessibilityDescription: "A man lifting a barbell in a dark gym", textColor: .white),
-                ThemePhoto(id: "steel-presence", name: "Presence", focalPoint: .center,
-                           overlayOpacity: 0.42, accessibilityDescription: "A close portrait of a shirtless man in a gym", textColor: .white),
+                ThemePhoto(id: "steel-strength", name: "Strength", focalPoint: UnitPoint(x: 0.80, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a barbell", textColor: .white),
                 ThemePhoto(id: "steel-release", name: "Release", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "A monochrome portrait of a man with his head tilted back", textColor: .white),
-                ThemePhoto(id: "steel-water", name: "Water", focalPoint: .center,
-                           overlayOpacity: 0.42, accessibilityDescription: "A man standing beneath falling water", textColor: .white)
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white)
+            ]
+        case .together:
+            return [
+                ThemePhoto(id: "together-park", name: "Park", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple cuddling in a park at golden hour", textColor: .white),
+                ThemePhoto(id: "together-home", name: "Home", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple laughing together on a sofa", textColor: .white),
+                ThemePhoto(id: "together-city", name: "City", focalPoint: .center,
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated portrait of a happy couple walking arm in arm on a city street at night", textColor: .white),
+                ThemePhoto(id: "together-coast", name: "Coast", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple embracing beside the sea at sunset", textColor: .white)
             ]
         case .refined, .disco:
             return []
