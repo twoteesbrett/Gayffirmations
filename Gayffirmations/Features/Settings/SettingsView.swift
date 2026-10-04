@@ -8,6 +8,7 @@ struct SettingsView: View {
     let resetCoordinator: AppDataResetCoordinator
 
     @State private var isEditingName = false
+    @State private var isShowingSchedule = false
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
 
@@ -18,29 +19,20 @@ struct SettingsView: View {
                     Button {
                         isEditingName = true
                     } label: {
-                        HStack {
-                            LabeledContent("Name", value: notificationCoordinator.personalizationStore.name.isEmpty
-                                           ? "Not set" : notificationCoordinator.personalizationStore.name)
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
-                        }
-                        .contentShape(Rectangle())
+                        disclosureLabel("Name", value: notificationCoordinator.personalizationStore.name.isEmpty
+                                        ? "Not set" : notificationCoordinator.personalizationStore.name)
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint("Edit the name used in personalised affirmations")
                 }
                 Section("Notifications") {
-                    NavigationLink {
-                        ScheduleView(
-                            store: scheduleStore,
-                            notificationCoordinator: notificationCoordinator
-                        )
+                    Button {
+                        isShowingSchedule = true
                     } label: {
-                        LabeledContent("Daily reminders") {
-                            Text(notificationCoordinator.deliveryIsPaused ? "Paused" : (scheduleStore.schedule.isEnabled ? "On" : "Off"))
-                        }
+                        disclosureLabel("Daily reminders", value: notificationCoordinator.deliveryIsPaused
+                                        ? "Paused" : (scheduleStore.schedule.isEnabled ? "On" : "Off"))
                     }
+                    .buttonStyle(.plain)
                 }
 
                 Section("Data") {
@@ -56,6 +48,12 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .navigationDestination(isPresented: $isShowingSchedule) {
+                ScheduleView(
+                    store: scheduleStore,
+                    notificationCoordinator: notificationCoordinator
+                )
             }
             .sheet(isPresented: $isEditingName) {
                 NameEditorView(notificationCoordinator: notificationCoordinator)
@@ -82,6 +80,18 @@ struct SettingsView: View {
                 Text(errorMessage ?? "Your settings could not be saved.")
             }
         }
+    }
+
+    private func disclosureLabel(_ title: String, value: String) -> some View {
+        HStack(spacing: 12) {
+            LabeledContent(title, value: value)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
+        }
+        .padding(.trailing, 2)
+        .contentShape(Rectangle())
     }
 
     private var resetConfirmationIsPresented: Binding<Bool> {
