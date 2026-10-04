@@ -6,9 +6,11 @@ final class UserDefaultsRepository:
     ThemeRepository,
     ThemeBackgroundRepository,
     AffirmationSelectionRepository,
+    PersonalizationRepository,
     AppDataRepository
 {
     private enum Key {
+        static let name = "gayffirmations.name"
         static let affirmations = "gayffirmations.affirmations"
         static let schedule = "gayffirmations.schedule"
         static let themeBackgrounds = "gayffirmations.themeBackgrounds"
@@ -35,7 +37,14 @@ final class UserDefaultsRepository:
     }
 
     func loadAffirmations() throws -> [Affirmation]? {
-        let saved = try load([Affirmation].self, forKey: Key.affirmations)
+        var saved = try load([Affirmation].self, forKey: Key.affirmations)
+        if let index = saved?.firstIndex(where: {
+            $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
+                && $0.text == "Stop comparing. You're the only Brett in the room."
+        }) {
+            saved?[index].text = "Stop comparing. You're the only {name} in the room."
+            if let saved { try saveAffirmations(saved) }
+        }
         guard !initialAffirmations.isEmpty,
               !userDefaults.bool(forKey: Key.initialAffirmationsSeeded) else { return saved }
 
@@ -55,6 +64,14 @@ final class UserDefaultsRepository:
 
     func saveAffirmations(_ affirmations: [Affirmation]) throws {
         try save(affirmations, forKey: Key.affirmations)
+    }
+
+    func loadName() throws -> String? {
+        try load(String.self, forKey: Key.name)
+    }
+
+    func saveName(_ name: String) throws {
+        try save(name, forKey: Key.name)
     }
 
     func loadSchedule() throws -> AffirmationSchedule? {
@@ -105,6 +122,7 @@ final class UserDefaultsRepository:
         userDefaults.set(themeData, forKey: Key.theme)
         userDefaults.set(selectionData, forKey: Key.affirmationSelection)
         userDefaults.removeObject(forKey: Key.themeBackgrounds)
+        userDefaults.removeObject(forKey: Key.name)
     }
 
     private func load<Value: Decodable>(

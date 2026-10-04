@@ -19,7 +19,7 @@ struct ScheduleView: View {
                 if isUpdatingSchedule {
                     ProgressView("Updating schedule…")
                 } else if notificationCoordinator.deliveryIsPaused {
-                    Text("Reminders are paused because the selected source has no affirmations. They will resume when matching entries return.")
+                    Text("Reminders are paused because no selected affirmations are ready. Add matching entries or set your name in Settings to use personalised messages.")
                 } else {
                     Text("Gayffirmations will ask for permission when you enable reminders.")
                 }
@@ -62,7 +62,7 @@ struct ScheduleView: View {
     @ViewBuilder
     private var preview: some View {
         if notificationCoordinator.deliveryIsPaused {
-            Text("No reminders will be delivered until the selected source has entries.")
+            Text("No reminders will be delivered until the selected source has affirmations ready to use.")
                 .foregroundStyle(.secondary)
         } else {
             schedulePreview

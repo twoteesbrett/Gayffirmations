@@ -221,24 +221,17 @@ struct LibraryView: View {
     private var affirmationList: some View {
         ForEach(selectedAffirmations) { affirmation in
             HStack(spacing: 12) {
-                Button {
-                    editorDestination = .edit(affirmation)
-                } label: {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(affirmation.text)
-                            .font(.body)
-                            .lineSpacing(3)
-                        if !affirmation.tags.isEmpty {
-                            Text(affirmation.tags.map { $0.lowercased() }.joined(separator: " · "))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                if affirmation.isBundled {
+                    affirmationLabel(affirmation)
+                } else {
+                    Button {
+                        editorDestination = .edit(affirmation)
+                    } label: {
+                        affirmationLabel(affirmation)
                     }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens the affirmation editor")
                 }
-                .buttonStyle(.plain)
-                .accessibilityHint("Opens the affirmation editor")
 
                 Button {
                     performPersistedChange {
@@ -260,10 +253,12 @@ struct LibraryView: View {
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 12))
             .swipeActions(edge: .leading) {
-                Button("Edit", systemImage: "pencil") {
-                    editorDestination = .edit(affirmation)
+                if !affirmation.isBundled {
+                    Button("Edit", systemImage: "pencil") {
+                        editorDestination = .edit(affirmation)
+                    }
+                    .tint(appTheme.accentColor)
                 }
-                .tint(appTheme.accentColor)
             }
             .swipeActions(edge: .trailing) {
                 Button("Delete", systemImage: "trash", role: .destructive) {
@@ -273,6 +268,34 @@ struct LibraryView: View {
                 }
             }
         }
+    }
+
+    private func affirmationLabel(_ affirmation: Affirmation) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(affirmation.resolved(name: notificationCoordinator.personalizationStore.name)?.text ?? affirmation.text)
+                .font(.body)
+                .lineSpacing(3)
+            if affirmation.resolved(name: notificationCoordinator.personalizationStore.name) == nil {
+                Text("Add a name in Settings to use this affirmation")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if affirmation.isBundled || !affirmation.tags.isEmpty {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    if affirmation.isBundled {
+                        Image(systemName: "lock.fill")
+                            .accessibilityLabel("Read-only message")
+                    }
+                    if !affirmation.tags.isEmpty {
+                        Text(affirmation.tags.map { $0.lowercased() }.joined(separator: " · "))
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
     }
 
     private func errorIsPresented(inTagPicker: Bool) -> Binding<Bool> {
@@ -302,7 +325,7 @@ struct LibraryView: View {
                 try store.add(text: text, tags: tags)
             }
         case .edit(let affirmation):
-            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags) { text, tags in
+            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, name: notificationCoordinator.personalizationStore.name) { text, tags in
                 try store.update(id: affirmation.id, text: text, tags: tags)
             }
         }

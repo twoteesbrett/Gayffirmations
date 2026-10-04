@@ -20,6 +20,22 @@ The first version should let someone:
 Accounts, cloud sync, widgets, subscriptions, and generated affirmations are
 intentionally outside the first release.
 
+## Bundled and personal messages
+
+Bundled messages have read-only text and tags. You can still favourite them
+or remove them from your library. Messages you create remain editable.
+Existing starter messages that were previously rewritten are preserved as editable
+personal messages; untouched starter messages become bundled messages.
+
+## Personalised messages
+
+Settings includes an optional name. Tap the Name row to edit it, then Done to save
+or Cancel to discard changes. Clearing the field and tapping Done removes it.
+Built-in personalised messages use this name and are skipped in Today and reminders
+when it is blank. For your own messages, write your name directly in the text.
+Skipped messages remain editable in Library. Changing the name refreshes pending
+reminders, and Reset All App Data clears it. Templates remain saved as templates.
+
 ## Scheduling behavior
 
 The initial scheduler will use the same schedule every day. It will divide the

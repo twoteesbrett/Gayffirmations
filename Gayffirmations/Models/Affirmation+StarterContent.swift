@@ -1,6 +1,6 @@
 import Foundation
 
-extension Affirmation {
+nonisolated extension Affirmation {
     static let starterAffirmations: [Affirmation] = [
         starter("B7E77000-0000-4000-8000-000000000001",
                 "Hey handsome, the pantry isn't going anywhere.",
@@ -45,11 +45,11 @@ extension Affirmation {
                 "Grey hairs? You've earned the highlights.",
                 [.body, .confidence, .selfKindness]),
         starter("B7E77000-0000-4000-8000-000000000015",
-                "Stop comparing. You're the only Brett in the room.",
+                "Stop comparing. You're the only {name} in the room.",
                 [.confidence, .selfKindness]),
     ]
 
     private static func starter(_ id: String, _ text: String, _ tags: [AffirmationTag]) -> Affirmation {
-        Affirmation(id: UUID(uuidString: id)!, text: text, tags: tags.map(\.rawValue))
+        Affirmation(id: UUID(uuidString: id)!, text: text, tags: tags.map(\.rawValue), source: .bundled)
     }
 }

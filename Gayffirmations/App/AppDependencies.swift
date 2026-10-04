@@ -32,7 +32,8 @@ final class AppDependencies {
             affirmationStore: affirmationStore,
             scheduleStore: scheduleStore,
             scheduler: LocalNotificationService(),
-            selectionStore: AffirmationSelectionStore(repository: repository)
+            selectionStore: AffirmationSelectionStore(repository: repository),
+            personalizationStore: PersonalizationStore(repository: repository)
         )
         self.notificationCoordinator = notificationCoordinator
         resetCoordinator = AppDataResetCoordinator(

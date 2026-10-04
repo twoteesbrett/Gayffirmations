@@ -21,7 +21,7 @@ struct StarterContentTests {
             ("Your body isn't auditioning for anyone.", ["body", "confidence", "self-kindness"]),
             ("You don't need a six-pack to be a whole snack.", ["body", "confidence", "self-kindness"]),
             ("Grey hairs? You've earned the highlights.", ["body", "confidence", "self-kindness"]),
-            ("Stop comparing. You're the only Brett in the room.", ["confidence", "self-kindness"]),
+            ("Stop comparing. You're the only {name} in the room.", ["confidence", "self-kindness"]),
         ]
         #expect(entries.count == expected.count)
         for (entry, expectedEntry) in zip(entries, expected) {

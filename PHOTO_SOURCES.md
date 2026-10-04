@@ -25,3 +25,5 @@ Nature uses six user-supplied Pexels photos from `/Users/brett/Desktop/assets`. 
 Nature retains colour; Steel renders in greyscale.
 
 Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.
+
+Disco’s Mirrorball uses the user-supplied `Neon Mirrorball Disco Glow.png` from `/Users/brett/Desktop/assets`, preserving its original resolution and aspect ratio.

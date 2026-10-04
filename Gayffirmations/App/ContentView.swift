@@ -32,6 +32,7 @@ struct ContentView: View {
         self.resetCoordinator = resetCoordinator
 
         let failures = [
+            notificationCoordinator.personalizationStore.persistenceErrorMessage.map { "Name: \($0)" },
             affirmationStore.persistenceErrorMessage.map {
                 "Affirmations: \($0)"
             },
@@ -58,6 +59,7 @@ struct ContentView: View {
             TodayView(
                 store: affirmationStore,
                 selectionStore: notificationCoordinator.selectionStore,
+                personalizationStore: notificationCoordinator.personalizationStore,
                 scheduleStore: scheduleStore,
                 isUpdating: notificationCoordinator.isUpdating,
                 themeStore: themeStore,

@@ -4,6 +4,7 @@ struct AffirmationEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     let affirmation: Affirmation?
+    let name: String
     let availableTags: [String]
     let onSave: (String, [String]) throws -> Void
 
@@ -17,8 +18,10 @@ struct AffirmationEditorView: View {
     init(
         affirmation: Affirmation? = nil,
         availableTags: [String] = [],
+        name: String = "",
         onSave: @escaping (String, [String]) throws -> Void
     ) {
+        self.name = name
         self.affirmation = affirmation
         self.availableTags = availableTags
         self.onSave = onSave
@@ -30,14 +33,24 @@ struct AffirmationEditorView: View {
         NavigationStack {
             Form {
                 Section("Affirmation") {
-                    TextField(
-                        "I am...",
-                        text: $text,
-                        axis: .vertical
-                    )
-                    .lineLimit(3...8)
-                    .focused($textFieldIsFocused)
-                    .accessibilityLabel("Affirmation text")
+                    if let affirmation, affirmation.isBundled {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(affirmation.resolved(name: name)?.text ?? affirmation.text)
+                            Image(systemName: "lock.fill")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .accessibilityLabel("Read-only message")
+                        }
+                    } else {
+                        TextField(
+                            "I am...",
+                            text: $text,
+                            axis: .vertical
+                        )
+                        .lineLimit(3...8)
+                        .focused($textFieldIsFocused)
+                        .accessibilityLabel("Affirmation text")
+                    }
 
                     if let validationMessage {
                         Text(validationMessage)
@@ -46,10 +59,12 @@ struct AffirmationEditorView: View {
                             .accessibilityFocused($validationMessageIsFocused)
                     }
                 }
-                tagSection
+                if affirmation?.isBundled != true {
+                    tagSection
+                }
             }
             .themedBackground()
-            .navigationTitle(affirmation == nil ? "New Affirmation" : "Edit Affirmation")
+            .navigationTitle(affirmation == nil ? "New Affirmation" : (affirmation?.isBundled == true ? "Affirmation" : "Edit Affirmation"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -59,13 +74,15 @@ struct AffirmationEditorView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        save()
+                    if affirmation?.isBundled == true {
+                        Button("Done") { dismiss() }
+                    } else {
+                        Button("Save") { save() }
                     }
                 }
             }
             .onAppear {
-                textFieldIsFocused = true
+                textFieldIsFocused = affirmation?.isBundled != true
             }
         }
     }

@@ -3,6 +3,7 @@ import SwiftUI
 struct TodayView: View {
     let store: AffirmationStore
     let selectionStore: AffirmationSelectionStore
+    let personalizationStore: PersonalizationStore
     let scheduleStore: ScheduleStore
     let isUpdating: Bool
     let themeStore: ThemeStore?
@@ -23,6 +24,7 @@ struct TodayView: View {
     init(
         store: AffirmationStore,
         selectionStore: AffirmationSelectionStore? = nil,
+        personalizationStore: PersonalizationStore? = nil,
         scheduleStore: ScheduleStore? = nil,
         isUpdating: Bool = false,
         themeStore: ThemeStore? = nil,
@@ -31,6 +33,7 @@ struct TodayView: View {
     ) {
         self.store = store
         self.selectionStore = selectionStore ?? AffirmationSelectionStore()
+        self.personalizationStore = personalizationStore ?? PersonalizationStore()
         self.scheduleStore = scheduleStore ?? ScheduleStore()
         self.isUpdating = isUpdating
         self.themeStore = themeStore
@@ -143,13 +146,16 @@ struct TodayView: View {
 
     private var emptyState: some View {
         let libraryIsEmpty = store.affirmations.isEmpty
+        let needsName = !selectionStore.selection.matchingAffirmations(in: store.affirmations).isEmpty
         return ContentUnavailableView {
-            Label(libraryIsEmpty ? "No Affirmations" : "No Matching Affirmations", systemImage: "text.quote")
+            Label(libraryIsEmpty ? "No Affirmations" : (needsName ? "Add a Name" : "No Matching Affirmations"), systemImage: "text.quote")
                 .foregroundStyle(foregroundColor)
         } description: {
             Text(libraryIsEmpty
                  ? "Tap the screen, then open Library in the top-left corner to add your first affirmation."
-                 : selectionStore.selection.emptyMessage)
+                 : (needsName
+                    ? "Add a name in Settings to use these personalised affirmations."
+                    : selectionStore.selection.emptyMessage))
                 .foregroundStyle(foregroundColor.opacity(0.85))
         }
     }
@@ -188,6 +194,7 @@ struct TodayView: View {
 
     private var selectedAffirmations: [Affirmation] {
         selectionStore.selection.matchingAffirmations(in: store.affirmations)
+            .compactMap { $0.resolved(name: personalizationStore.name) }
     }
 
     private func cycleAffirmation(by offset: Int) {

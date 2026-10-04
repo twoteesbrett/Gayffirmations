@@ -25,6 +25,7 @@ final class NotificationCoordinator {
     var errorMessage: String?
     private var refreshTask: Task<Void, Never>?
     let selectionStore: AffirmationSelectionStore
+    let personalizationStore: PersonalizationStore
     private let affirmationStore: AffirmationStore
     private let scheduleStore: ScheduleStore
     private let scheduler: any NotificationScheduling
@@ -34,12 +35,14 @@ final class NotificationCoordinator {
         affirmationStore: AffirmationStore,
         scheduleStore: ScheduleStore,
         scheduler: any NotificationScheduling,
-        selectionStore: AffirmationSelectionStore? = nil
+        selectionStore: AffirmationSelectionStore? = nil,
+        personalizationStore: PersonalizationStore? = nil
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
         self.scheduler = scheduler
         self.selectionStore = selectionStore ?? AffirmationSelectionStore()
+        self.personalizationStore = personalizationStore ?? PersonalizationStore()
         planner = NotificationPlanner()
         affirmationStore.willChangeAffirmations = { [weak self] _ in
             // A pending source change may depend on tags or favourites too.
@@ -49,6 +52,12 @@ final class NotificationCoordinator {
             guard let self, self.deliveryChanges(from: previous, to: self.affirmationStore.affirmations) else { return }
             self.refreshAfterLibraryChange()
         }
+    }
+
+    func setName(_ name: String) throws {
+        try checkIdle()
+        try personalizationStore.setName(name)
+        refreshAfterLibraryChange()
     }
 
     func setEnabled(_ isEnabled: Bool) async throws {
@@ -178,6 +187,7 @@ final class NotificationCoordinator {
 
     var selectedAffirmations: [Affirmation] {
         selectionStore.selection.matchingAffirmations(in: affirmationStore.affirmations)
+            .compactMap { $0.resolved(name: personalizationStore.name) }
     }
 
     var deliveryIsPaused: Bool {
@@ -193,7 +203,8 @@ final class NotificationCoordinator {
         // Today can use a healthy selection even when delivery data is unavailable.
         guard scheduleStore.schedule.isEnabled,
               scheduleStore.persistenceErrorMessage == nil,
-              affirmationStore.persistenceErrorMessage == nil else {
+              affirmationStore.persistenceErrorMessage == nil,
+              personalizationStore.persistenceErrorMessage == nil else {
             try selectionStore.select(selection)
             scheduler.removePendingNotifications()
             return
@@ -201,6 +212,7 @@ final class NotificationCoordinator {
 
         try checkDeliveryData()
         let entries = selection.matchingAffirmations(in: affirmationStore.affirmations)
+            .compactMap { $0.resolved(name: personalizationStore.name) }
         let reminders = try planner.reminders(for: scheduleStore.schedule, affirmations: entries)
         do {
             try await replaceReminders(with: reminders)
@@ -217,7 +229,8 @@ final class NotificationCoordinator {
         // Never schedule fallback data after a failed load.
         guard affirmationStore.persistenceErrorMessage == nil,
               scheduleStore.persistenceErrorMessage == nil,
-              selectionStore.persistenceErrorMessage == nil else {
+              selectionStore.persistenceErrorMessage == nil,
+              personalizationStore.persistenceErrorMessage == nil else {
             scheduler.removePendingNotifications()
             return
         }
@@ -236,8 +249,8 @@ final class NotificationCoordinator {
 
     private func deliveryChanges(from previous: [Affirmation], to updated: [Affirmation]) -> Bool {
         let selection = selectionStore.selection
-        return selection.matchingAffirmations(in: previous).map(\.text)
-            != selection.matchingAffirmations(in: updated).map(\.text)
+        return selection.matchingAffirmations(in: previous).compactMap { $0.resolved(name: personalizationStore.name)?.text }
+            != selection.matchingAffirmations(in: updated).compactMap { $0.resolved(name: personalizationStore.name)?.text }
     }
 
     private func replaceReminders(with reminders: [NotificationReminder]) async throws {
@@ -261,7 +274,8 @@ final class NotificationCoordinator {
         let failures = [
             affirmationStore.persistenceErrorMessage,
             scheduleStore.persistenceErrorMessage,
-            selectionStore.persistenceErrorMessage
+            selectionStore.persistenceErrorMessage,
+            personalizationStore.persistenceErrorMessage
         ].compactMap { $0 }
         guard failures.isEmpty else {
             throw PersistenceUnavailableError(reason: failures.joined(separator: "\n"))

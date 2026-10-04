@@ -7,12 +7,29 @@ struct SettingsView: View {
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
 
+    @State private var isEditingName = false
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Personalisation") {
+                    Button {
+                        isEditingName = true
+                    } label: {
+                        HStack {
+                            LabeledContent("Name", value: notificationCoordinator.personalizationStore.name.isEmpty
+                                           ? "Not set" : notificationCoordinator.personalizationStore.name)
+                            Image(systemName: "chevron.right")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Edit the name used in personalised affirmations")
+                }
                 Section("Notifications") {
                     NavigationLink {
                         ScheduleView(
@@ -40,6 +57,9 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .sheet(isPresented: $isEditingName) {
+                NameEditorView(notificationCoordinator: notificationCoordinator)
+            }
             .confirmationDialog(
                 pendingReset?.title ?? "Reset",
                 isPresented: resetConfirmationIsPresented,
@@ -56,10 +76,10 @@ struct SettingsView: View {
                     Text(pendingReset.message)
                 }
             }
-            .alert("Unable to Reset", isPresented: errorIsPresented) {
+            .alert("Unable to Save Settings", isPresented: errorIsPresented) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text(errorMessage ?? "The selected data could not be reset.")
+                Text(errorMessage ?? "Your settings could not be saved.")
             }
         }
     }
@@ -147,7 +167,7 @@ private enum ResetAction {
         case .schedule:
             "This turns off daily reminders, restores the default times, and removes pending notifications."
         case .all:
-            "This restores the affirmation library, notification schedule, affirmation selection, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
+            "This restores the affirmation library, notification schedule, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
         }
     }
 }

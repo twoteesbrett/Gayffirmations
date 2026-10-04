@@ -2,11 +2,14 @@ import Foundation
 import Observation
 
 enum AffirmationStoreError: LocalizedError, Equatable {
+    case bundledMessage
     case blankText
     case duplicateText
 
     var errorDescription: String? {
         switch self {
+        case .bundledMessage:
+            "This affirmation is read-only."
         case .blankText:
             "An affirmation needs some text."
         case .duplicateText:
@@ -77,12 +80,14 @@ final class AffirmationStore {
 
     // Omitting tags preserves them for callers that only edit text.
     func update(id: Affirmation.ID, text: String, tags: [String]? = nil) throws {
-        let text = try validatedText(text, excluding: id)
-
         guard let index = affirmations.firstIndex(where: { $0.id == id }) else {
             return
         }
 
+        guard !affirmations[index].isBundled else {
+            throw AffirmationStoreError.bundledMessage
+        }
+        let text = try validatedText(text, excluding: id)
         var updatedAffirmations = affirmations
         updatedAffirmations[index].text = text
         if let tags {

@@ -28,6 +28,11 @@ protocol AffirmationSelectionRepository {
     func saveAffirmationSelection(_ selection: AffirmationSelection) throws
 }
 
+protocol PersonalizationRepository {
+    func loadName() throws -> String?
+    func saveName(_ name: String) throws
+}
+
 protocol AppDataRepository {
     // A throwing save must leave every section unchanged.
     func saveAppData(
