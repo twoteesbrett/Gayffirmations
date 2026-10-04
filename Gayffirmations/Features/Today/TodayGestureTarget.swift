@@ -1,13 +1,14 @@
 import SwiftUI
 import UIKit
 
-/// Horizontal swipes browse affirmations while allowing vertical scrolling.
-struct AffirmationSwipeTarget: UIViewRepresentable {
+/// Taps reveal controls; horizontal swipes browse without blocking vertical scrolling.
+struct TodayGestureTarget: UIViewRepresentable {
+    var onTap: () -> Void
     var onSwipeLeft: () -> Void
     var onSwipeRight: () -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onSwipeLeft: onSwipeLeft, onSwipeRight: onSwipeRight)
+        Coordinator(onTap: onTap, onSwipeLeft: onSwipeLeft, onSwipeRight: onSwipeRight)
     }
 
     func makeUIView(context: Context) -> UIView {
@@ -26,21 +27,31 @@ struct AffirmationSwipeTarget: UIViewRepresentable {
         swipeRight.direction = .right
         swipeRight.delegate = context.coordinator
 
+        let tap = UITapGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.didTap)
+        )
+        tap.require(toFail: swipeLeft)
+        tap.require(toFail: swipeRight)
+        view.addGestureRecognizer(tap)
         view.addGestureRecognizer(swipeLeft)
         view.addGestureRecognizer(swipeRight)
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.onTap = onTap
         context.coordinator.onSwipeLeft = onSwipeLeft
         context.coordinator.onSwipeRight = onSwipeRight
     }
 
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var onTap: () -> Void
         var onSwipeLeft: () -> Void
         var onSwipeRight: () -> Void
 
-        init(onSwipeLeft: @escaping () -> Void, onSwipeRight: @escaping () -> Void) {
+        init(onTap: @escaping () -> Void, onSwipeLeft: @escaping () -> Void, onSwipeRight: @escaping () -> Void) {
+            self.onTap = onTap
             self.onSwipeLeft = onSwipeLeft
             self.onSwipeRight = onSwipeRight
         }
@@ -52,6 +63,7 @@ struct AffirmationSwipeTarget: UIViewRepresentable {
             otherGestureRecognizer is UIPanGestureRecognizer
         }
 
+        @objc func didTap() { onTap() }
         @objc func didSwipeLeft() { onSwipeLeft() }
         @objc func didSwipeRight() { onSwipeRight() }
     }

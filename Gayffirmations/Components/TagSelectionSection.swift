@@ -25,8 +25,6 @@ struct TagSelectionSection: View {
 
         } header: {
             Text("Tags")
-        } footer: {
-            Text("Choose tags to include matching affirmations.")
         }
     }
 }

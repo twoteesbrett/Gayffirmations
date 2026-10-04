@@ -6,7 +6,11 @@ struct TodayView: View {
     let scheduleStore: ScheduleStore
     let isUpdating: Bool
     let themeStore: ThemeStore?
+    let sheetDismissalID: UUID?
+    let onOpenDestination: (TodayDestination) -> Void
 
+    @State private var controls = TodayControlsState()
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @State private var errorMessage: String?
     @State private var browsingState = TodayBrowsingState()
     @State private var browsingForward = true
@@ -21,21 +25,24 @@ struct TodayView: View {
         selectionStore: AffirmationSelectionStore? = nil,
         scheduleStore: ScheduleStore? = nil,
         isUpdating: Bool = false,
-        themeStore: ThemeStore? = nil
+        themeStore: ThemeStore? = nil,
+        sheetDismissalID: UUID? = nil,
+        onOpenDestination: @escaping (TodayDestination) -> Void = { _ in }
     ) {
         self.store = store
         self.selectionStore = selectionStore ?? AffirmationSelectionStore()
         self.scheduleStore = scheduleStore ?? ScheduleStore()
         self.isUpdating = isUpdating
         self.themeStore = themeStore
+        self.sheetDismissalID = sheetDismissalID
+        self.onOpenDestination = onOpenDestination
     }
 
     var body: some View {
         TimelineView(.periodic(from: refreshMinute, by: 60)) { context in
             let affirmation = currentAffirmation(at: context.date)
             GeometryReader { geometry in
-                // Balance the space reserved for the toolbar and home indicator so
-                // the message sits at the screen's centre, rather than below it.
+                // Balance the safe areas to keep the message at the screen's centre.
                 let centeringInset = geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
                 ScrollView {
                     ZStack {
@@ -47,12 +54,14 @@ struct TodayView: View {
                             emptyState
                         }
                     }
+                    // Reserve room for the controls even while hidden, so text never jumps.
                     .padding(.horizontal, 28)
-                    .padding(.top, 24 + max(0, -centeringInset))
-                    .padding(.bottom, 24 + max(0, centeringInset))
+                    .padding(.top, 68 + max(0, -centeringInset))
+                    .padding(.bottom, 68 + max(0, centeringInset))
                     .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                     .overlay {
-                        AffirmationSwipeTarget(
+                        TodayGestureTarget(
+                            onTap: { controls.toggle() },
                             onSwipeLeft: { cycleAffirmation(by: 1) },
                             onSwipeRight: { cycleAffirmation(by: -1) }
                         )
@@ -60,15 +69,23 @@ struct TodayView: View {
                     }
                 }
                 .clipped()
+                .simultaneousGesture(
+                    DragGesture().onChanged { _ in controls.registerInteraction() }
+                )
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if let affirmation {
-                        favoriteButton(for: affirmation)
-                            .transaction { $0.animation = nil }
+            .overlay {
+                TodayCornerControls(
+                    affirmation: affirmation,
+                    isUpdating: isUpdating,
+                    onOpenDestination: openDestination,
+                    onToggleFavorite: {
+                        if let affirmation { toggleFavorite(affirmation) }
                     }
-                }
-                .iconOnlyBackground()
+                )
+                .opacity(controls.isVisible ? 1 : 0)
+                .allowsHitTesting(controls.isVisible)
+                .accessibilityHidden(!controls.isVisible)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: controls.isVisible)
             }
             .onChange(of: affirmation?.id, initial: true) { _, id in
                 themeStore?.updateDisplayedAffirmation(id)
@@ -76,7 +93,7 @@ struct TodayView: View {
         }
         .foregroundStyle(foregroundColor)
         .tint(foregroundColor)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .background {
             ZStack {
                 appTheme.backgroundGradient
@@ -86,6 +103,25 @@ struct TodayView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }
+            else { controls.reset() }
+        }
+        .onChange(of: voiceOverEnabled, initial: true) { _, enabled in
+            controls.setAlwaysVisible(enabled)
+        }
+        .onChange(of: sheetDismissalID) { _, _ in
+            controls.show()
+        }
+        .task(id: controls.hideDeadline) {
+            guard let deadline = controls.hideDeadline else { return }
+            do {
+                try await Task.sleep(for: .seconds(max(0, deadline.timeIntervalSinceNow)))
+                try Task.checkCancellation()
+                controls.expire(deadline: deadline)
+            } catch is CancellationError {
+                // A new interaction or disappearing view cancels the previous timeout.
+            } catch {
+                controls.reset()
+            }
         }
         .onChange(of: scheduleStore.schedule) { _, _ in
             browsingState.reset()
@@ -112,7 +148,7 @@ struct TodayView: View {
                 .foregroundStyle(foregroundColor)
         } description: {
             Text(libraryIsEmpty
-                 ? "Open Library from the menu to add your first affirmation."
+                 ? "Tap the screen, then open Library in the top-left corner to add your first affirmation."
                  : selectionStore.selection.emptyMessage)
                 .foregroundStyle(foregroundColor.opacity(0.85))
         }
@@ -155,6 +191,7 @@ struct TodayView: View {
     }
 
     private func cycleAffirmation(by offset: Int) {
+        controls.registerInteraction()
         var updatedBrowsingState = browsingState
         guard let next = updatedBrowsingState.cycle(
             by: offset,
@@ -170,23 +207,18 @@ struct TodayView: View {
         }
     }
 
-    private func favoriteButton(for affirmation: Affirmation) -> some View {
-        Button {
-            do {
-                try store.toggleFavorite(id: affirmation.id)
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-        } label: {
-            Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
-                .font(.system(size: 22, weight: .regular))
-                .foregroundStyle(foregroundColor)
-                .frame(minWidth: 44, minHeight: 44)
-                .contentShape(Rectangle())
+    private func openDestination(_ destination: TodayDestination) {
+        controls.reset()
+        onOpenDestination(destination)
+    }
+
+    private func toggleFavorite(_ affirmation: Affirmation) {
+        controls.registerInteraction()
+        do {
+            try store.toggleFavorite(id: affirmation.id)
+        } catch {
+            errorMessage = error.localizedDescription
         }
-        .buttonStyle(.plain)
-        .disabled(isUpdating)
-        .accessibilityLabel(affirmation.isFavorite ? "Remove from favourites" : "Add to favourites")
     }
 }
 

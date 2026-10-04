@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
-    case nature, steel, refined, disco, together, fruity
+    case nature, steel, refined, disco
 
     var id: Self { self }
     var name: String { rawValue.capitalized }
@@ -11,8 +11,6 @@ nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
         case .steel: "Cool gunmetal. Quiet strength."
         case .refined: "Warm cream. A little sophistication."
         case .disco: "Electric colour. Permission to play."
-        case .together: "Warm moments. The joy of connection."
-        case .fruity: "Sweet pastels. A cheeky little wink."
         }
     }
 
@@ -32,6 +30,6 @@ nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
     private static let retiredThemeNames: Set<String> = [
         "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
         "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
-        "bubblegum", "daydream", "muscle", "spectrum"
+        "bubblegum", "daydream", "muscle", "spectrum", "together", "fruity"
     ]
 }

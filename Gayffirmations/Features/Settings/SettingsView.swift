@@ -4,7 +4,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
-    let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
 
@@ -14,14 +13,6 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Appearance") {
-                    NavigationLink {
-                        ThemePickerView(store: themeStore)
-                    } label: {
-                        LabeledContent("Theme", value: themeStore.selectedTheme.name)
-                    }
-                }
-
                 Section("Notifications") {
                     NavigationLink {
                         ScheduleView(
@@ -184,7 +175,6 @@ private enum ResetAction {
     SettingsView(
         affirmationStore: affirmationStore,
         scheduleStore: scheduleStore,
-        themeStore: themeStore,
         notificationCoordinator: notificationCoordinator,
         resetCoordinator: resetCoordinator
     )

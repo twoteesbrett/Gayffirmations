@@ -37,7 +37,11 @@ retaining the enabled schedule and resume when matching entries return.
 
 Today shows the most recent scheduled affirmation, keeping the final reminder
 current overnight. With reminders off, it rotates once per local calendar day.
-The menu opens Library and Settings. Swiping left anywhere in the affirmation area advances to the
+Tap the screen to reveal corner icons for Library (top left), Favourite (top right),
+Themes (bottom left), and Settings (bottom right). Tap again to hide them, or leave
+them idle for five seconds. Interaction restarts the timer; opening a sheet clears
+the controls. Dismissing a sheet reveals them with a fresh five-second timeout.
+VoiceOver keeps them visible. Swiping left anywhere in the affirmation area advances to the
 next affirmation; swiping right goes back. Message text slides in the swipe direction
 and optional photos transition with it. Reduce Motion uses crossfades.
 These temporary choices expire at
@@ -78,6 +82,7 @@ Gayffirmations/
 │   ├── Today/
 │   ├── Library/
 │   ├── Schedule/
+│   ├── Themes/
 │   └── Settings/
 ├── Data/
 ├── Services/Notifications/

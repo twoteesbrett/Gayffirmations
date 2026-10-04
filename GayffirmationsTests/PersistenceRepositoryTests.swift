@@ -189,6 +189,19 @@ struct PersistenceRepositoryTests {
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
+    @Test("Removed themes fall back to Nature and allow subsequent selections", arguments: ["together", "fruity"])
+    func removedThemeMigration(name: String) throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        fixture.userDefaults.set(try JSONEncoder().encode(name), forKey: "gayffirmations.theme")
+
+        let store = ThemeStore(repository: fixture.repository)
+        #expect(store.selectedTheme == .nature)
+        #expect(store.persistenceErrorMessage == nil)
+        try store.select(.steel)
+        #expect(try fixture.repository.loadTheme() == .steel)
+    }
+
     @Test("A theme can be saved and loaded")
     func themeRoundTrip() throws {
         let fixture = RepositoryFixture()

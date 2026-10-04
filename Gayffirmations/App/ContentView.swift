@@ -15,7 +15,8 @@ struct ContentView: View {
     let resetCoordinator: AppDataResetCoordinator
 
     @State private var startupPersistenceErrorMessage: String?
-    @State private var destination: Destination?
+    @State private var destination: TodayDestination?
+    @State private var sheetDismissalID: UUID?
 
     init(
         affirmationStore: AffirmationStore,
@@ -59,25 +60,12 @@ struct ContentView: View {
                 selectionStore: notificationCoordinator.selectionStore,
                 scheduleStore: scheduleStore,
                 isUpdating: notificationCoordinator.isUpdating,
-                themeStore: themeStore
+                themeStore: themeStore,
+                sheetDismissalID: sheetDismissalID,
+                onOpenDestination: { destination = $0 }
             )
             .environment(\.themePhoto, themeStore.selectedPhoto)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Button("Library", systemImage: "books.vertical") { destination = .library }
-                        Button("Settings", systemImage: "gearshape") { destination = .settings }
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 22, weight: .regular))
-                            .foregroundStyle(themeStore.selectedPhoto?.textColor ?? themeStore.selectedTheme.textColor)
-                            .frame(minWidth: 44, minHeight: 44)
-                    }
-                    .accessibilityLabel("Menu")
-                }
-                .iconOnlyBackground()
-            }
-            .sheet(item: $destination) { destination in
+            .sheet(item: $destination, onDismiss: { sheetDismissalID = UUID() }) { destination in
                 destinationView(destination)
                     .themeAppearance(themeStore.selectedTheme)
             }
@@ -110,15 +98,16 @@ struct ContentView: View {
     }
 
     @ViewBuilder
-    private func destinationView(_ destination: Destination) -> some View {
+    private func destinationView(_ destination: TodayDestination) -> some View {
         switch destination {
         case .library:
             LibraryView(store: affirmationStore, notificationCoordinator: notificationCoordinator)
+        case .themes:
+            ThemesView(store: themeStore)
         case .settings:
             SettingsView(
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
-                themeStore: themeStore,
                 notificationCoordinator: notificationCoordinator,
                 resetCoordinator: resetCoordinator
             )
@@ -135,11 +124,6 @@ struct ContentView: View {
             }
         )
     }
-}
-
-private enum Destination: Identifiable {
-    case library, settings
-    var id: Self { self }
 }
 
 #if DEBUG

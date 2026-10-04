@@ -15,47 +15,33 @@ extension AppTheme {
         switch self {
         case .nature:
             return [
-                ThemePhoto(id: "nature-night-sky", name: "Night sky", focalPoint: .center,
-                           overlayOpacity: 0.12, accessibilityDescription: "Stars above silhouetted forest trees", textColor: .white),
+                ThemePhoto(id: "nature-canyon", name: "Canyon", focalPoint: UnitPoint(x: 0.55, y: 0.5),
+                           overlayOpacity: 0.42, accessibilityDescription: "Red sandstone canyon walls framing a ribbon of blue sky", textColor: .white),
+                ThemePhoto(id: "nature-meadow", name: "Meadow", focalPoint: .center,
+                           overlayOpacity: 0.38, accessibilityDescription: "Soft green meadow grasses against a shaded woodland background", textColor: .white),
                 ThemePhoto(id: "nature-forest", name: "Forest", focalPoint: UnitPoint(x: 0.56, y: 0.5),
                            overlayOpacity: 0.48, accessibilityDescription: "Sunlight filtering through a green forest", textColor: .white),
-                ThemePhoto(id: "nature-coast", name: "Coast", focalPoint: .center,
-                           overlayOpacity: 0.50, accessibilityDescription: "Green coastal cliffs beside blue water and white surf", textColor: .white)
+                ThemePhoto(id: "nature-beach", name: "Beach", focalPoint: UnitPoint(x: 0.5, y: 0.60),
+                           overlayOpacity: 0.50, accessibilityDescription: "Gentle waves washing over golden sand in warm evening light", textColor: .white),
+                ThemePhoto(id: "nature-river", name: "River", focalPoint: UnitPoint(x: 0.5, y: 0.65),
+                           overlayOpacity: 0.48, accessibilityDescription: "Clear blue river flowing around boulders beneath leafy trees", textColor: .white),
+                ThemePhoto(id: "nature-waterfall", name: "Waterfall", focalPoint: UnitPoint(x: 0.45, y: 0.5),
+                           overlayOpacity: 0.48, accessibilityDescription: "A cascading waterfall surrounded by lush green ferns and foliage", textColor: .white)
             ]
         case .steel:
             return [
-                ThemePhoto(id: "steel-strength", name: "Strength", focalPoint: UnitPoint(x: 0.80, y: 0.5),
-                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a barbell", textColor: .white),
+                ThemePhoto(id: "steel-strength", name: "Strength", focalPoint: UnitPoint(x: 0.85, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a standing man curling a barbell", textColor: .white),
                 ThemePhoto(id: "steel-release", name: "Release", focalPoint: .center,
                            overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white),
                 ThemePhoto(id: "steel-curl", name: "Curl", focalPoint: UnitPoint(x: 0.70, y: 0.5),
                            overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a seated man curling a dumbbell", textColor: .white),
                 ThemePhoto(id: "steel-deadlift", name: "Deadlift", focalPoint: UnitPoint(x: 0.52, y: 0.5),
-                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a man preparing to deadlift a barbell", textColor: .white)
-            ]
-        case .together:
-            return [
-                ThemePhoto(id: "together-park", name: "Park", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple cuddling in a park at golden hour", textColor: .white),
-                ThemePhoto(id: "together-home", name: "Home", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple laughing together on a sofa", textColor: .white),
-                ThemePhoto(id: "together-city", name: "City", focalPoint: .center,
-                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated portrait of a happy couple walking arm in arm on a city street at night", textColor: .white),
-                ThemePhoto(id: "together-coast", name: "Coast", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated portrait of a happy couple embracing beside the sea at sunset", textColor: .white)
-            ]
-        case .fruity:
-            return [
-                ThemePhoto(id: "fruity-cherry", name: "Cherry", focalPoint: .center,
-                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii cherry against a dreamy pastel background", textColor: .white),
-                ThemePhoto(id: "fruity-aubergine", name: "Aubergine", focalPoint: .center,
-                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii aubergine against a dreamy pastel background", textColor: .white),
-                ThemePhoto(id: "fruity-banana", name: "Banana", focalPoint: .center,
-                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii banana against a dreamy pastel background", textColor: .white),
-                ThemePhoto(id: "fruity-peach", name: "Peach", focalPoint: .center,
-                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii peach against a dreamy pastel background", textColor: .white),
-                ThemePhoto(id: "fruity-coconut", name: "Coconut", focalPoint: .center,
-                           overlayOpacity: 0.40, accessibilityDescription: "A winking kawaii coconut against a dreamy pastel background", textColor: .white)
+                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a man preparing to deadlift a barbell", textColor: .white),
+                ThemePhoto(id: "steel-squat", name: "Squat", focalPoint: UnitPoint(x: 0.55, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man squatting with a barbell", textColor: .white),
+                ThemePhoto(id: "steel-pull-up", name: "Pull-up", focalPoint: .center,
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man doing a pull-up, viewed from behind", textColor: .white)
             ]
         case .disco:
             return [

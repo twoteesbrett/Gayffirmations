@@ -18,6 +18,9 @@ struct ThemePickerView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                     .accessibilityAddTraits(
                         store.selectedTheme == theme ? .isSelected : []
                     )
@@ -53,7 +56,7 @@ struct ThemePickerView: View {
             }
         }
         .themedBackground()
-        .navigationTitle("Theme")
+        .navigationTitle("Themes")
         .alert("Unable to Change Theme", isPresented: errorIsPresented) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -107,8 +110,43 @@ private struct ThemePreviewRow: View {
                 }
             }
         }
-        .contentShape(Rectangle())
-        .padding(.vertical, 4)
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
+        .foregroundStyle(previewPhoto == nil ? theme.textColor : .white)
+        .background {
+            theme.backgroundGradient
+                .overlay {
+                    if let photo = previewPhoto {
+                        PhotoBackground(photo: photo)
+                            .environment(\.appTheme, theme)
+                            .overlay {
+                                LinearGradient(
+                                    colors: [.black.opacity(0.40), .black.opacity(0.16)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            }
+                    }
+                }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay {
+            RoundedRectangle(cornerRadius: 20)
+                .strokeBorder(.white.opacity(isSelected ? 0.85 : 0.16), lineWidth: isSelected ? 2 : 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 20))
+    }
+
+    /// Stable covers make the collections recognizable while browsing the picker.
+    private var previewPhoto: ThemePhoto? {
+        let photoID: String?
+        switch theme {
+        case .nature: photoID = "nature-forest"
+        case .steel: photoID = "steel-strength"
+        case .refined: photoID = nil
+        case .disco: photoID = "disco-mirrorball"
+        }
+        return theme.photos.first { $0.id == photoID }
     }
 
     private var artwork: some View {
@@ -133,7 +171,7 @@ private struct ThemePreviewRow: View {
                 .font(.headline)
             Text(theme.description)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(previewPhoto == nil ? theme.textColor.opacity(0.85) : .white.opacity(0.9))
         }
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -142,7 +180,8 @@ private struct ThemePreviewRow: View {
     private var selectionIndicator: some View {
         if isSelected {
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(theme.accentColor)
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(previewPhoto == nil ? theme.textColor : .black.opacity(0.8), .white)
                 .accessibilityHidden(true)
         }
     }
