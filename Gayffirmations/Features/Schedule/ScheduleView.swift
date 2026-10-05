@@ -7,7 +7,7 @@ struct ScheduleView: View {
 
     @State private var presentedError: PresentedError?
     @State private var isUpdatingSchedule = false
-    @State private var showsExactTimes = true
+    @State private var showsExactTimes = false
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
