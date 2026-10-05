@@ -141,8 +141,8 @@ Notification sounds are selectable in Settings and saved with the schedule.
   (426 KB combined, about 87% smaller than the supplied WAVs). See
   [SOURCES.md](SOURCES.md). The simulator build includes all five files;
   listening review and iPhone playback checks remain pending.
-- [x] Add a Sound picker under Settings → Notifications with Default, None,
-      and custom sounds, including custom-sound previews.
+- [x] Add a Sound picker under Settings → Notifications with None, Default,
+      and custom sounds, including previews on selection and a leading checkmark.
 - [x] Save and restore the selected sound, defaulting existing installations
       to Default without losing their saved schedule.
 - [x] Refresh pending reminders when the sound changes, preserving existing

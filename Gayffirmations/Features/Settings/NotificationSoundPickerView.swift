@@ -13,46 +13,30 @@ struct NotificationSoundPickerView: View {
         Form {
             Section {
                 ForEach(NotificationSound.allCases) { sound in
-                    HStack(spacing: 12) {
-                        Button {
-                            select(sound)
-                        } label: {
-                            HStack {
-                                Text(sound.title)
-                                    .foregroundStyle(.primary)
-                                    .multilineTextAlignment(.leading)
-                                Spacer(minLength: 8)
-                                if store.schedule.sound == sound {
-                                    Image(systemName: "checkmark")
-                                        .accessibilityHidden(true)
-                                }
-                            }
-                            .frame(minHeight: 44)
-                            .contentShape(Rectangle())
+                    Button {
+                        select(sound)
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                                .frame(width: 22)
+                                .opacity(store.schedule.sound == sound ? 1 : 0)
+                                .accessibilityHidden(true)
+                            Text(sound.title)
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.leading)
+                            Spacer(minLength: 0)
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(store.schedule.sound == sound ? .isSelected : [])
-
-                        if sound.filename != nil {
-                            Button {
-                                do {
-                                    try preview.play(sound)
-                                } catch {
-                                    errorMessage = error.localizedDescription
-                                }
-                            } label: {
-                                Image(systemName: "play.circle")
-                                    .font(.title2)
-                                    .frame(minWidth: 44, minHeight: 44)
-                            }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel("Preview \(sound.title)")
-                            .accessibilityHint("Plays the sound without changing your selection")
-                        }
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(store.schedule.sound == sound ? .isSelected : [])
+                    .accessibilityHint(sound.filename != nil
+                        ? "Selects and plays this sound" : "Selects this notification sound")
                 }
             } footer: {
-                Text("Default uses your iPhone’s notification sound. None delivers reminders silently. Use the play buttons to preview custom sounds. Silent mode and your notification settings can silence sounds.")
+                Text("Default uses your iPhone’s notification sound. None delivers reminders silently. Tap a custom sound to select and hear it. Silent mode and your notification settings can silence sounds.")
             }
         }
         .themedBackground()
@@ -74,15 +58,20 @@ struct NotificationSoundPickerView: View {
     }
 
     private func select(_ sound: NotificationSound) {
-        preview.stop()
-        guard !isSaving, !notificationCoordinator.isUpdating,
-              sound != store.schedule.sound else { return }
+        guard !isSaving, !notificationCoordinator.isUpdating else { return }
+        // Preview immediately so a delayed save cannot start audio after dismissal.
+        // Default and None stop the previous preview without playing an asset.
+        preview.play(sound) { error in
+            errorMessage = error.localizedDescription
+        }
+        guard sound != store.schedule.sound else { return }
         isSaving = true
         Task { @MainActor in
             defer { isSaving = false }
             do {
                 try await notificationCoordinator.setSound(sound)
             } catch {
+                preview.stop()
                 errorMessage = error.localizedDescription
             }
         }

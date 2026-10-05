@@ -77,18 +77,23 @@ between zero and twelve, including changes made outside the UI.
 
 ## Notification sounds
 
-Settings → Notifications → Sound offers Default, None, and five custom sounds:
+Settings → Notifications → Sound offers None, Default, and five custom sounds:
 Flute, Marimba, Choir, Harp, and Ahem.
-Each custom sound has a separate preview button. The selection is saved with
+Tapping a custom sound selects and previews it; tapping it again replays it.
+A checkmark on the left shows the selected sound. The selection is saved with
 the schedule and applied to all pending reminders; existing saved schedules
 retain Default. Resetting the notification schedule or all app data restores
 Default. Sound previews stop when leaving the picker or backgrounding the app.
 Notification playback follows the iPhone's sound and notification settings.
 
-Custom previews use `AVAudioPlayer` without changing the saved selection.
+Custom previews use `AVAudioPlayer` and start immediately when a row is tapped.
+Player creation, playback, and stopping run on a serial background queue so
+audio-session work does not block the interface. Leaving the picker cancels
+queued previews and stops playback; errors return to the main actor only for
+the current preview.
 Default has no in-app preview. Each planned reminder carries the selected sound
 to `UNNotificationSound`; None omits its sound. Display names, Settings summaries,
-and preview accessibility labels come from `NotificationSound.title`. Keep
+and sound-row accessibility labels come from `NotificationSound.title`. Keep
 saved identifiers and CAF filenames stable when renaming sounds so existing
 selections continue to work. Audio preparation and file sizes are in
 [SOURCES.md](SOURCES.md#notification-sounds).

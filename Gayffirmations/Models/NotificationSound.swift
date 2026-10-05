@@ -1,8 +1,8 @@
 import Foundation
 
 nonisolated enum NotificationSound: String, Codable, CaseIterable, Identifiable {
-    case systemDefault = "default"
     case none
+    case systemDefault = "default"
     case upliftingFlute = "uplifting-flute"
     case magicMarimba = "magic-marimba"
     case choirHarpBless = "choir-harp-bless"
