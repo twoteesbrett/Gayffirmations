@@ -3,7 +3,7 @@ import Testing
 
 @MainActor
 struct ScheduleStoreTests {
-    @Test("Invalid reminder counts leave both saved and visible schedules unchanged", arguments: [-1, 13, Int.max])
+    @Test("Invalid reminder counts leave both saved and visible schedules unchanged", arguments: [-1, 0, 25, Int.max])
     func invalidCountPreservesSchedule(count: Int) {
         let repository = InMemoryScheduleRepository()
         let store = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
@@ -13,6 +13,19 @@ struct ScheduleStoreTests {
         }
         #expect(store.schedule == original)
         #expect(repository.schedule == original)
+    }
+
+    @Test("Valid reminder count boundaries and expanded counts survive restart", arguments: [1, 13, 24])
+    func validCountsPersist(count: Int) throws {
+        let repository = InMemoryScheduleRepository()
+        let store = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+
+        try store.setNotificationsPerDay(count)
+
+        #expect(store.schedule.notificationsPerDay == count)
+        #expect(repository.schedule?.notificationsPerDay == count)
+        let restartedStore = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        #expect(restartedStore.schedule == store.schedule)
     }
 
     @Test("A saved schedule is loaded when a store is created")

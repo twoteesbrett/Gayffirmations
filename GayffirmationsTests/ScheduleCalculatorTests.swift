@@ -8,7 +8,7 @@ struct ScheduleCalculatorTests {
     @Test("Every rhythm preserves counts and stays inside the daily period",
           arguments: ScheduleRhythm.allCases, ScheduleEmphasis.allCases)
     func weightedSchedules(rhythm: ScheduleRhythm, emphasis: ScheduleEmphasis) throws {
-        for count in 0...12 {
+        for count in 1...24 {
             let schedule = AffirmationSchedule(
                 startTime: TimeOfDay(hour: 9, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
@@ -76,7 +76,7 @@ struct ScheduleCalculatorTests {
         }
     }
 
-    @Test("Invalid reminder counts are rejected before calculating times", arguments: [-1, 13, Int.max])
+    @Test("Invalid reminder counts are rejected before calculating times", arguments: [-1, 0, 25, Int.max])
     func rejectsInvalidReminderCounts(count: Int) {
         #expect(throws: ScheduleCalculatorError.invalidReminderCount) {
             try calculator.notificationTimes(for: AffirmationSchedule(notificationsPerDay: count))
@@ -85,9 +85,9 @@ struct ScheduleCalculatorTests {
 
     @Test("The maximum supported reminder count produces distinct times")
     func maximumReminderCount() throws {
-        let times = try calculator.notificationTimes(for: AffirmationSchedule(notificationsPerDay: 12))
-        #expect(times.count == 12)
-        #expect(Set(times.map(\.minutesSinceMidnight)).count == 12)
+        let times = try calculator.notificationTimes(for: AffirmationSchedule(notificationsPerDay: 24))
+        #expect(times.count == 24)
+        #expect(Set(times.map(\.minutesSinceMidnight)).count == 24)
     }
 
     @Test("A narrow period cannot deliver several reminders at the same minute")
@@ -148,13 +148,6 @@ struct ScheduleCalculatorTests {
             TimeOfDay(hour: 9, minute: 38),
             TimeOfDay(hour: 9, minute: 53)
         ])
-    }
-
-    @Test("Zero reminders produces no times")
-    func zeroReminders() throws {
-        let schedule = AffirmationSchedule(notificationsPerDay: 0)
-
-        #expect(try calculator.notificationTimes(for: schedule).isEmpty)
     }
 
     @Test("An end time before the start time is rejected")

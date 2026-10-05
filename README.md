@@ -81,7 +81,7 @@ The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be
 added later. Reminder combinations that round to duplicate delivery minutes
 are rejected; choose a longer period, fewer reminders, or gentler emphasis. Reminder counts must be
-between zero and twelve, including changes made outside the UI.
+between one and twenty-four, including changes made outside the UI.
 
 ## Notification sounds
 

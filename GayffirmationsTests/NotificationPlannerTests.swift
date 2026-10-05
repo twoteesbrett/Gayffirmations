@@ -56,13 +56,13 @@ struct NotificationPlannerTests {
         ])
     }
 
-    @Test("A schedule with no reminders produces an empty plan")
-    func emptyPlan() throws {
-        let schedule = AffirmationSchedule(notificationsPerDay: 0)
+    @Test("An empty selection still rejects invalid reminder counts", arguments: [0, 25])
+    func emptySelectionRejectsInvalidCounts(count: Int) {
+        let schedule = AffirmationSchedule(notificationsPerDay: count)
 
-        #expect(
-            try planner.reminders(for: schedule, affirmations: []).isEmpty
-        )
+        #expect(throws: ScheduleCalculatorError.invalidReminderCount) {
+            try planner.reminders(for: schedule, affirmations: [])
+        }
     }
 
     @Test("An empty selection pauses delivery")
