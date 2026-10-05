@@ -5,6 +5,77 @@ import Testing
 struct ScheduleCalculatorTests {
     private let calculator = ScheduleCalculator()
 
+    @Test("Every rhythm preserves counts and stays inside the daily period",
+          arguments: ScheduleRhythm.allCases, ScheduleEmphasis.allCases)
+    func weightedSchedules(rhythm: ScheduleRhythm, emphasis: ScheduleEmphasis) throws {
+        for count in 0...12 {
+            let schedule = AffirmationSchedule(
+                startTime: TimeOfDay(hour: 9, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                notificationsPerDay: count, rhythm: rhythm, emphasis: emphasis
+            )
+            let times = try calculator.notificationTimes(for: schedule)
+            #expect(times.count == count)
+            #expect(times == times.sorted())
+            #expect(Set(times.map(\.minutesSinceMidnight)).count == count)
+            #expect(times.allSatisfy { $0 >= schedule.startTime && $0 <= schedule.endTime })
+        }
+    }
+
+    @Test("Evening gaps shrink, morning gaps grow, and emphasis increases the shift")
+    func weightedGaps() throws {
+        var previousLateTotal = 0
+        for emphasis in ScheduleEmphasis.allCases {
+            let early = try calculator.notificationTimes(for: AffirmationSchedule(
+                notificationsPerDay: 6, rhythm: .moreEarly, emphasis: emphasis
+            )).map(\.minutesSinceMidnight)
+            let late = try calculator.notificationTimes(for: AffirmationSchedule(
+                notificationsPerDay: 6, rhythm: .moreLate, emphasis: emphasis
+            )).map(\.minutesSinceMidnight)
+            let earlyGaps = zip(early, early.dropFirst()).map { $1 - $0 }
+            let lateGaps = zip(late, late.dropFirst()).map { $1 - $0 }
+            #expect(zip(earlyGaps, earlyGaps.dropFirst()).allSatisfy { $0 < $1 })
+            #expect(zip(lateGaps, lateGaps.dropFirst()).allSatisfy { $0 > $1 })
+            #expect(late.reduce(0, +) > previousLateTotal)
+            previousLateTotal = late.reduce(0, +)
+            #expect(zip(early, late.reversed()).allSatisfy { $0 + $1 == 26 * 60 })
+        }
+    }
+
+    @Test("Balanced evening times match the approved preview")
+    func eveningExample() throws {
+        let schedule = AffirmationSchedule(
+            startTime: TimeOfDay(hour: 9, minute: 0),
+            endTime: TimeOfDay(hour: 23, minute: 0),
+            notificationsPerDay: 6, rhythm: .moreLate
+        )
+        #expect(try calculator.notificationTimes(for: schedule).map(\.minutesSinceMidnight)
+                == [649, 845, 1013, 1153, 1265, 1349])
+    }
+
+    @Test("One weighted reminder moves toward the chosen end")
+    func oneWeightedReminder() throws {
+        for rhythm in [ScheduleRhythm.moreEarly, .moreLate] {
+            let times = try calculator.notificationTimes(for: AffirmationSchedule(
+                notificationsPerDay: 1, rhythm: rhythm
+            ))
+            #expect(times.count == 1)
+            #expect(rhythm == .moreEarly ? times[0].hour < 13 : times[0].hour > 13)
+        }
+    }
+
+    @Test("Clustering that rounds to duplicate minutes is rejected")
+    func weightedDuplicates() {
+        let schedule = AffirmationSchedule(
+            startTime: TimeOfDay(hour: 9, minute: 0),
+            endTime: TimeOfDay(hour: 9, minute: 5),
+            notificationsPerDay: 5, rhythm: .moreLate, emphasis: .strong
+        )
+        #expect(throws: ScheduleCalculatorError.remindersTooClose) {
+            try calculator.notificationTimes(for: schedule)
+        }
+    }
+
     @Test("Invalid reminder counts are rejected before calculating times", arguments: [-1, 13, Int.max])
     func rejectsInvalidReminderCounts(count: Int) {
         #expect(throws: ScheduleCalculatorError.invalidReminderCount) {

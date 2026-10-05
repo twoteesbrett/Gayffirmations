@@ -1,30 +1,80 @@
 import Foundation
 
+enum ScheduleRhythm: String, Codable, CaseIterable, Identifiable {
+    case evenlySpaced, moreEarly, moreLate
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .evenlySpaced: "Evenly spaced"
+        case .moreEarly: "More early"
+        case .moreLate: "More late"
+        }
+    }
+
+    var explanation: String {
+        switch self {
+        case .evenlySpaced: "Your reminders are evenly spaced throughout the day."
+        case .moreEarly: "Same daily total, more reminders toward the start of your daily period."
+        case .moreLate: "Same daily total, more reminders toward the end of your daily period."
+        }
+    }
+}
+
+enum ScheduleEmphasis: String, Codable, CaseIterable, Identifiable {
+    case gentle, balanced, strong
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .gentle: "Gentle"
+        case .balanced: "Balanced"
+        case .strong: "Strong"
+        }
+    }
+
+    var weight: Double {
+        switch self {
+        case .gentle: 0.3
+        case .balanced: 0.6
+        case .strong: 0.9
+        }
+    }
+}
+
 struct AffirmationSchedule: Codable, Equatable {
-    static let notificationCountRange = 0...12
+    static let notificationCountRange = 1...24
 
     var isEnabled: Bool
     var startTime: TimeOfDay
     var endTime: TimeOfDay
     var notificationsPerDay: Int
     var sound: NotificationSound
+    var rhythm: ScheduleRhythm
+    var emphasis: ScheduleEmphasis
 
     init(
         isEnabled: Bool = false,
         startTime: TimeOfDay = TimeOfDay(hour: 9, minute: 0),
         endTime: TimeOfDay = TimeOfDay(hour: 17, minute: 0),
         notificationsPerDay: Int = 4,
-        sound: NotificationSound = .systemDefault
+        sound: NotificationSound = .systemDefault,
+        rhythm: ScheduleRhythm = .evenlySpaced,
+        emphasis: ScheduleEmphasis = .balanced
     ) {
         self.isEnabled = isEnabled
         self.startTime = startTime
         self.endTime = endTime
         self.notificationsPerDay = notificationsPerDay
         self.sound = sound
+        self.rhythm = rhythm
+        self.emphasis = emphasis
     }
 
     private enum CodingKeys: String, CodingKey {
-        case isEnabled, startTime, endTime, notificationsPerDay, sound
+        case isEnabled, startTime, endTime, notificationsPerDay, sound, rhythm, emphasis
     }
 
     init(from decoder: any Decoder) throws {
@@ -35,6 +85,9 @@ struct AffirmationSchedule: Codable, Equatable {
         notificationsPerDay = try container.decode(Int.self, forKey: .notificationsPerDay)
         // Schedules saved before sound selection keep their existing behaviour.
         sound = try container.decodeIfPresent(NotificationSound.self, forKey: .sound) ?? .systemDefault
+        // Existing schedules retain their exact evenly spaced delivery times.
+        rhythm = try container.decodeIfPresent(ScheduleRhythm.self, forKey: .rhythm) ?? .evenlySpaced
+        emphasis = try container.decodeIfPresent(ScheduleEmphasis.self, forKey: .emphasis) ?? .balanced
     }
 }
 

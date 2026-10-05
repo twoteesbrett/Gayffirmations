@@ -4,6 +4,30 @@ import Testing
 
 @MainActor
 struct PersistenceRepositoryTests {
+    @Test("Legacy schedules keep evenly spaced times")
+    func legacyRhythmMigration() throws {
+        let data = Data("""
+        {"isEnabled":true,"startTime":{"hour":9,"minute":0},
+        "endTime":{"hour":17,"minute":0},"notificationsPerDay":4}
+        """.utf8)
+        let schedule = try JSONDecoder().decode(AffirmationSchedule.self, from: data)
+        #expect(schedule.rhythm == .evenlySpaced)
+        #expect(schedule.emphasis == .balanced)
+        #expect(try ScheduleCalculator().notificationTimes(for: schedule).map(\.hour) == [10, 12, 14, 16])
+    }
+
+    @Test("Rhythm and emphasis survive saving, restarting, and resetting")
+    func rhythmPersistence() throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let schedule = AffirmationSchedule(notificationsPerDay: 6, rhythm: .moreLate, emphasis: .strong)
+        try fixture.repository.saveSchedule(schedule)
+        let store = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        #expect(store.schedule == schedule)
+        try store.reset()
+        #expect(try fixture.repository.loadSchedule() == AffirmationSchedule())
+    }
+
     @Test("Invalid saved times preserve the original data and block schedule updates",
           arguments: [(-1, 0), (24, 0), (9, -1), (9, 60)])
     func invalidSavedTime(hour: Int, minute: Int) throws {

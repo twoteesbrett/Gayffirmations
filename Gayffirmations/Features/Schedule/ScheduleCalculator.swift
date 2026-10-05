@@ -12,7 +12,7 @@ enum ScheduleCalculatorError: LocalizedError, Equatable {
         case .endMustBeAfterStart:
             "End time must be later than start time."
         case .remindersTooClose:
-            "Choose a longer daily period or fewer reminders so each reminder has a different delivery time."
+            "Choose a longer daily period, fewer reminders, or gentler emphasis so each reminder has a different delivery time."
         }
     }
 }
@@ -39,7 +39,18 @@ struct ScheduleCalculator {
 
         let times = (0..<count).map { index in
             let position = (Double(index) + 0.5) / Double(count)
-            let minutes = Double(start) + Double(duration) * position
+            // Blend linear positions with mirrored quadratic curves. Keeping the
+            // weight below one avoids collapsing delivery at either boundary.
+            let weightedPosition: Double
+            switch schedule.rhythm {
+            case .evenlySpaced:
+                weightedPosition = position
+            case .moreEarly:
+                weightedPosition = position + schedule.emphasis.weight * (position * position - position)
+            case .moreLate:
+                weightedPosition = position + schedule.emphasis.weight * (position - position * position)
+            }
+            let minutes = Double(start) + Double(duration) * weightedPosition
             return TimeOfDay(minutesSinceMidnight: Int(minutes.rounded()))
         }
         guard Set(times.map(\.minutesSinceMidnight)).count == times.count else {

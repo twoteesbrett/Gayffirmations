@@ -42,12 +42,20 @@ reminders, and Reset All App Data clears it. Templates remain saved as templates
 
 ## Scheduling behavior
 
-The initial scheduler will use the same schedule every day. It will divide the
-chosen period into equal sections and place one notification in the middle of
-each section.
+The scheduler uses the same schedule every day. Daily rhythm offers Evenly spaced,
+More early, and More late while keeping the selected daily total fixed. Evenly
+spaced divides the chosen period into equal sections and places one notification
+in the middle of each section. Existing saved schedules retain this behavior.
 
 For example, four notifications between 9:00 AM and 5:00 PM would arrive at
 approximately 10:00 AM, 12:00 PM, 2:00 PM, and 4:00 PM.
+
+More early and More late blend those positions with mirrored quadratic curves.
+Gentle, Balanced, and Strong emphasis progressively shift more reminders toward
+the chosen end of the daily period. A single reminder shifts too. The timeline
+and expandable exact-time list preview the same times used for delivery. Rhythm
+and emphasis are saved with the schedule; resetting restores Evenly spaced and
+Balanced. At accessibility text sizes, the rhythm controls use menu pickers.
 
 Library, Today, and reminders share one saved selection managed in Library.
 Choose All, favourites, or tags; presets select a set of available tags. Combined
@@ -72,7 +80,7 @@ Next and Previous actions.
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be
 added later. Reminder combinations that round to duplicate delivery minutes
-are rejected; choose a longer period or fewer reminders. Reminder counts must be
+are rejected; choose a longer period, fewer reminders, or gentler emphasis. Reminder counts must be
 between zero and twelve, including changes made outside the UI.
 
 ## Notification sounds

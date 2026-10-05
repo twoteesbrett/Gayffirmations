@@ -87,6 +87,14 @@ final class NotificationCoordinator {
         try await updateSchedule { $0.sound = sound }
     }
 
+    func setRhythm(_ rhythm: ScheduleRhythm) async throws {
+        try await updateSchedule { $0.rhythm = rhythm }
+    }
+
+    func setEmphasis(_ emphasis: ScheduleEmphasis) async throws {
+        try await updateSchedule { $0.emphasis = emphasis }
+    }
+
     private func updateSchedule(_ change: (inout AffirmationSchedule) -> Void) async throws {
         try checkIdle()
         isUpdating = true

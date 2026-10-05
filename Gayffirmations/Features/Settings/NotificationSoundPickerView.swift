@@ -17,17 +17,15 @@ struct NotificationSoundPickerView: View {
                         select(sound)
                     } label: {
                         HStack(spacing: 12) {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.tint)
-                                .frame(width: 22)
-                                .opacity(store.schedule.sound == sound ? 1 : 0)
-                                .accessibilityHidden(true)
                             Text(sound.title)
                                 .foregroundStyle(.primary)
                                 .multilineTextAlignment(.leading)
                             Spacer(minLength: 0)
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                                .opacity(store.schedule.sound == sound ? 1 : 0)
+                                .accessibilityHidden(true)
                         }
-                        .frame(minHeight: 44)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)

@@ -4,6 +4,62 @@ import Testing
 
 @MainActor
 struct NotificationCoordinatorTests {
+    @Test("Rhythm changes preserve the daily count and recover on failure")
+    func rhythmChangesAndRecovery() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let (coordinator, store) = makeCoordinator(scheduler: scheduler)
+        try await coordinator.setEnabled(true)
+        let original = scheduler.scheduledReminders
+        try await coordinator.setRhythm(.moreLate)
+        try await coordinator.setEmphasis(.strong)
+        #expect(store.schedule.notificationsPerDay == original.count)
+        #expect(scheduler.scheduledReminders.count == original.count)
+        #expect(scheduler.scheduledReminders.map(\.time)
+                == (try ScheduleCalculator().notificationTimes(for: store.schedule)))
+        #expect(scheduler.scheduledReminders != original)
+        let saved = store.schedule
+        let reminders = scheduler.scheduledReminders
+        scheduler.failuresRemaining = 1
+        await #expect(throws: NotificationSchedulerTestError.self) {
+            try await coordinator.setRhythm(.moreEarly)
+        }
+        #expect(store.schedule == saved)
+        #expect(scheduler.scheduledReminders == reminders)
+        #expect(!coordinator.isUpdating)
+    }
+
+    @Test("Disabled rhythm changes save without scheduling notifications")
+    func disabledRhythmChanges() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let (coordinator, store) = makeCoordinator(scheduler: scheduler)
+        try await coordinator.setRhythm(.moreEarly)
+        try await coordinator.setEmphasis(.gentle)
+        #expect(store.schedule.rhythm == .moreEarly)
+        #expect(store.schedule.emphasis == .gentle)
+        #expect(scheduler.replaceCallCount == 0)
+        #expect(scheduler.authorizationRequestCount == 0)
+    }
+
+    @Test("Invalid clustering preserves an enabled schedule and its pending reminders")
+    func invalidEmphasisPreservesDelivery() async throws {
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let (coordinator, store) = makeCoordinator(scheduler: scheduler)
+        try await coordinator.setEndTime(TimeOfDay(hour: 9, minute: 5))
+        try await coordinator.setNotificationsPerDay(5)
+        try await coordinator.setRhythm(.moreLate)
+        try await coordinator.setEmphasis(.gentle)
+        try await coordinator.setEnabled(true)
+        let previousSchedule = store.schedule
+        let previousReminders = scheduler.scheduledReminders
+        let previousReplacements = scheduler.replaceCallCount
+        await #expect(throws: ScheduleCalculatorError.remindersTooClose) {
+            try await coordinator.setEmphasis(.strong)
+        }
+        #expect(store.schedule == previousSchedule)
+        #expect(scheduler.scheduledReminders == previousReminders)
+        #expect(scheduler.replaceCallCount == previousReplacements)
+    }
+
     @Test("An invalid narrow period leaves the enabled schedule and reminders unchanged")
     func narrowPeriodPreservesDelivery() async throws {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
