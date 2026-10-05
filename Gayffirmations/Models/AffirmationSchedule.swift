@@ -7,17 +7,34 @@ struct AffirmationSchedule: Codable, Equatable {
     var startTime: TimeOfDay
     var endTime: TimeOfDay
     var notificationsPerDay: Int
+    var sound: NotificationSound
 
     init(
         isEnabled: Bool = false,
         startTime: TimeOfDay = TimeOfDay(hour: 9, minute: 0),
         endTime: TimeOfDay = TimeOfDay(hour: 17, minute: 0),
-        notificationsPerDay: Int = 4
+        notificationsPerDay: Int = 4,
+        sound: NotificationSound = .systemDefault
     ) {
         self.isEnabled = isEnabled
         self.startTime = startTime
         self.endTime = endTime
         self.notificationsPerDay = notificationsPerDay
+        self.sound = sound
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case isEnabled, startTime, endTime, notificationsPerDay, sound
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isEnabled = try container.decode(Bool.self, forKey: .isEnabled)
+        startTime = try container.decode(TimeOfDay.self, forKey: .startTime)
+        endTime = try container.decode(TimeOfDay.self, forKey: .endTime)
+        notificationsPerDay = try container.decode(Int.self, forKey: .notificationsPerDay)
+        // Schedules saved before sound selection keep their existing behaviour.
+        sound = try container.decodeIfPresent(NotificationSound.self, forKey: .sound) ?? .systemDefault
     }
 }
 

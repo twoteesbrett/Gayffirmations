@@ -9,6 +9,7 @@ enum NotificationAuthorizationStatus: Equatable {
 struct NotificationReminder: Equatable {
     let time: TimeOfDay
     let affirmationText: String
+    var sound: NotificationSound = .systemDefault
 }
 
 protocol NotificationScheduling {

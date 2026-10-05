@@ -25,6 +25,7 @@ struct AppDataResetCoordinatorTests {
         try library.add(text: "Custom")
         try theme.select(.nature)
         try await coordinator.setEnabled(true)
+        try await coordinator.setSound(.choirHarpBless)
         try await coordinator.setSelection(.tag("Work"))
         let originalLibrary = library.affirmations
         let originalSchedule = schedule.schedule

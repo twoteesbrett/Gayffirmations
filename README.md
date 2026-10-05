@@ -4,6 +4,10 @@ Gayffirmations is an iOS affirmation app built as both a useful product and a wa
 learn Swift and SwiftUI. The first goal is reliable, easy-to-read functionality;
 visual polish will follow once the core behavior is working.
 
+This README covers app behaviour and development. [SOURCES.md](SOURCES.md)
+records bundled asset origins and preparation; [TODO.md](TODO.md) tracks
+remaining work and verification.
+
 ## First release
 
 The first version should let someone:
@@ -65,17 +69,69 @@ the next reminder, or at midnight without reminders. Changing the schedule or
 source selection clears the temporary choice. VoiceOver exposes equivalent
 Next and Previous actions.
 
-Themes with photos use them by default. Nature and Steel offer a photo switch,
-saved separately for each theme; turning it off uses the colour background. Photos rotate as affirmations change
-and follow the browsing direction; Reduce Motion uses a crossfade. The theme
-picker shows the available photos. Text stays centred with a dark overlay over
-photos for readability; longer text stays within margins and can scroll.
-
 The first version will require the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be
 added later. Reminder combinations that round to duplicate delivery minutes
 are rejected; choose a longer period or fewer reminders. Reminder counts must be
 between zero and twelve, including changes made outside the UI.
+
+## Notification sounds
+
+Settings → Notifications → Sound offers Default, None, and five custom sounds:
+Flute, Marimba, Choir, Harp, and Ahem.
+Each custom sound has a separate preview button. The selection is saved with
+the schedule and applied to all pending reminders; existing saved schedules
+retain Default. Resetting the notification schedule or all app data restores
+Default. Sound previews stop when leaving the picker or backgrounding the app.
+Notification playback follows the iPhone's sound and notification settings.
+
+Custom previews use `AVAudioPlayer` without changing the saved selection.
+Default has no in-app preview. Each planned reminder carries the selected sound
+to `UNNotificationSound`; None omits its sound. Display names, Settings summaries,
+and preview accessibility labels come from `NotificationSound.title`. Keep
+saved identifiers and CAF filenames stable when renaming sounds so existing
+selections continue to work. Audio preparation and file sizes are in
+[SOURCES.md](SOURCES.md#notification-sounds).
+
+## Themes and photos
+
+The four themes are Nature, Steel, Refined, and Disco. Nature and Steel each
+have six photos, Disco has three, and Refined uses a colour background.
+Themes with photos use them by default and offer a Use photos switch saved
+separately for each theme. Turning it off uses the theme's colour background.
+The picker shows thumbnail previews. Steel renders photos in greyscale;
+other themes retain colour. Source images retain their original colours.
+
+Photos appear on Today; Library and Settings use the theme gradient. Each
+photo has a crop focal point, dark overlay, and foreground colour chosen for
+readability. Longer affirmations can scroll within the available space.
+
+Photos advance when the displayed affirmation changes, including swipes and
+scheduled changes. Swiping back reverses the photo sequence. The incoming
+photo follows the message's swipe direction; Reduce Motion uses a crossfade.
+The collection cycles in order. Rotation is session state and restarts at the
+first photo on launch; only the Use photos preference is saved. Unrelated
+view updates, favouriting, and opening Settings do not advance photos.
+There is no separate timer or daily photo rotation.
+
+To add photos, bundle image assets and add entries to `AppTheme.photos` with
+stable IDs, descriptive accessibility labels, focal points, and checked
+overlay and foreground settings. Record the originals in [SOURCES.md](SOURCES.md).
+Check portrait and landscape crops, long affirmations, accessibility text
+sizes, and toolbar contrast. Themes with photos automatically offer the switch.
+
+## Saved-data compatibility
+
+Startup preserves saved content and preferences. Initial starter content is
+seeded once, using stable IDs and matching text to avoid duplicates; later
+launches preserve edits and deletions. The earlier content-rebuild reset is
+no longer performed, including for installations with an old rebuild marker.
+
+Retired theme identifiers decode as Nature; current identifiers retain their
+identity. Unknown or malformed data reports an error rather than silently
+replacing saved content. Legacy fixed photo IDs are ignored when decoding
+background preferences. Reset All clears saved background choices. Schedules
+saved before sound selection was added load with Default sound.
 
 ## Technical direction
 
@@ -102,6 +158,7 @@ Gayffirmations/
 │   └── Settings/
 ├── Data/
 ├── Services/Notifications/
+├── Resources/Sounds/
 ├── Stores/
 └── Components/
 ```
@@ -115,7 +172,7 @@ when a save or replacement fails. Library edits notify that same coordinator thr
 store callbacks. `AppDataResetCoordinator` handles resets across all stores.
 
 `AffirmationSelection` owns matching rules; `ScheduleCalculator` owns reminder times;
-`NotificationPlanner` combines those times with affirmation text; and
+`NotificationPlanner` combines those times with affirmation text and the selected sound; and
 `TodayAffirmationResolver` uses the same slot order. An empty matching collection
 produces no reminders. Clearing the final Library filter returns to All.
 `WrappingLayout` handles button placement without knowing about selections or storage. `TodayBrowsingState` owns temporary browsing,

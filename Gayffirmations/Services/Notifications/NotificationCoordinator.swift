@@ -83,6 +83,10 @@ final class NotificationCoordinator {
         try await updateSchedule { $0.notificationsPerDay = notificationsPerDay }
     }
 
+    func setSound(_ sound: NotificationSound) async throws {
+        try await updateSchedule { $0.sound = sound }
+    }
+
     private func updateSchedule(_ change: (inout AffirmationSchedule) -> Void) async throws {
         try checkIdle()
         isUpdating = true

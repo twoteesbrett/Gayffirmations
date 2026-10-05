@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     @State private var isEditingName = false
     @State private var isShowingSchedule = false
+    @State private var isShowingSound = false
     @State private var pendingReset: ResetAction?
     @State private var errorMessage: String?
 
@@ -33,6 +34,12 @@ struct SettingsView: View {
                                         ? "Paused" : (scheduleStore.schedule.isEnabled ? "On" : "Off"))
                     }
                     .buttonStyle(.plain)
+                    Button {
+                        isShowingSound = true
+                    } label: {
+                        disclosureLabel("Sound", value: scheduleStore.schedule.sound.title)
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 Section("Data") {
@@ -51,6 +58,12 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $isShowingSchedule) {
                 ScheduleView(
+                    store: scheduleStore,
+                    notificationCoordinator: notificationCoordinator
+                )
+            }
+            .navigationDestination(isPresented: $isShowingSound) {
+                NotificationSoundPickerView(
                     store: scheduleStore,
                     notificationCoordinator: notificationCoordinator
                 )
@@ -175,9 +188,9 @@ private enum ResetAction {
         case .affirmations:
             "This replaces your affirmation library, including custom affirmations and favorites, with the original defaults."
         case .schedule:
-            "This turns off daily reminders, restores the default times, and removes pending notifications."
+            "This turns off daily reminders, restores the default times and sound, and removes pending notifications."
         case .all:
-            "This restores the affirmation library, notification schedule, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
+            "This restores the affirmation library, notification schedule and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
         }
     }
 }

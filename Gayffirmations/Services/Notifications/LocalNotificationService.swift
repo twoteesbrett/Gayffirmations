@@ -62,14 +62,23 @@ final class LocalNotificationService: NotificationScheduling {
         )
     }
 
-    private func request(
+    func request(
         for reminder: NotificationReminder,
         index: Int
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         content.title = "Gayffirmations"
         content.body = reminder.affirmationText
-        content.sound = .default
+        switch reminder.sound {
+        case .systemDefault:
+            content.sound = .default
+        case .none:
+            content.sound = nil
+        default:
+            if let filename = reminder.sound.filename {
+                content.sound = UNNotificationSound(named: UNNotificationSoundName(filename))
+            }
+        }
 
         let trigger = UNCalendarNotificationTrigger(
             dateMatching: DateComponents(

@@ -129,7 +129,37 @@ reminders; Settings keeps appearance, notifications, and data controls.
     to All affirmations are reachable.
   Missing-tag and empty-library cases remain preview/source-review coverage.
 
-## 10. Visual polish
+## 10. Notification sounds
+
+Notification sounds are selectable in Settings and saved with the schedule.
+
+- [x] Choose an initial set of custom sounds supplied by the user (now five).
+- [x] Prepare and bundle the custom audio assets for notification playback.
+
+  Flute, Marimba, Choir, Harp, and Ahem assets are converted to mono IMA4 CAF
+  in `Gayffirmations/Resources/Sounds`
+  (426 KB combined, about 87% smaller than the supplied WAVs). See
+  [SOURCES.md](SOURCES.md). The simulator build includes all five files;
+  listening review and iPhone playback checks remain pending.
+- [x] Add a Sound picker under Settings → Notifications with Default, None,
+      and custom sounds, including custom-sound previews.
+- [x] Save and restore the selected sound, defaulting existing installations
+      to Default without losing their saved schedule.
+- [x] Refresh pending reminders when the sound changes, preserving existing
+      delivery if saving or scheduling fails.
+- [x] Include the sound preference in notification-schedule and reset-all
+      behaviour, restoring Default.
+- [x] Test persistence compatibility, sound selection, reminder refresh,
+      failure recovery, and resets.
+
+  Full simulator test suite passes, including legacy schedule decoding,
+  every sound choice surviving reload, reminder updates, save/scheduling
+  recovery, paused delivery, schedule/reset-all behaviour, and decoding all
+  audio assets from the app bundle.
+- [ ] Verify previews and notification playback on an iPhone, including None,
+      system sound settings, and accessibility of the picker.
+
+## 11. Visual polish
 
 - [x] Refine the Library layout around tag and favourites filters.
 

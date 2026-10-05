@@ -15,7 +15,8 @@ struct NotificationPlanner {
         return times.enumerated().map { index, time in
             NotificationReminder(
                 time: time,
-                affirmationText: affirmations[index % affirmations.count].text
+                affirmationText: affirmations[index % affirmations.count].text,
+                sound: schedule.sound
             )
         }
     }
