@@ -30,7 +30,7 @@ struct SettingsView: View {
                     Button {
                         isShowingSchedule = true
                     } label: {
-                        disclosureLabel("Daily reminders", value: notificationCoordinator.deliveryIsPaused
+                        disclosureLabel("Schedule", value: notificationCoordinator.deliveryIsPaused
                                         ? "Paused" : (scheduleStore.schedule.isEnabled ? "On" : "Off"))
                     }
                     .buttonStyle(.plain)
@@ -56,17 +56,31 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .navigationDestination(isPresented: $isShowingSchedule) {
-                ScheduleView(
-                    store: scheduleStore,
-                    notificationCoordinator: notificationCoordinator
-                )
+            .sheet(isPresented: $isShowingSchedule) {
+                NavigationStack {
+                    ScheduleView(
+                        store: scheduleStore,
+                        notificationCoordinator: notificationCoordinator
+                    )
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { isShowingSchedule = false }
+                        }
+                    }
+                }
             }
-            .navigationDestination(isPresented: $isShowingSound) {
-                NotificationSoundPickerView(
-                    store: scheduleStore,
-                    notificationCoordinator: notificationCoordinator
-                )
+            .sheet(isPresented: $isShowingSound) {
+                NavigationStack {
+                    NotificationSoundPickerView(
+                        store: scheduleStore,
+                        notificationCoordinator: notificationCoordinator
+                    )
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { isShowingSound = false }
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $isEditingName) {
                 NameEditorView(notificationCoordinator: notificationCoordinator)
@@ -155,7 +169,7 @@ private enum ResetAction {
         case .affirmations:
             "Restore Default Affirmations"
         case .schedule:
-            "Reset Notification Schedule"
+            "Reset Schedule"
         case .all:
             "Reset All App Data"
         }
@@ -166,7 +180,7 @@ private enum ResetAction {
         case .affirmations:
             "Restore Default Affirmations?"
         case .schedule:
-            "Reset Notification Schedule?"
+            "Reset Schedule?"
         case .all:
             "Reset All App Data?"
         }

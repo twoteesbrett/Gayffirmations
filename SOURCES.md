@@ -7,14 +7,14 @@ App behaviour and development guidance are in [README.md](README.md).
 
 Steel uses six user-supplied AI-generated images from `/Users/brett/Desktop/assets`. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
 
-| Photo | Original file | Source |
+| Photo | Source file | Source |
 | --- | --- | --- |
-| Strength | Monochrome Barbell Curl Portrait.png | User-supplied AI-generated image |
-| Release | Monochrome Kettlebell Roar.png | User-supplied AI-generated image |
-| Curl | Original filename not recorded | User-supplied AI-generated image |
-| Deadlift | Original filename not recorded | User-supplied AI-generated image |
-| Squat | ChatGPT Image Oct 4, 2026 at 01_02_33 PM.png | User-supplied AI-generated image |
-| Pull-up | Monochrome Pull-Up in an Industrial Gym.png | User-supplied AI-generated image |
+| Strength | steel-strength.png | User-supplied AI-generated image |
+| Release | steel-release.png | User-supplied AI-generated image |
+| Curl | steel-curl.png | User-supplied AI-generated image |
+| Deadlift | steel-deadlift.png | User-supplied AI-generated image |
+| Squat | steel-squat.png | User-supplied AI-generated image |
+| Pull-up | steel-pull-up.png | User-supplied AI-generated image |
 
 Nature uses six user-supplied Pexels photos from `/Users/brett/Desktop/assets`. Bundled JPEGs preserve their aspect ratios and are resized to a maximum dimension of 3,000 pixels to keep background decoding lightweight.
 
@@ -31,16 +31,44 @@ Nature retains colour; Steel renders in greyscale.
 
 Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.
 
-Disco’s Mirrorball uses the user-supplied `Neon Mirrorball Disco Glow.png` from `/Users/brett/Desktop/assets`, preserving its original resolution and aspect ratio.
+Disco uses six user-supplied AI-generated images from `/Users/brett/Desktop/assets`, preserving their original resolution and aspect ratio.
 
-Disco also includes Aviators (`disco-aviators`) and Neon Portrait
-(`disco-portrait`). Their original filenames and source details have not yet
-been recorded.
+| Photo | Source file | Bundled asset identifier |
+| --- | --- | --- |
+| Mirrorball | disco-mirrorball.png | `disco-mirrorball` |
+| Aviators | disco-aviators.png | `disco-aviators` |
+| Dance | disco-dance.png | `disco-dance` |
+| Roller Skates | disco-roller-skates.jpg | `disco-roller-skates` |
+| Last Dance | disco-last-dance.png | `disco-last-dance` |
+| Vinyl | disco-vinyl.png | `disco-vinyl` |
+
+## AI-generated source filenames
+
+On 6 October 2026, the AI-generated files in `/Users/brett/Desktop/assets` were renamed to lowercase, hyphenated names. Existing theme photos match the app's asset identifiers. File contents and extensions were preserved; files starting with `pexels` or `mixkit` were left unchanged.
+
+| Previous filename | Current filename |
+| --- | --- |
+| Monochrome Barbell Curl Portrait.png | steel-strength.png |
+| Monochrome Kettlebell Roar.png | steel-release.png |
+| Cinematic Monochrome Dumbbell Curl.png | steel-curl.png |
+| Low-Key Deadlift Power.png | steel-deadlift.png |
+| ChatGPT Image Oct 4, 2026 at 01_02_33 PM.png | steel-squat.png |
+| Monochrome Pull-Up in an Industrial Gym.png | steel-pull-up.png |
+| Neon Mirrorball Disco Glow.png | disco-mirrorball.png |
+| Neon Disco Aviators on Marble.png | disco-aviators.png |
+| Neon-lit portrait with vibrant bokeh.png | disco-portrait.png |
+| ChatGPT Image 6 Oct 2026, 17_46_54.png | disco-dancefloor-portrait.png |
+| ChatGPT Image 6 Oct 2026, 17_37_42.jpg | disco-roller-skates.jpg |
+| Gayffirmations app icon.png | gayffirmations-app-icon.png |
+
+The former `disco-portrait` and `disco-dancefloor-portrait` assets are no longer bundled in the app. `disco-dance.png` replaces the Dancefloor portrait in the Disco rotation. `gayffirmations-app-icon.png` is the AI-generated icon source; the app bundles its prepared icon as `AppIcon.appiconset/AppIcon.png`.
+
+The app reads bundled copies from `Gayffirmations/Assets.xcassets`, not the Desktop source folder. These source renames require no Swift, asset catalog, or saved-selection changes. When renaming a bundled image file, update its `Contents.json`; when changing an asset identifier, also update code references and account for persisted selections using the old identifier.
 
 ## Notification sounds
 
 The user supplied five WAV files with Mixkit filenames from
-`/Users/brett/Downloads`. Original filenames are retained below for provenance.
+`/Users/brett/Desktop/assets`. Original filenames are retained below for provenance.
 The originals remain outside the app; only optimized CAF files are bundled.
 
 | Sound | Original filename | Duration | WAV bytes | CAF bytes |
@@ -52,7 +80,7 @@ The originals remain outside the app; only optimized CAF files are bundled.
 | Ahem | mixkit-male-clearing-the-throat-2226.wav | 1.483 s | 262,196 | 34,877 |
 
 The optimized files live in `Gayffirmations/Resources/Sounds`. The original
-WAVs remain in the user's Downloads folder and are not copied into the app.
+WAVs are available in the user's Desktop assets folder and are not copied into the app.
 Total asset size is 425,731 bytes, about 87% smaller than the originals
 (3,199,196 bytes).
 

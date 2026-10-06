@@ -58,9 +58,9 @@ and emphasis are saved with the schedule; resetting restores Evenly spaced and
 Balanced. At accessibility text sizes, the rhythm controls use menu pickers.
 
 Library, Today, and reminders share one saved selection managed in Library.
-Choose All, favourites, or tags; presets select a set of available tags. Combined
+Choose All, favourites, or tags. Combined
 choices include entries matching any choice, once each. The Tags button opens
-the preset picker and individual tag controls. If the selected source has no entries, reminders pause while
+the individual tag controls. If the selected source has no entries, reminders pause while
 retaining the enabled schedule and resume when matching entries return.
 
 Today shows the most recent scheduled affirmation, keeping the final reminder
@@ -109,7 +109,7 @@ selections continue to work. Audio preparation and file sizes are in
 ## Themes and photos
 
 The four themes are Nature, Steel, Refined, and Disco. Nature and Steel each
-have six photos, Disco has three, and Refined uses a colour background.
+have six photos, Disco has six, and Refined uses a colour background.
 Themes with photos use them by default and offer a Use photos switch saved
 separately for each theme. Turning it off uses the theme's colour background.
 The picker shows thumbnail previews. Steel renders photos in greyscale;
@@ -145,6 +145,8 @@ identity. Unknown or malformed data reports an error rather than silently
 replacing saved content. Legacy fixed photo IDs are ignored when decoding
 background preferences. Reset All clears saved background choices. Schedules
 saved before sound selection was added load with Default sound.
+Legacy schedules with zero reminders load with reminders disabled and a count
+of one, preserving their times and sound. Delivery stays off until explicitly enabled.
 
 ## Technical direction
 

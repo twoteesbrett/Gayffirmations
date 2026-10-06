@@ -88,6 +88,12 @@ struct AffirmationSchedule: Codable, Equatable {
         // Existing schedules retain their exact evenly spaced delivery times.
         rhythm = try container.decodeIfPresent(ScheduleRhythm.self, forKey: .rhythm) ?? .evenlySpaced
         emphasis = try container.decodeIfPresent(ScheduleEmphasis.self, forKey: .emphasis) ?? .balanced
+        // Zero was previously valid and meant no delivery, even when enabled.
+        // Keep delivery off while giving the current controls a valid count.
+        if notificationsPerDay == 0 {
+            notificationsPerDay = Self.notificationCountRange.lowerBound
+            isEnabled = false
+        }
     }
 }
 

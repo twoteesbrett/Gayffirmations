@@ -174,14 +174,15 @@ Notification sounds are selectable in Settings and saved with the schedule.
 - [ ] Refine each theme's light and dark appearance.
 
   Theme styling centralizes adaptive accent/background colours and typography.
-  Today uses scalable, centred text over a fixed photo per theme and horizontal
+  Today uses scalable, centred text over rotating theme photos and horizontal
   swipes to browse. The theme picker previews the same photos; app screens
   inherit the selected type design and follow system appearance. Eight Today
   previews cover every theme in light and dark.
   Simulator build passes; visual approval and final artwork remain pending.
 - [ ] Replace temporary theme previews with final artwork.
 - [ ] Add restrained transitions and haptics.
-- [ ] Create an app icon and launch presentation.
+- [x] Create an app icon.
+- [ ] Create a launch presentation.
 - [ ] Perform a final accessibility and usability pass.
 
   Layout review centralizes theme backgrounds across all screens and sheets,
@@ -190,19 +191,22 @@ Notification sounds are selectable in Settings and saved with the schedule.
   Daily reminder controls also respect shared coordinator updates. Live visual
   and VoiceOver verification remains pending.
 
-## Fixed category presets
+## Starter content and tag controls
 
-- [x] Bundle 35 starter affirmations (five per preset), with multiple tags covering all 24 predefined tags. Existing saved libraries are preserved; restoring defaults loads the starter collection.
-
-- [x] Define the seven fixed categories as presets of tags.
-- [x] Share a Presets menu and flat tag list across Library and the editor; remove duplicate Settings selection controls.
-- [x] Applying a preset replaces selected tags while preserving Favourites.
-- [x] Recognize matching presets; show Custom selection for other tag combinations.
-- [x] Offer predefined tags in the editor; offer available presets in the shared Library selection controls.
-- [x] Persist Library choices through the reminder coordinator; Today supports swiping through the selected collection.
-- [x] Review shared-selection ownership and save failures, keep Clear all available for custom-only libraries, and make the Library selection summary scroll with its entries at large text sizes.
-- [x] Isolate previews from real notification scheduling and preserve unexpected saved value types.
+- [x] Bundle 15 starter affirmations with combinations of the five predefined
+      tags: Body, Food, Confidence, Gay, and Self-kindness. Existing saved
+      libraries are preserved; restoring defaults loads the starter collection.
+- [x] Share individual tag controls across Library and the editor.
+- [x] Persist Library choices through the reminder coordinator; Today supports
+      swiping through the selected collection.
+- [x] Review shared-selection ownership and save failures, and make the Library
+      selection summary scroll with its entries at large text sizes.
+- [x] Isolate previews from real notification scheduling and preserve unexpected
+      saved value types.
 - [ ] Perform live visual and accessibility review of shared selection controls.
+
+Category presets are not implemented in the current app. Custom tags remain
+available alongside the predefined tags.
 
 ## Code review — 2 October 2026
 
@@ -237,14 +241,21 @@ inside the tag picker and editor.
       Codable and Equatable conformances do not inherit main-actor isolation.
 - [x] Update README behavior to describe optional rotating theme photos.
 
+## Code review — 7 October 2026
+
+- [x] Migrate saved zero-reminder schedules to a disabled schedule with one
+      reminder, preserving times and sound without starting delivery.
+- [x] Cover loading, launch reconciliation, schedule updates, restarting, and
+      explicit re-enabling for migrated schedules.
+- [x] Align documentation with the current 15 starter messages, five predefined
+      tags, individual tag controls, rotating photos, and bundled app icon.
+
+The current reminder range is one to twenty-four; the zero-to-twelve range
+recorded in the 3 October review describes the earlier implementation.
+
 ## Later ideas
 
-- [ ] Allow users to create and edit category presets. Initially use fixed presets:
-  Feel Good (self-worth, confidence, joy); Playful (playful); Being Me (gay identity, pride,
-  authenticity, shame); My Body (body image, appearance, masculinity, ageing);
-  Love & Dating (dating, relationships, rejection, intimacy); Connection
-  (friends, chosen family, belonging, loneliness); Tough Days (anxiety,
-  setbacks, uncertainty, starting again). Custom tags remain available in the flat tag list.
+- [ ] Add category presets and allow users to create and edit them.
 
 - [ ] Select days of the week.
 - [ ] Randomize delivery within each time section.

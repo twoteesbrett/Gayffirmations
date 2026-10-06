@@ -7,6 +7,7 @@ struct ScheduleView: View {
 
     @State private var presentedError: PresentedError?
     @State private var isUpdatingSchedule = false
+    @State private var showsUpdatingIndicator = false
     @State private var showsExactTimes = false
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -19,9 +20,7 @@ struct ScheduleView: View {
             Section {
                 Toggle("Daily reminders", isOn: enabledBinding)
             } footer: {
-                if isUpdatingSchedule {
-                    ProgressView("Updating schedule…")
-                } else if notificationCoordinator.deliveryIsPaused {
+                if notificationCoordinator.deliveryIsPaused {
                     Text("Reminders are paused because no selected affirmations are ready. Add matching entries or set your name in Settings to use personalised messages.")
                 } else {
                     Text("Gayffirmations will ask for permission when you enable reminders.")
@@ -78,10 +77,45 @@ struct ScheduleView: View {
             }
         }
         .themedBackground()
-        .disabled(isUpdatingSchedule || notificationCoordinator.isUpdating)
-        .navigationTitle("Notification Schedule")
+        .disabled(isUpdating)
+        .navigationTitle("Schedule")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if #available(iOS 26.0, *) {
+                updatingToolbarItem
+                    .sharedBackgroundVisibility(.hidden)
+            } else {
+                updatingToolbarItem
+            }
+        }
+        .task(id: isUpdating) {
+            showsUpdatingIndicator = false
+            guard isUpdating else { return }
+
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                try Task.checkCancellation()
+                showsUpdatingIndicator = true
+            } catch {
+                // A quick save or dismissal cancels the delayed indicator.
+            }
+        }
         .alert(item: $presentedError) { presentedError in
             alert(for: presentedError)
+        }
+    }
+
+    private var isUpdating: Bool {
+        isUpdatingSchedule || notificationCoordinator.isUpdating
+    }
+
+    private var updatingToolbarItem: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            ProgressView()
+                .frame(width: 24, height: 24)
+                .opacity(showsUpdatingIndicator && isUpdating ? 1 : 0)
+                .accessibilityLabel("Updating schedule")
+                .accessibilityHidden(!showsUpdatingIndicator || !isUpdating)
         }
     }
 

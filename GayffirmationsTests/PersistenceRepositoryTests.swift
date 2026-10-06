@@ -4,6 +4,42 @@ import Testing
 
 @MainActor
 struct PersistenceRepositoryTests {
+    @Test("Legacy zero-reminder schedules remain off and support updates after loading",
+          arguments: [false, true])
+    func legacyZeroReminderMigration(enabled: Bool) async throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let data = Data("""
+        {"isEnabled":\(enabled),"startTime":{"hour":8,"minute":30},
+        "endTime":{"hour":19,"minute":15},"notificationsPerDay":0,
+        "sound":"magic-marimba"}
+        """.utf8)
+        fixture.userDefaults.set(data, forKey: "gayffirmations.schedule")
+        let store = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        #expect(store.persistenceErrorMessage == nil)
+        #expect(store.schedule == AffirmationSchedule(
+            startTime: TimeOfDay(hour: 8, minute: 30),
+            endTime: TimeOfDay(hour: 19, minute: 15),
+            notificationsPerDay: 1, sound: .magicMarimba
+        ))
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: AffirmationStore(affirmations: [Affirmation(text: "Keep me")]),
+            scheduleStore: store, scheduler: scheduler
+        )
+        await coordinator.reconcileOnLaunch()
+        #expect(scheduler.replaceCallCount == 0)
+        #expect(scheduler.scheduledReminders.isEmpty)
+        try await coordinator.setEnabled(false)
+        try await coordinator.setSound(.none)
+        let restarted = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        #expect(restarted.schedule == store.schedule)
+        #expect(!restarted.schedule.isEnabled)
+        #expect(restarted.schedule.sound == .none)
+        try await coordinator.setEnabled(true)
+        #expect(scheduler.scheduledReminders.count == 1)
+    }
+
     @Test("Legacy schedules keep evenly spaced times")
     func legacyRhythmMigration() throws {
         let data = Data("""

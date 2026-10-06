@@ -47,8 +47,14 @@ extension AppTheme {
             return [
                 ThemePhoto(id: "disco-aviators", name: "Aviators", focalPoint: .center,
                            overlayOpacity: 0.38, accessibilityDescription: "Aviator sunglasses on marble reflecting a mirrorball and pink and blue disco lights", textColor: .white),
-                ThemePhoto(id: "disco-portrait", name: "Neon Portrait", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "A shirtless man lit by pink and blue neon against vibrant bokeh", textColor: .white),
+                ThemePhoto(id: "disco-dance", name: "Dance", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated low-angle view of people dancing on a glossy floor reflecting pink and blue disco lights", textColor: .white),
+                ThemePhoto(id: "disco-roller-skates", name: "Roller Skates", focalPoint: .center,
+                           overlayOpacity: 0.38, accessibilityDescription: "AI-generated pink roller skates beside a mirrorball under pink and blue disco lights", textColor: .white),
+                ThemePhoto(id: "disco-last-dance", name: "Last Dance", focalPoint: UnitPoint(x: 0.62, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated image of two men embracing beneath a mirrorball under pink and blue dancefloor lights", textColor: .white),
+                ThemePhoto(id: "disco-vinyl", name: "Vinyl", focalPoint: .center,
+                           overlayOpacity: 0.42, accessibilityDescription: "An AI-generated close-up of a vinyl record playing on a turntable beneath a mirrorball and pink and blue disco lights", textColor: .white),
                 ThemePhoto(id: "disco-mirrorball", name: "Mirrorball", focalPoint: UnitPoint(x: 0.60, y: 0.5),
                            overlayOpacity: 0.50, accessibilityDescription: "A mirrorball glowing under pink and blue disco spotlights", textColor: .white)
             ]

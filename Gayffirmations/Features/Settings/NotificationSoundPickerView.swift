@@ -34,11 +34,11 @@ struct NotificationSoundPickerView: View {
                         ? "Selects and plays this sound" : "Selects this notification sound")
                 }
             } footer: {
-                Text("Default uses your iPhone’s notification sound. None delivers reminders silently. Tap a custom sound to select and hear it. Silent mode and your notification settings can silence sounds.")
+                Text("None delivers reminders silently. Default uses your iPhone’s notification sound. Tap a custom sound to select and hear it. Silent mode and your notification settings can silence sounds.")
             }
         }
         .themedBackground()
-        .navigationTitle("Notification Sound")
+        .navigationTitle("Sound")
         .navigationBarTitleDisplayMode(.inline)
         .disabled(isSaving || notificationCoordinator.isUpdating)
         .onDisappear { preview.stop() }
