@@ -22,6 +22,15 @@ final class ThemeStore {
         return photos[photoRotation.photoIndex % photos.count]
     }
 
+    /// Preview a browsing destination without advancing the committed photo rotation.
+    func photo(for affirmationID: UUID, direction: Int) -> ThemePhoto? {
+        let photos = selectedTheme.photos
+        guard backgroundChoice.usesPhoto, !photos.isEmpty else { return nil }
+        var preview = photoRotation
+        preview.update(affirmationID: affirmationID, photoCount: photos.count, direction: direction)
+        return photos[preview.photoIndex % photos.count]
+    }
+
     func updateDisplayedAffirmation(_ id: UUID?, direction: Int = 1) {
         photoRotation.update(affirmationID: id, photoCount: selectedTheme.photos.count, direction: direction)
     }

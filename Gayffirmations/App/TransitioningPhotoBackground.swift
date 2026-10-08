@@ -15,8 +15,8 @@ struct TransitioningPhotoBackground: View {
                 if let previousPhoto {
                     PhotoBackground(photo: previousPhoto)
                 }
-                if let displayedPhoto {
-                    PhotoBackground(photo: displayedPhoto)
+                if let visiblePhoto = displayedPhoto ?? photo {
+                    PhotoBackground(photo: visiblePhoto)
                         .offset(x: reduceMotion ? 0 : (browsingForward ? 1 : -1)
                                 * geometry.size.width * (1 - progress))
                         .opacity(reduceMotion ? progress : 1)

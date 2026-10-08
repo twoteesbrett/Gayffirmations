@@ -1,8 +1,28 @@
+import Foundation
 import Testing
 @testable import Gayffirmations
 
 @MainActor
 struct ThemeStoreTests {
+    @Test("Swipe previews leave the current photo unchanged and match the committed destination")
+    func swipePhotoPreview() throws {
+        let store = ThemeStore(selectedTheme: .nature)
+        let current = UUID()
+        let next = UUID()
+        store.updateDisplayedAffirmation(current)
+        let original = store.selectedPhoto?.id
+        let forward = store.photo(for: next, direction: 1)
+        let backward = store.photo(for: next, direction: -1)
+        #expect(forward?.id == AppTheme.nature.photos[1].id)
+        #expect(backward?.id == AppTheme.nature.photos.last?.id)
+        #expect(store.selectedPhoto?.id == original)
+
+        store.updateDisplayedAffirmation(next, direction: -1)
+        #expect(store.selectedPhoto?.id == backward?.id)
+        try store.setUsesPhoto(false)
+        #expect(store.photo(for: current, direction: 1) == nil)
+    }
+
     @Test("A saved theme is loaded when a store is created")
     func loadsSavedTheme() {
         let repository = InMemoryThemeRepository(theme: .steel)
