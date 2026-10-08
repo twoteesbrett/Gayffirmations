@@ -10,6 +10,7 @@ struct LibraryView: View {
     @State private var editorDestination: EditorDestination?
     @State private var persistenceErrorMessage: String?
     @State private var isTagPickerPresented = false
+    @State private var showsOnlyMine = false
 
     @State private var filter: AffirmationSelection
 
@@ -49,15 +50,19 @@ struct LibraryView: View {
                         ContentUnavailableView {
                             Label("No Matching Affirmations", systemImage: "text.quote")
                         } description: {
-                            Text(filter.emptyMessage)
+                            Text(showsOnlyMine ? "Add your own affirmation or clear filters to see more entries." : filter.emptyMessage)
                         } actions: {
                             Button("Show All Affirmations") {
-                                setFilter(.all)
+                                clearFilters()
                             }
                             .buttonStyle(.bordered)
                         }
                     } else {
                         affirmationList
+                    }
+                } footer: {
+                    if filteredAffirmations.contains(where: { !$0.isBundled }) {
+                        Text("Swipe right on your affirmations to edit, or left to delete. System affirmations are read-only.")
                     }
                 }
             }
@@ -99,12 +104,12 @@ struct LibraryView: View {
                 filterControls
             }
 
-            if filter != .all {
+            if filter != .all || showsOnlyMine {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(filter.name)
+                    Text(showsOnlyMine ? (filter == .all ? "Mine" : "Mine · \(filter.name)") : filter.name)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
-                    Button("Clear filters") { setFilter(.all) }
+                    Button("Clear filters") { clearFilters() }
                 }
                 .font(.subheadline)
             }
@@ -121,8 +126,11 @@ struct LibraryView: View {
 
     private var filterControls: some View {
         Group {
-            filterButton("All", systemImage: "square.stack", isSelected: filter == .all) {
-                setFilter(.all)
+            filterButton("All", systemImage: "square.stack", isSelected: filter == .all && !showsOnlyMine) {
+                clearFilters()
+            }
+            filterButton("Mine", systemImage: "person", isSelected: showsOnlyMine) {
+                showsOnlyMine.toggle()
             }
             filterButton("Favourites", systemImage: "heart", isSelected: filter.includesFavourites) {
                 setFilter(filter.selectingFavourites(!filter.includesFavourites))
@@ -146,7 +154,7 @@ struct LibraryView: View {
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Show entries matching any selected tag or Favourites. These filters only change the Library list.")
+                    Text("Show entries matching any selected tag or Favourites. With Mine selected, only your own affirmations are shown. These filters only change the Library list.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,
@@ -200,12 +208,18 @@ struct LibraryView: View {
         filter = selection.usingAllWhenEmpty
     }
 
+    private func clearFilters() {
+        filter = .all
+        showsOnlyMine = false
+    }
+
     private var hasSelectedTags: Bool {
         !filter.selectedTags.isEmpty
     }
 
     private var filteredAffirmations: [Affirmation] {
-        filter.matchingAffirmations(in: store.affirmations)
+        let matches = filter.matchingAffirmations(in: store.affirmations)
+        return showsOnlyMine ? matches.filter { !$0.isBundled } : matches
     }
 
     private var affirmationList: some View {
@@ -251,10 +265,13 @@ struct LibraryView: View {
                 }
             }
             .swipeActions(edge: .trailing) {
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    performPersistedChange {
-                        try store.delete(id: affirmation.id)
+                if !affirmation.isBundled {
+                    Button("Delete", systemImage: "trash", role: .destructive) {
+                        performPersistedChange {
+                            try store.delete(id: affirmation.id)
+                        }
                     }
+                    .tint(.red)
                 }
             }
         }

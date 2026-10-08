@@ -82,6 +82,25 @@ struct AffirmationStoreTests {
         #expect(store.affirmations.isEmpty)
     }
 
+    @Test("Bundled affirmations cannot be deleted or change persisted data")
+    func rejectBundledDeletion() {
+        let bundled = Affirmation(text: "System", source: .bundled)
+        let custom = Affirmation(text: "Custom")
+        let original = [bundled, custom]
+        let repository = InMemoryAffirmationRepository(affirmations: original)
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [])
+        var notified = false
+        store.willChangeAffirmations = { _ in notified = true }
+        store.didChangeAffirmations = { _ in notified = true }
+
+        #expect(throws: AffirmationStoreError.bundledMessage) {
+            try store.delete(id: bundled.id)
+        }
+        #expect(store.affirmations == original)
+        #expect(repository.affirmations == original)
+        #expect(!notified)
+    }
+
     @Test("An affirmation can be favorited and unfavorited")
     func toggleFavorite() throws {
         let affirmation = Affirmation(text: "Favorite")

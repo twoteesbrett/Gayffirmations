@@ -97,6 +97,10 @@ final class AffirmationStore {
     }
 
     func delete(id: Affirmation.ID) throws {
+        guard let affirmation = affirmations.first(where: { $0.id == id }) else { return }
+        guard !affirmation.isBundled else {
+            throw AffirmationStoreError.bundledMessage
+        }
         try persist(affirmations.filter { $0.id != id })
     }
 
