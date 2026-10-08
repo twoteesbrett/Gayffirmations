@@ -14,6 +14,7 @@ struct TodayView: View {
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @State private var errorMessage: String?
     @State private var browsingState = TodayBrowsingState()
+    @State private var displayedSchedule: AffirmationSchedule
     @State private var browsingForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.themePhoto) private var themePhoto
@@ -35,6 +36,7 @@ struct TodayView: View {
         self.selectionStore = selectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
         self.scheduleStore = scheduleStore ?? ScheduleStore()
+        _displayedSchedule = State(initialValue: self.scheduleStore.schedule)
         self.isUpdating = isUpdating
         self.themeStore = themeStore
         self.sheetDismissalID = sheetDismissalID
@@ -126,8 +128,14 @@ struct TodayView: View {
                 controls.reset()
             }
         }
-        .onChange(of: scheduleStore.schedule) { _, _ in
-            browsingState.reset()
+        .onChange(of: scheduleStore.schedule) { _, schedule in
+            browsingState.updateSchedule(
+                from: displayedSchedule,
+                to: schedule,
+                at: .now,
+                affirmations: selectedAffirmations
+            )
+            displayedSchedule = schedule
         }
         .onChange(of: selectionStore.selection) { _, _ in
             browsingState.reset()
@@ -187,7 +195,7 @@ struct TodayView: View {
     private func currentAffirmation(at date: Date) -> Affirmation? {
         browsingState.affirmation(
             at: date,
-            schedule: scheduleStore.schedule,
+            schedule: displayedSchedule,
             affirmations: selectedAffirmations
         )
     }
@@ -203,7 +211,7 @@ struct TodayView: View {
         guard let next = updatedBrowsingState.cycle(
             by: offset,
             at: .now,
-            schedule: scheduleStore.schedule,
+            schedule: displayedSchedule,
             affirmations: selectedAffirmations
         ) else { return }
 

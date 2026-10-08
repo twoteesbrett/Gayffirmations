@@ -46,6 +46,23 @@ struct TodayBrowsingState {
         manualSelection = nil
     }
 
+    /// Schedule edits affect future rotation without replacing the visible message.
+    mutating func updateSchedule(
+        from oldSchedule: AffirmationSchedule,
+        to newSchedule: AffirmationSchedule,
+        at date: Date,
+        affirmations: [Affirmation],
+        calendar: Calendar = .current
+    ) {
+        guard let current = affirmation(
+            at: date, schedule: oldSchedule, affirmations: affirmations, calendar: calendar
+        ) else { return }
+        manualSelection = ManualSelection(
+            id: current.id,
+            expiresAt: resolver.nextChange(after: date, schedule: newSchedule, calendar: calendar)
+        )
+    }
+
     private struct ManualSelection {
         let id: Affirmation.ID
         let expiresAt: Date
