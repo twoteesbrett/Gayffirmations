@@ -47,7 +47,8 @@ nonisolated struct Affirmation: Codable, Identifiable, Equatable {
             let starter = Self.starterAffirmations.first { $0.id == savedID }
             let isOriginalNameMessage = id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
                 && text == "Stop comparing. You're the only Brett in the room."
-            source = (starter?.text == text || isOriginalNameMessage) ? .bundled : .user
+            let hasOriginalText = starter?.text == text || isOriginalNameMessage
+            source = (hasOriginalText && starter?.tags == tags) ? .bundled : .user
         }
     }
 }
