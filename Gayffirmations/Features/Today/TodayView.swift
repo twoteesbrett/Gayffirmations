@@ -112,7 +112,11 @@ struct TodayView: View {
             controls.setAlwaysVisible(enabled)
         }
         .onChange(of: sheetDismissalID) { _, _ in
-            controls.show()
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                controls.show()
+            }
         }
         .task(id: controls.hideDeadline) {
             guard let deadline = controls.hideDeadline else { return }

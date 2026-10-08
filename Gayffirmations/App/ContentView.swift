@@ -67,9 +67,15 @@ struct ContentView: View {
                 onOpenDestination: { destination = $0 }
             )
             .environment(\.themePhoto, themeStore.selectedPhoto)
-            .sheet(item: $destination, onDismiss: { sheetDismissalID = UUID() }) { destination in
+            .sheet(item: $destination) { destination in
                 destinationView(destination)
                     .themeAppearance(themeStore.selectedTheme)
+            }
+            .onChange(of: destination) { previous, current in
+                // Restore controls as dismissal begins, before Today is uncovered.
+                if previous != nil, current == nil {
+                    sheetDismissalID = UUID()
+                }
             }
         }
         .themeAppearance(themeStore.selectedTheme)
