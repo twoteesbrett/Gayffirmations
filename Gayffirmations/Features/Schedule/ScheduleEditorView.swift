@@ -9,6 +9,7 @@ struct ScheduleEditorView: View {
     @State private var isSaving = false
     @State private var errorMessage: String?
     @State private var permissionDenied = false
+    @State private var enableLimitReached = false
     let coordinator: NotificationCoordinator
 
     init(schedule: AffirmationSchedule, coordinator: NotificationCoordinator) {
@@ -20,7 +21,20 @@ struct ScheduleEditorView: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Enable", isOn: $draft.isEnabled)
+                    Toggle("Enable", isOn: Binding(
+                        get: { draft.isEnabled },
+                        set: { enabled in
+                            if enabled && otherEnabledReminderCount + draft.notificationsPerDay > ScheduleValidation.dailyReminderLimit {
+                                enableLimitReached = true
+                            } else {
+                                draft.isEnabled = enabled
+                                enableLimitReached = false
+                            }
+                        }
+                    ))
+                    if enableLimitReached {
+                        limitMessage("Enabling this schedule would exceed the \(ScheduleValidation.dailyReminderLimit) daily reminder limit. Reduce this or another schedule’s frequency first.")
+                    }
                 }
                 Section {
                     NavigationLink {
@@ -35,9 +49,18 @@ struct ScheduleEditorView: View {
                     DatePicker("Start", selection: timeBinding(\.startTime), displayedComponents: .hourAndMinute)
                     DatePicker("End", selection: timeBinding(\.endTime), displayedComponents: .hourAndMinute)
                 }
-                Section("Frequency") {
-                    Stepper("\(draft.notificationsPerDay) per day", value: $draft.notificationsPerDay,
-                            in: AffirmationSchedule.notificationCountRange)
+                Section {
+                    Stepper("\(draft.notificationsPerDay) per day", onIncrement: canIncreaseFrequency ? {
+                        draft.notificationsPerDay += 1
+                        enableLimitReached = false
+                    } : nil, onDecrement: draft.notificationsPerDay > AffirmationSchedule.notificationCountRange.lowerBound ? {
+                        draft.notificationsPerDay -= 1
+                        enableLimitReached = false
+                    } : nil)
+                } header: {
+                    Text("Frequency")
+                } footer: {
+                    Text("\(otherEnabledReminderCount + (draft.isEnabled ? draft.notificationsPerDay : 0)) daily reminders across enabled schedules. A maximum of \(ScheduleValidation.dailyReminderLimit) per day is permitted.")
                 }
                 Section {
                     if dynamicTypeSize.isAccessibilitySize {
@@ -106,6 +129,24 @@ struct ScheduleEditorView: View {
                 Text(errorMessage ?? "Please try again.")
             }
         }
+    }
+
+    private var canIncreaseFrequency: Bool {
+        draft.notificationsPerDay < AffirmationSchedule.notificationCountRange.upperBound
+            && (!draft.isEnabled || otherEnabledReminderCount + draft.notificationsPerDay < ScheduleValidation.dailyReminderLimit)
+    }
+
+    private var otherEnabledReminderCount: Int {
+        coordinator.scheduleStore.schedules
+            .filter { $0.id != draft.id && $0.isEnabled }
+            .reduce(0) { $0 + $1.notificationsPerDay }
+    }
+
+    private func limitMessage(_ message: String) -> some View {
+        Label(message, systemImage: "exclamationmark.triangle")
+            .font(.footnote)
+            .foregroundStyle(.red)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var validationMessage: String? {
