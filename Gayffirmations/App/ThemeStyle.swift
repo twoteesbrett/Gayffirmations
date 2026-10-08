@@ -4,7 +4,7 @@ extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
         case .nature, .refined: .light
-        case .steel, .disco: .dark
+        case .steel, .disco, .concrete: .dark
         }
     }
 
@@ -14,6 +14,7 @@ extension AppTheme {
         case .steel: Color(hex: 0xA7C9E0)
         case .refined: Color(hex: 0x806039)
         case .disco: Color(hex: 0xFFB276)
+        case .concrete: Color(hex: 0xC9C8BF)
         }
     }
 
@@ -23,6 +24,7 @@ extension AppTheme {
         case .steel: Color(hex: 0xF0F4F7)
         case .refined: Color(hex: 0x49362D)
         case .disco: Color(hex: 0xFFF2FA)
+        case .concrete: Color(hex: 0xF3F2ED)
         }
     }
 
@@ -37,6 +39,9 @@ extension AppTheme {
         case .refined:
             LinearGradient(colors: [Color(hex: 0xFAF0DE), Color(hex: 0xDEC8AE)],
                            startPoint: .top, endPoint: .bottomTrailing)
+        case .concrete:
+            LinearGradient(colors: [Color(hex: 0x292B2A), Color(hex: 0x555650)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
         case .disco:
             LinearGradient(colors: [Color(hex: 0x17285D), Color(hex: 0x532478), Color(hex: 0x872C68)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -45,7 +50,7 @@ extension AppTheme {
 
     var fontDesign: Font.Design {
         switch self {
-        case .nature, .steel: .default
+        case .nature, .steel, .concrete: .default
         case .refined: .serif
         case .disco: .rounded
         }
@@ -53,7 +58,7 @@ extension AppTheme {
 
     var affirmationWeight: Font.Weight {
         switch self {
-        case .nature, .refined: .regular
+        case .nature, .refined, .concrete: .regular
         case .steel: .bold
         case .disco: .semibold
         }
@@ -65,6 +70,7 @@ extension AppTheme {
         case .steel: 4
         case .refined: 10
         case .disco: 6
+        case .concrete: 8
         }
     }
 

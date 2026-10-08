@@ -58,6 +58,21 @@ extension AppTheme {
                 ThemePhoto(id: "disco-mirrorball", name: "Mirrorball", focalPoint: UnitPoint(x: 0.60, y: 0.5),
                            overlayOpacity: 0.50, accessibilityDescription: "A mirrorball glowing under pink and blue disco spotlights", textColor: .white)
             ]
+        case .concrete:
+            return [
+                ThemePhoto(id: "concrete-fjord", name: "Fjord", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a concrete colonnade opening onto a fjord beneath a cloudy sky", textColor: .white),
+                ThemePhoto(id: "concrete-oculus", name: "Oculus", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a circular skylight illuminating a monumental concrete interior", textColor: .white),
+                ThemePhoto(id: "concrete-sunlight", name: "Sunlight", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of angular sunlight falling across a concrete wall and bench", textColor: .white),
+                ThemePhoto(id: "concrete-pillar", name: "Pillar", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a towering concrete pillar supporting a beam against a cloudy sky", textColor: .white),
+                ThemePhoto(id: "concrete-ivy", name: "Ivy", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of green ivy trailing over a textured concrete wall", textColor: .white),
+                ThemePhoto(id: "concrete-stairway", name: "Stairway", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of concrete stairs rising between angular walls toward an open sky", textColor: .white)
+            ]
         case .refined:
             return []
         }

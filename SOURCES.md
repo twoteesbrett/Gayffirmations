@@ -5,7 +5,7 @@ App behaviour and development guidance are in [README.md](README.md).
 
 ## Photos
 
-Steel uses six user-supplied AI-generated images from `/Users/brett/Desktop/assets`. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
+Steel uses six user-supplied AI-generated images from `/Users/brett/Desktop/gayffirmations-assets`. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
 
 | Photo | Source file | Source |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ Steel uses six user-supplied AI-generated images from `/Users/brett/Desktop/asse
 | Squat | steel-squat.png | User-supplied AI-generated image |
 | Pull-up | steel-pull-up.png | User-supplied AI-generated image |
 
-Nature uses six user-supplied Pexels photos from `/Users/brett/Desktop/assets`. Bundled JPEGs preserve their aspect ratios and are resized to a maximum dimension of 3,000 pixels to keep background decoding lightweight.
+Nature uses six user-supplied Pexels photos from `/Users/brett/Desktop/gayffirmations-assets`. Bundled JPEGs preserve their aspect ratios and are resized to a maximum dimension of 3,000 pixels to keep background decoding lightweight.
 
 | Photo | Source filename identifier | Original file / source ID |
 | --- | --- | --- |
@@ -31,7 +31,7 @@ Nature retains colour; Steel renders in greyscale.
 
 Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.
 
-Disco uses six user-supplied AI-generated images from `/Users/brett/Desktop/assets`, preserving their original resolution and aspect ratio.
+Disco uses six user-supplied AI-generated images from `/Users/brett/Desktop/gayffirmations-assets`, preserving their original resolution and aspect ratio.
 
 | Photo | Source file | Bundled asset identifier |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ Disco uses six user-supplied AI-generated images from `/Users/brett/Desktop/asse
 
 ## AI-generated source filenames
 
-On 6 October 2026, the AI-generated files in `/Users/brett/Desktop/assets` were renamed to lowercase, hyphenated names. Existing theme photos match the app's asset identifiers. File contents and extensions were preserved; files starting with `pexels` or `mixkit` were left unchanged.
+On 6 October 2026, the AI-generated files in `/Users/brett/Desktop/gayffirmations-assets` were renamed to lowercase, hyphenated names. Existing theme photos match the app's asset identifiers. File contents and extensions were preserved; files starting with `pexels` or `mixkit` were left unchanged.
 
 | Previous filename | Current filename |
 | --- | --- |
@@ -68,7 +68,7 @@ The app reads bundled copies from `Gayffirmations/Assets.xcassets`, not the Desk
 ## Notification sounds
 
 The user supplied five WAV files with Mixkit filenames from
-`/Users/brett/Desktop/assets`. Original filenames are retained below for provenance.
+`/Users/brett/Desktop/gayffirmations-assets`. Original filenames are retained below for provenance.
 The originals remain outside the app; only optimized CAF files are bundled.
 
 | Sound | Original filename | Duration | WAV bytes | CAF bytes |
@@ -108,3 +108,16 @@ playback checks on an iPhone remain in [TODO.md](TODO.md).
 
 Apple references: [custom notification sounds](https://developer.apple.com/documentation/usernotifications/unnotificationsound)
 and [system alert playback limitations](https://developer.apple.com/documentation/audiotoolbox/audioservicesplayalertsound(_:)).
+
+## Concrete
+
+Concrete uses six user-supplied AI-generated images, preserving their original resolution and aspect ratio. Source images are in `/Users/brett/Desktop/gayffirmations-assets`.
+
+| Photo | Source file | Bundled asset identifier |
+| --- | --- | --- |
+| Fjord | concrete-fjord.png | `concrete-fjord` |
+| Oculus | concrete-oculus.png | `concrete-oculus` |
+| Sunlight | concrete-sunlight.png | `concrete-sunlight` |
+| Pillar | concrete-pillar.png | `concrete-pillar` |
+| Ivy | concrete-ivy.png | `concrete-ivy` |
+| Stairway | concrete-stairway.png | `concrete-stairway` |

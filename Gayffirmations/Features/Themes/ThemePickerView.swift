@@ -145,6 +145,7 @@ private struct ThemePreviewRow: View {
         case .steel: photoID = "steel-strength"
         case .refined: photoID = nil
         case .disco: photoID = "disco-mirrorball"
+        case .concrete: photoID = "concrete-oculus"
         }
         return theme.photos.first { $0.id == photoID }
     }

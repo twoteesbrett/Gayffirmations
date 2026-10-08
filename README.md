@@ -108,8 +108,8 @@ selections continue to work. Audio preparation and file sizes are in
 
 ## Themes and photos
 
-The four themes are Nature, Steel, Refined, and Disco. Nature and Steel each
-have six photos, Disco has six, and Refined uses a colour background.
+The five themes are Nature, Steel, Refined, Disco, and Concrete. Nature, Steel,
+Disco, and Concrete each have six photos; Refined uses a colour background.
 Themes with photos use them by default and offer a Use photos switch saved
 separately for each theme. Turning it off uses the theme's colour background.
 The picker shows thumbnail previews. Steel renders photos in greyscale;
