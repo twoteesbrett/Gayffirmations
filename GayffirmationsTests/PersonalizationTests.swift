@@ -111,11 +111,11 @@ struct PersonalizationTests {
         await coordinator.waitForLibraryRefresh()
         #expect(!scheduler.scheduledReminders.isEmpty)
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Hi Alex" })
-        try await coordinator.setSelection(.tag("Personal"))
+        try coordinator.setFallbackSelection(.tag("Personal"))
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Hi Alex" })
         try coordinator.setName("")
         await coordinator.waitForLibraryRefresh()
-        #expect(coordinator.selectedAffirmations.isEmpty)
+        #expect(coordinator.fallbackAffirmations.isEmpty)
         #expect(scheduler.scheduledReminders.isEmpty)
         try library.update(id: entry.id, text: "Hi there")
         await coordinator.waitForLibraryRefresh()
@@ -139,11 +139,11 @@ struct PersonalizationSelectionRecoveryTests {
             affirmationStore: AffirmationStore(affirmations: [Affirmation(text: "Favourite", isFavorite: true)]),
             scheduleStore: ScheduleStore(schedule: AffirmationSchedule(isEnabled: true)),
             scheduler: scheduler,
-            selectionStore: selection,
+            fallbackSelectionStore: selection,
             personalizationStore: PersonalizationStore(repository: repository)
         )
         await coordinator.reconcileOnLaunch()
-        try await coordinator.setSelection(.favourites)
+        try coordinator.setFallbackSelection(.favourites)
         #expect(selection.selection == .favourites)
         #expect(try repository.loadAffirmationSelection() == .favourites)
         #expect(defaults.data(forKey: "gayffirmations.name") == corrupt)

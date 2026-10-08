@@ -39,8 +39,8 @@ struct ContentView: View {
             scheduleStore.persistenceErrorMessage.map {
                 "Schedule: \($0)"
             },
-            notificationCoordinator.selectionStore.persistenceErrorMessage.map {
-                "Affirmation selection: \($0)"
+            notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage.map {
+                "Today fallback: \($0)"
             },
             themeStore.persistenceErrorMessage.map {
                 "Theme: \($0)"
@@ -58,7 +58,7 @@ struct ContentView: View {
         NavigationStack {
             TodayView(
                 store: affirmationStore,
-                selectionStore: notificationCoordinator.selectionStore,
+                fallbackSelectionStore: notificationCoordinator.fallbackSelectionStore,
                 personalizationStore: notificationCoordinator.personalizationStore,
                 scheduleStore: scheduleStore,
                 isUpdating: notificationCoordinator.isUpdating,

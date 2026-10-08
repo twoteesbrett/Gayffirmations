@@ -24,7 +24,7 @@ final class NotificationCoordinator {
     private(set) var isUpdating = false
     var errorMessage: String?
     private var refreshTask: Task<Void, Never>?
-    let selectionStore: AffirmationSelectionStore
+    let fallbackSelectionStore: AffirmationSelectionStore
     let personalizationStore: PersonalizationStore
     private let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
@@ -35,13 +35,13 @@ final class NotificationCoordinator {
         affirmationStore: AffirmationStore,
         scheduleStore: ScheduleStore,
         scheduler: any NotificationScheduling,
-        selectionStore: AffirmationSelectionStore? = nil,
+        fallbackSelectionStore: AffirmationSelectionStore? = nil,
         personalizationStore: PersonalizationStore? = nil
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
         self.scheduler = scheduler
-        self.selectionStore = selectionStore ?? AffirmationSelectionStore()
+        self.fallbackSelectionStore = fallbackSelectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
         affirmationStore.willChangeAffirmations = { [weak self] _ in try self?.checkIdle() }
         affirmationStore.didChangeAffirmations = { [weak self] previous in
@@ -69,14 +69,14 @@ final class NotificationCoordinator {
         schedule.isEnabled && matchingAffirmations(for: schedule).isEmpty
     }
 
-    var selectedAffirmations: [Affirmation] {
-        selectionStore.selection.matchingAffirmations(in: affirmationStore.affirmations)
+    var fallbackAffirmations: [Affirmation] {
+        fallbackSelectionStore.selection.matchingAffirmations(in: affirmationStore.affirmations)
             .compactMap { $0.resolved(name: personalizationStore.name) }
     }
 
-    func setSelection(_ selection: AffirmationSelection) async throws {
+    func setFallbackSelection(_ selection: AffirmationSelection) throws {
         try checkIdle()
-        try selectionStore.select(selection)
+        try fallbackSelectionStore.select(selection.usingAllWhenEmpty)
     }
 
     func setName(_ name: String) throws {

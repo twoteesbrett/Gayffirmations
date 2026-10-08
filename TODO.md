@@ -86,10 +86,10 @@ Complete the intended functionality before continuing visual polish.
 
 ## 9. Affirmation selection and delivery
 
-Use one shared selection for Today and reminders: all affirmations, or any
-combination of favourites and tags. Include entries matching any chosen source
-once each. Library now manages this shared selection for browsing, Today, and
-reminders; Settings keeps appearance, notifications, and data controls.
+Each schedule chooses its own content. Schedules also manages a separate
+fallback selection for Today when no reminders are deliverable, defaulting to
+All while preserving existing saved choices. Library’s All, Favourites, and
+Tags buttons only filter its list for browsing and editing.
 
 - [x] Define a small selection model and one shared rule for finding matching
       affirmations; keep selection logic out of views and notification services.
@@ -197,13 +197,13 @@ Notification sounds are selectable in Settings and saved with the schedule.
       tags: Body, Food, Confidence, Gay, and Self-kindness. Existing saved
       libraries are preserved; restoring defaults loads the starter collection.
 - [x] Share individual tag controls across Library and the editor.
-- [x] Persist Library choices through the reminder coordinator; Today supports
-      swiping through the selected collection.
+- [x] Keep Library filters local to browsing; persist Today’s fallback choice
+      separately under Schedules. Today supports swiping through its current content.
 - [x] Review shared-selection ownership and save failures, and make the Library
       selection summary scroll with its entries at large text sizes.
 - [x] Isolate previews from real notification scheduling and preserve unexpected
       saved value types.
-- [ ] Perform live visual and accessibility review of shared selection controls.
+- [ ] Perform live visual and accessibility review of Library filters and fallback content controls.
 
 Category presets are not implemented in the current app. Custom tags remain
 available alongside the predefined tags.

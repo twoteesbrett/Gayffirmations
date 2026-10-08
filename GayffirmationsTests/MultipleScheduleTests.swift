@@ -127,8 +127,8 @@ struct MultipleScheduleTests {
         await coordinator.reconcileOnLaunch()
         let previous = scheduler.scheduledReminders
         let replacements = scheduler.replaceCallCount
-        try await coordinator.setSelection(.tag("Food"))
-        #expect(coordinator.selectedAffirmations == [food])
+        try coordinator.setFallbackSelection(.tag("Food"))
+        #expect(coordinator.fallbackAffirmations == [food])
         #expect(scheduler.scheduledReminders == previous)
         #expect(scheduler.replaceCallCount == replacements)
     }

@@ -9,18 +9,25 @@ struct LibraryView: View {
 
     @State private var editorDestination: EditorDestination?
     @State private var persistenceErrorMessage: String?
-    @State private var isSavingSelection = false
     @State private var isTagPickerPresented = false
 
-    private var selection: AffirmationSelection {
-        notificationCoordinator.selectionStore.selection
+    @State private var filter: AffirmationSelection
+
+    init(
+        store: AffirmationStore,
+        notificationCoordinator: NotificationCoordinator,
+        initialFilter: AffirmationSelection = .all
+    ) {
+        self.store = store
+        self.notificationCoordinator = notificationCoordinator
+        _filter = State(initialValue: initialFilter)
     }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    selectionBar
+                    filterBar
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 4, bottom: 12, trailing: 4))
@@ -38,14 +45,14 @@ struct LibraryView: View {
                             }
                             .buttonStyle(.borderedProminent)
                         }
-                    } else if selectedAffirmations.isEmpty {
+                    } else if filteredAffirmations.isEmpty {
                         ContentUnavailableView {
                             Label("No Matching Affirmations", systemImage: "text.quote")
                         } description: {
-                            Text(selection.emptyMessage)
+                            Text(filter.emptyMessage)
                         } actions: {
                             Button("Show All Affirmations") {
-                                saveSelection(.all)
+                                setFilter(.all)
                             }
                             .buttonStyle(.bordered)
                         }
@@ -76,82 +83,79 @@ struct LibraryView: View {
             }
             .alert(
                 "Unable to Save",
-                isPresented: errorIsPresented(inTagPicker: false)
+                isPresented: errorIsPresented
             ) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(persistenceErrorMessage ?? "Please try again.")
             }
-            .disabled(isSavingSelection || notificationCoordinator.isUpdating)
+            .disabled(notificationCoordinator.isUpdating)
         }
     }
 
-    private var selectionBar: some View {
+    private var filterBar: some View {
         VStack(alignment: .leading, spacing: 12) {
             WrappingLayout(spacing: 8) {
-                selectionControls
+                filterControls
             }
 
-            if hasSelectedTags {
-                Text(selection.selectedTags.map { $0.lowercased() }.joined(separator: ", "))
-                    .font(.subheadline)
-                    .fixedSize(horizontal: false, vertical: true)
+            if filter != .all {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(filter.name)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Button("Clear filters") { setFilter(.all) }
+                }
+                .font(.subheadline)
             }
 
-            Text("These filters control Library and Today when no schedules are delivering. Choose reminder content within each schedule.")
+            Text("Filter the list to find and edit affirmations. Choose Today’s content in Schedules.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
-            if isSavingSelection {
-                ProgressView("Updating selection…")
-            }
-
-            Text("\(selectedAffirmations.count) \(selectedAffirmations.count == 1 ? "affirmation" : "affirmations")")
+            Text("\(filteredAffirmations.count) \(filteredAffirmations.count == 1 ? "affirmation" : "affirmations")")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
     }
 
-    private var selectionControls: some View {
+    private var filterControls: some View {
         Group {
-            selectionButton("All", systemImage: "square.stack", isSelected: selection == .all) {
-                saveSelection(.all)
+            filterButton("All", systemImage: "square.stack", isSelected: filter == .all) {
+                setFilter(.all)
             }
-            selectionButton("Favourites", systemImage: "heart", isSelected: selection.includesFavourites) {
-                saveSelection(selection.selectingFavourites(!selection.includesFavourites))
+            filterButton("Favourites", systemImage: "heart", isSelected: filter.includesFavourites) {
+                setFilter(filter.selectingFavourites(!filter.includesFavourites))
             }
-            selectionButton("Tags", systemImage: "tag", isSelected: hasSelectedTags) {
+            filterButton("Tags", systemImage: "tag", isSelected: hasSelectedTags) {
                 isTagPickerPresented = true
             }
         }
     }
 
     private var tagChoices: [String] {
-        TagChoices.sortedUnique(selection.selectedTags + store.availableTags)
+        TagChoices.sortedUnique(filter.selectedTags + store.availableTags)
     }
 
     private var tagPicker: some View {
         NavigationStack {
             Form {
                 Section {
-                    if isSavingSelection {
-                        ProgressView("Updating selection…")
-                    }
                     if tagChoices.isEmpty {
                         Text("Add tags to affirmations in the editor to find them here.")
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Choose tags. Entries matching any selected tag or Favourites appear in Library and in Today when no schedules are delivering.")
+                    Text("Show entries matching any selected tag or Favourites. These filters only change the Library list.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,
-                    selection: selection,
-                    onChange: saveSelection
+                    selection: filter,
+                    onChange: setFilter
                 )
             }
             .themedBackground()
-            .disabled(isSavingSelection || notificationCoordinator.isUpdating)
+            .disabled(notificationCoordinator.isUpdating)
             .navigationTitle("Tags")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -159,15 +163,10 @@ struct LibraryView: View {
                     Button("Done") { isTagPickerPresented = false }
                 }
             }
-            .alert("Unable to Change Selection", isPresented: errorIsPresented(inTagPicker: true)) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(persistenceErrorMessage ?? "Please try again.")
-            }
         }
     }
 
-    private func selectionButton(
+    private func filterButton(
         _ title: String,
         systemImage: String,
         isSelected: Bool,
@@ -197,29 +196,20 @@ struct LibraryView: View {
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
-    private func saveSelection(_ selection: AffirmationSelection) {
-        guard !isSavingSelection, !notificationCoordinator.isUpdating else { return }
-        isSavingSelection = true
-        Task {
-            defer { isSavingSelection = false }
-            do {
-                try await notificationCoordinator.setSelection(selection.usingAllWhenEmpty)
-            } catch {
-                persistenceErrorMessage = error.localizedDescription
-            }
-        }
+    private func setFilter(_ selection: AffirmationSelection) {
+        filter = selection.usingAllWhenEmpty
     }
 
     private var hasSelectedTags: Bool {
-        !selection.selectedTags.isEmpty
+        !filter.selectedTags.isEmpty
     }
 
-    private var selectedAffirmations: [Affirmation] {
-        selection.matchingAffirmations(in: store.affirmations)
+    private var filteredAffirmations: [Affirmation] {
+        filter.matchingAffirmations(in: store.affirmations)
     }
 
     private var affirmationList: some View {
-        ForEach(selectedAffirmations) { affirmation in
+        ForEach(filteredAffirmations) { affirmation in
             HStack(spacing: 12) {
                 if affirmation.isBundled {
                     affirmationLabel(affirmation)
@@ -298,9 +288,9 @@ struct LibraryView: View {
             .contentShape(Rectangle())
     }
 
-    private func errorIsPresented(inTagPicker: Bool) -> Binding<Bool> {
+    private var errorIsPresented: Binding<Bool> {
         Binding(
-            get: { persistenceErrorMessage != nil && isTagPickerPresented == inTagPicker },
+            get: { persistenceErrorMessage != nil },
             set: { isPresented in
                 if !isPresented {
                     persistenceErrorMessage = nil
@@ -391,9 +381,8 @@ private func libraryPreview(
     let coordinator = NotificationCoordinator(
         affirmationStore: store,
         scheduleStore: ScheduleStore(),
-        scheduler: PreviewNotificationScheduler(),
-        selectionStore: AffirmationSelectionStore(selection: selection)
+        scheduler: PreviewNotificationScheduler()
     )
-    return LibraryView(store: store, notificationCoordinator: coordinator)
+    return LibraryView(store: store, notificationCoordinator: coordinator, initialFilter: selection)
 }
 #endif

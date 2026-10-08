@@ -31,7 +31,7 @@ final class AppDataResetCoordinator {
             affirmationStore.persistenceErrorMessage,
             scheduleStore.persistenceErrorMessage,
             themeStore.persistenceErrorMessage,
-            notificationCoordinator.selectionStore.persistenceErrorMessage,
+            notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage,
             notificationCoordinator.personalizationStore.persistenceErrorMessage
         ].compactMap { $0 }
         guard failures.isEmpty else {
@@ -48,7 +48,7 @@ final class AppDataResetCoordinator {
         affirmationStore.applyPersistedDefaults()
         scheduleStore.applyPersistedDefaults()
         themeStore.applyPersistedDefaults()
-        notificationCoordinator.selectionStore.applyPersistedDefaults()
+        notificationCoordinator.fallbackSelectionStore.applyPersistedDefaults()
         notificationCoordinator.personalizationStore.applyPersistedDefaults()
         notificationCoordinator.removePendingReminders()
     }

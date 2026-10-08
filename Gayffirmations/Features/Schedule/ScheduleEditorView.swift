@@ -20,7 +20,7 @@ struct ScheduleEditorView: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Daily reminders", isOn: $draft.isEnabled)
+                    Toggle("Enable", isOn: $draft.isEnabled)
                 }
                 Section {
                     NavigationLink {
@@ -66,7 +66,7 @@ struct ScheduleEditorView: View {
                         Text("This schedule will pause until matching affirmations are ready. Add matching entries or set your name in Settings to use personalised messages.")
                             .foregroundStyle(.secondary)
                     } else if !draft.isEnabled {
-                        Text("Enable daily reminders to deliver at these times.")
+                        Text("Enable this schedule to deliver at these times.")
                             .foregroundStyle(.secondary)
                     }
                     if let validationMessage {

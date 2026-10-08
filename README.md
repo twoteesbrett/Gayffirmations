@@ -66,8 +66,13 @@ Balanced. At accessibility text sizes, the rhythm controls use menu pickers.
 Each schedule independently selects All, favourites, or multiple tags. Combined
 choices include entries matching any choice, once each. Empty selections or
 selections without usable messages pause only that schedule; it resumes when
-matching entries become available. Library filters control browsing and Today’s
-fallback content, without changing schedule selections.
+matching entries become available. Library’s All, Favourites, and Tags buttons
+only filter its list for browsing and editing. Filters start at All when Library opens, and do not change Today
+or reminders. Active choices are shown above the list with Clear filters.
+Settings → Notifications → Schedules includes “When no schedule is active”
+to choose Today’s fallback content: All affirmations, favourites, or tags.
+New installations default to All; existing fallback choices are preserved.
+The fallback also applies when enabled schedules have no usable messages.
 
 Schedules are identified by their time range and affirmation selection, without
 requiring a name. Existing installations preserve all delivery settings and copy
@@ -77,7 +82,7 @@ Today and notifications use the same combined daily plan. Today shows the most
 recent scheduled affirmation across all enabled, deliverable schedules, keeping
 the final reminder current overnight. Tied times retain saved schedule order;
 Today shows the last of those reminders. Swiping browses the current schedule’s
-content. With no deliverable reminders, Today rotates through the Library selection
+content. With no deliverable reminders, Today rotates through the fallback selection
 once per local calendar day.
 Tap the screen to reveal corner icons for Library (top left), Favourite (top right),
 Themes (bottom left), and Settings (bottom right). Tap again to hide them, or leave
@@ -87,9 +92,9 @@ VoiceOver keeps them visible. Swiping left anywhere in the affirmation area adva
 next affirmation; swiping right goes back. Message text slides in the swipe direction
 and optional photos transition with it. Reduce Motion uses crossfades.
 These temporary choices expire at
-the next reminder, or at midnight without reminders. Changing the schedule or
-source selection clears the temporary choice. VoiceOver exposes equivalent
-Next and Previous actions.
+the next reminder, or at midnight without reminders. Changing a schedule or
+the fallback selection clears the temporary choice. Library filters leave it
+unchanged. VoiceOver exposes equivalent Next and Previous actions.
 
 Each schedule requires the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be

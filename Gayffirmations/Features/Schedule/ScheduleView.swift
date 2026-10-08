@@ -41,6 +41,18 @@ struct ScheduleView: View {
                 Text("Each schedule has its own tags, times, and daily rhythm. Swipe right to duplicate a schedule, or left to delete it.")
             }
 
+            Section {
+                NavigationLink {
+                    FallbackAffirmationsView(coordinator: notificationCoordinator)
+                } label: {
+                    LabeledContent("Affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
+                }
+            } header: {
+                Text("When no schedule is active")
+            } footer: {
+                Text("Today uses this selection when no schedule has reminders ready to deliver, including paused schedules. It changes once per day and never sends reminders.")
+            }
+
             Section("Daily preview") {
                 LabeledContent("Enabled reminders", value: "\(notificationCoordinator.dailyTotal) of \(ScheduleValidation.dailyReminderLimit)")
                 if plan.isEmpty {

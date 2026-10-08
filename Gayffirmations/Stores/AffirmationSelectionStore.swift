@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 
+/// Persists Today’s content choice when no schedule can deliver reminders.
 @MainActor
 @Observable
 final class AffirmationSelectionStore {

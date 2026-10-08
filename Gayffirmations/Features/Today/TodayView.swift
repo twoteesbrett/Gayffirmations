@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TodayView: View {
     let store: AffirmationStore
-    let selectionStore: AffirmationSelectionStore
+    let fallbackSelectionStore: AffirmationSelectionStore
     let personalizationStore: PersonalizationStore
     let scheduleStore: ScheduleStore
     let isUpdating: Bool
@@ -23,7 +23,7 @@ struct TodayView: View {
 
     init(
         store: AffirmationStore,
-        selectionStore: AffirmationSelectionStore? = nil,
+        fallbackSelectionStore: AffirmationSelectionStore? = nil,
         personalizationStore: PersonalizationStore? = nil,
         scheduleStore: ScheduleStore? = nil,
         isUpdating: Bool = false,
@@ -32,7 +32,7 @@ struct TodayView: View {
         onOpenDestination: @escaping (TodayDestination) -> Void = { _ in }
     ) {
         self.store = store
-        self.selectionStore = selectionStore ?? AffirmationSelectionStore()
+        self.fallbackSelectionStore = fallbackSelectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
         self.scheduleStore = scheduleStore ?? ScheduleStore()
         self.isUpdating = isUpdating
@@ -129,7 +129,7 @@ struct TodayView: View {
         .onChange(of: scheduleStore.schedules) { _, _ in
             browsingState.reset()
         }
-        .onChange(of: selectionStore.selection) { _, _ in
+        .onChange(of: fallbackSelectionStore.selection) { _, _ in
             browsingState.reset()
         }
         .alert("Unable to Save Favourite", isPresented: Binding(
@@ -146,7 +146,7 @@ struct TodayView: View {
 
     private var emptyState: some View {
         let libraryIsEmpty = store.affirmations.isEmpty
-        let needsName = !selectionStore.selection.matchingAffirmations(in: store.affirmations).isEmpty
+        let needsName = !fallbackSelectionStore.selection.matchingAffirmations(in: store.affirmations).isEmpty
         return ContentUnavailableView {
             Label(libraryIsEmpty ? "No Affirmations" : (needsName ? "Add a Name" : "No Matching Affirmations"), systemImage: "text.quote")
                 .foregroundStyle(foregroundColor)
@@ -155,7 +155,7 @@ struct TodayView: View {
                  ? "Tap the screen, then open Library in the top-left corner to add your first affirmation."
                  : (needsName
                     ? "Add a name in Settings to use these personalised affirmations."
-                    : selectionStore.selection.emptyMessage))
+                    : "Choose different fallback content in Schedules or add matching affirmations in Library."))
                 .foregroundStyle(foregroundColor.opacity(0.85))
         }
     }
@@ -191,7 +191,7 @@ struct TodayView: View {
     private func context(at date: Date) -> TodayAffirmationContext {
         TodayAffirmationResolver().context(
             at: date, schedules: scheduleStore.schedules, affirmations: store.affirmations,
-            fallbackSelection: selectionStore.selection, name: personalizationStore.name
+            fallbackSelection: fallbackSelectionStore.selection, name: personalizationStore.name
         )
     }
 
@@ -258,7 +258,7 @@ struct TodayView: View {
 #Preview("Empty selection at largest text size") {
     TodayView(
         store: AffirmationStore(affirmations: PreviewContent.affirmations),
-        selectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
+        fallbackSelectionStore: AffirmationSelectionStore(selection: .tag("Finding calm during a busy working day"))
     )
     .environment(\.dynamicTypeSize, .accessibility5)
 }

@@ -99,13 +99,13 @@ struct NotificationCoordinatorTests {
         let coordinator = NotificationCoordinator(
             affirmationStore: AffirmationStore(affirmations: [favourite, Affirmation(text: "Other")]),
             scheduleStore: ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule()),
-            scheduler: scheduler, selectionStore: selection
+            scheduler: scheduler, fallbackSelectionStore: selection
         )
 
-        try await coordinator.setSelection(.favourites)
+        try coordinator.setFallbackSelection(.favourites)
 
         #expect(selection.selection == .favourites)
-        #expect(coordinator.selectedAffirmations == [favourite])
+        #expect(coordinator.fallbackAffirmations == [favourite])
         #expect(try repository.loadAffirmationSelection() == .favourites)
         #expect(defaults.data(forKey: "gayffirmations.schedule") == corruptData)
         #expect(scheduler.replaceCallCount == 0)
@@ -126,7 +126,7 @@ struct NotificationCoordinatorTests {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler,
-            selectionStore: AffirmationSelectionStore(repository: repository)
+            fallbackSelectionStore: AffirmationSelectionStore(repository: repository)
         )
         await coordinator.reconcileOnLaunch()
         try library.add(text: "Two")
@@ -169,15 +169,15 @@ struct NotificationCoordinatorTests {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler,
-            selectionStore: AffirmationSelectionStore(repository: repository)
+            fallbackSelectionStore: AffirmationSelectionStore(repository: repository)
         )
         try await coordinator.setEnabled(true)
         let previous = scheduler.scheduledReminders
         repository.failSaves = true
-        await #expect(throws: NotificationSchedulerTestError.self) {
-            try await coordinator.setSelection(.favourites)
+        #expect(throws: NotificationSchedulerTestError.self) {
+            try coordinator.setFallbackSelection(.favourites)
         }
-        #expect(coordinator.selectionStore.selection == .all)
+        #expect(coordinator.fallbackSelectionStore.selection == .all)
         #expect(repository.selection == .all)
         #expect(scheduler.scheduledReminders == previous)
     }
@@ -191,7 +191,7 @@ struct NotificationCoordinatorTests {
         let coordinator = NotificationCoordinator(
             affirmationStore: AffirmationStore(affirmations: [Affirmation(text: "Scheduled")]),
             scheduleStore: schedule, scheduler: scheduler,
-            selectionStore: AffirmationSelectionStore(repository: repository)
+            fallbackSelectionStore: AffirmationSelectionStore(repository: repository)
         )
         await coordinator.reconcileOnLaunch()
         #expect(scheduler.scheduledReminders.count == 4)
@@ -286,7 +286,7 @@ struct NotificationCoordinatorTests {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler,
-            selectionStore: AffirmationSelectionStore(selection: .tag("Work"))
+            fallbackSelectionStore: AffirmationSelectionStore(selection: .tag("Work"))
         )
         await coordinator.reconcileOnLaunch()
         #expect(schedule.schedule.isEnabled)
@@ -489,8 +489,8 @@ struct NotificationCoordinatorTests {
         #expect(throws: NotificationCoordinatorError.updateInProgress) {
             try library.toggleFavorite(id: library.affirmations[0].id)
         }
-        await #expect(throws: NotificationCoordinatorError.updateInProgress) {
-            try await coordinator.setSelection(.favourites)
+        #expect(throws: NotificationCoordinatorError.updateInProgress) {
+            try coordinator.setFallbackSelection(.favourites)
         }
         await coordinator.waitForLibraryRefresh()
         #expect(!coordinator.isUpdating)
