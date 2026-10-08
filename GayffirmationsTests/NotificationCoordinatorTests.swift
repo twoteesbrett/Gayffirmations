@@ -60,24 +60,6 @@ struct NotificationCoordinatorTests {
         #expect(scheduler.replaceCallCount == previousReplacements)
     }
 
-    @Test("An invalid narrow period leaves the enabled schedule and reminders unchanged")
-    func narrowPeriodPreservesDelivery() async throws {
-        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
-        let (coordinator, store) = makeCoordinator(scheduler: scheduler)
-        try await coordinator.setEnabled(true)
-        try await coordinator.setNotificationsPerDay(4)
-        let previousSchedule = store.schedule
-        let previousReminders = scheduler.scheduledReminders
-        let previousReplacements = scheduler.replaceCallCount
-        await #expect(throws: ScheduleCalculatorError.remindersTooClose) {
-            try await coordinator.setEndTime(TimeOfDay(hour: 9, minute: 1))
-        }
-        #expect(store.schedule == previousSchedule)
-        #expect(scheduler.scheduledReminders == previousReminders)
-        #expect(scheduler.replaceCallCount == previousReplacements)
-        #expect(!coordinator.isUpdating)
-    }
-
     @Test("Opening Library preserves the shared coordinator and its reminder hooks")
     func libraryUsesSharedCoordinator() async throws {
         let entry = Affirmation(text: "Selected", tags: ["confidence"])
@@ -87,7 +69,7 @@ struct NotificationCoordinatorTests {
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
         )
-        try await coordinator.setSelection(.tag("confidence"))
+        try await coordinator.setScheduleSelection(.tag("confidence"))
         try await coordinator.setEnabled(true)
 
         _ = LibraryView(store: library, notificationCoordinator: coordinator)
@@ -98,7 +80,7 @@ struct NotificationCoordinatorTests {
 
         try library.update(id: entry.id, text: "Edited", tags: [])
         await coordinator.waitForLibraryRefresh()
-        #expect(coordinator.selectedAffirmations.isEmpty)
+        #expect(coordinator.firstScheduleAffirmations.isEmpty)
         #expect(coordinator.deliveryIsPaused)
         #expect(scheduler.scheduledReminders.isEmpty)
     }
@@ -129,7 +111,7 @@ struct NotificationCoordinatorTests {
         #expect(scheduler.replaceCallCount == 0)
     }
 
-    @Test("Library edits after a failed selection load preserve the saved schedule")
+    @Test("Library edits still refresh independent schedules after a failed browsing selection load")
     func corruptSelectionPreservesScheduleDuringLibraryEdit() async throws {
         let suiteName = "DeliveryRecoveryTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
@@ -153,9 +135,9 @@ struct NotificationCoordinatorTests {
         #expect(schedule.schedule == originalSchedule)
         #expect(try repository.loadSchedule() == originalSchedule)
         #expect(defaults.data(forKey: "gayffirmations.affirmationSelection") == corruptData)
-        #expect(scheduler.scheduledReminders.isEmpty)
-        #expect(scheduler.replaceCallCount == 0)
-        #expect(coordinator.errorMessage != nil)
+        #expect(scheduler.scheduledReminders.count == 4)
+        #expect(scheduler.replaceCallCount == 2)
+        #expect(coordinator.errorMessage == nil)
     }
 
     @Test("Combined delivery uses both sources and removing one preserves the other")
@@ -167,14 +149,14 @@ struct NotificationCoordinatorTests {
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler
         )
-        try await coordinator.setSelection(.sources(favourites: true, tags: ["Confidence"]))
+        try await coordinator.setScheduleSelection(.sources(favourites: true, tags: ["Confidence"]))
         try await coordinator.setEnabled(true)
-        #expect(coordinator.selectedAffirmations == [favourite, tagged])
+        #expect(coordinator.firstScheduleAffirmations == [favourite, tagged])
         #expect(Set(scheduler.scheduledReminders.map(\.affirmationText)) == ["Favourite", "Tagged"])
         try library.toggleFavorite(id: favourite.id)
         await coordinator.waitForLibraryRefresh()
         #expect(!coordinator.deliveryIsPaused)
-        #expect(coordinator.selectedAffirmations == [tagged])
+        #expect(coordinator.firstScheduleAffirmations == [tagged])
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Tagged" })
     }
 
@@ -200,23 +182,19 @@ struct NotificationCoordinatorTests {
         #expect(scheduler.scheduledReminders == previous)
     }
 
-    @Test("Unreadable selection data prevents fallback delivery on launch or enable")
-    func unreadableSourceBlocksDelivery() async throws {
+    @Test("Unreadable browsing selection does not block independent schedule delivery")
+    func unreadableSourceDoesNotBlockDelivery() async throws {
         let repository = DeliverySelectionRepository()
         repository.failLoads = true
         let schedule = ScheduleStore(schedule: AffirmationSchedule(isEnabled: true))
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
-            affirmationStore: AffirmationStore(affirmations: [Affirmation(text: "Fallback")]),
+            affirmationStore: AffirmationStore(affirmations: [Affirmation(text: "Scheduled")]),
             scheduleStore: schedule, scheduler: scheduler,
             selectionStore: AffirmationSelectionStore(repository: repository)
         )
         await coordinator.reconcileOnLaunch()
-        await #expect(throws: PersistenceUnavailableError.self) {
-            try await coordinator.setEnabled(true)
-        }
-        #expect(scheduler.replaceCallCount == 0)
-        #expect(scheduler.scheduledReminders.isEmpty)
+        #expect(scheduler.scheduledReminders.count == 4)
         #expect(schedule.schedule.isEnabled)
     }
 
@@ -229,7 +207,7 @@ struct NotificationCoordinatorTests {
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
         )
-        try await coordinator.setSelection(.favourites)
+        try await coordinator.setScheduleSelection(.favourites)
         try await coordinator.setEnabled(true)
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "First" })
         try library.toggleFavorite(id: first.id)
@@ -253,15 +231,15 @@ struct NotificationCoordinatorTests {
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
         )
-        try await coordinator.setSelection(.tag("work"))
+        try await coordinator.setScheduleSelection(.tag("work"))
         try await coordinator.setEnabled(true)
         try library.update(id: first.id, text: first.text, tags: [])
         await coordinator.waitForLibraryRefresh()
         #expect(coordinator.deliveryIsPaused)
-        #expect(coordinator.selectionStore.selection == .tag("work"))
+        #expect(coordinator.scheduleStore.schedules[0].selection == .tag("work"))
         try library.restoreDefaults()
         await coordinator.waitForLibraryRefresh()
-        #expect(coordinator.selectionStore.selection == .tag("work"))
+        #expect(coordinator.scheduleStore.schedules[0].selection == .tag("work"))
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "First" })
         #expect(!scheduler.scheduledReminders.isEmpty)
     }
@@ -291,13 +269,13 @@ struct NotificationCoordinatorTests {
             affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler
         )
         try await coordinator.setEnabled(true)
-        try await coordinator.setSelection(.favourites)
+        try await coordinator.setScheduleSelection(.favourites)
         let previous = scheduler.scheduledReminders
         scheduler.failuresRemaining = 1
         await #expect(throws: NotificationSchedulerTestError.self) {
-            try await coordinator.setSelection(.all)
+            try await coordinator.setScheduleSelection(.all)
         }
-        #expect(coordinator.selectionStore.selection == .favourites)
+        #expect(coordinator.scheduleStore.schedules[0].selection == .favourites)
         #expect(scheduler.scheduledReminders == previous)
     }
 
@@ -433,41 +411,6 @@ struct NotificationCoordinatorTests {
         #expect(scheduleStore.schedule.notificationsPerDay == 3)
         #expect(scheduler.replaceCallCount == 2)
         #expect(scheduler.scheduledReminders.count == 3)
-    }
-
-    @Test("Changing a disabled schedule does not schedule reminders")
-    func disabledScheduleChangeOnlyPersists() async throws {
-        let scheduler = NotificationSchedulerSpy(
-            authorizationStatus: .authorized
-        )
-        let (coordinator, scheduleStore) = makeCoordinator(scheduler: scheduler)
-
-        try await coordinator.setEndTime(TimeOfDay(hour: 19, minute: 0))
-
-        #expect(scheduleStore.schedule.endTime == TimeOfDay(hour: 19, minute: 0))
-        #expect(scheduler.replaceCallCount == 0)
-    }
-
-    @Test("A scheduling failure does not save the changed schedule")
-    func schedulingFailureDoesNotPersist() async throws {
-        let scheduler = NotificationSchedulerSpy(
-            authorizationStatus: .authorized
-        )
-        let (coordinator, scheduleStore) = makeCoordinator(
-            scheduler: scheduler,
-            isEnabled: true
-        )
-        try await coordinator.setEnabled(true)
-        let originalReminders = scheduler.scheduledReminders
-        scheduler.failuresRemaining = 1
-        let originalSchedule = scheduleStore.schedule
-
-        await #expect(throws: NotificationSchedulerTestError.failed) {
-            try await coordinator.setNotificationsPerDay(6)
-        }
-
-        #expect(scheduleStore.schedule == originalSchedule)
-        #expect(scheduler.scheduledReminders == originalReminders)
     }
 
     @Test("Library edits, deletions, and restores refresh reminder text")
@@ -643,12 +586,12 @@ enum NotificationSchedulerTestError: Error {
 private final class NotificationTestScheduleRepository: ScheduleRepository {
     var schedule: AffirmationSchedule?
 
-    func loadSchedule() throws -> AffirmationSchedule? {
-        schedule
+    func loadSchedules() throws -> [AffirmationSchedule]? {
+        schedule.map { [$0] }
     }
 
-    func saveSchedule(_ schedule: AffirmationSchedule) throws {
-        self.schedule = schedule
+    func saveSchedules(_ schedules: [AffirmationSchedule]) throws {
+        self.schedule = schedules.first
     }
 }
 

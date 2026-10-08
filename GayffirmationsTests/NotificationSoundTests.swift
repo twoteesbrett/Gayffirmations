@@ -14,6 +14,8 @@ struct NotificationSoundTests {
         """.utf8)
         let schedule = try JSONDecoder().decode(AffirmationSchedule.self, from: data)
         #expect(schedule == AffirmationSchedule(
+            id: schedule.id,
+            name: "Daily affirmations",
             isEnabled: true,
             startTime: TimeOfDay(hour: 10, minute: 15),
             endTime: TimeOfDay(hour: 20, minute: 45),
@@ -32,7 +34,7 @@ struct NotificationSoundTests {
         let coordinator = makeCoordinator(store: store, scheduler: scheduler)
         try await coordinator.setSound(sound)
         let reloaded = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        #expect(reloaded.schedule.sound == sound)
+        #expect(reloaded.notificationSound == sound)
         #expect(!reloaded.schedule.isEnabled)
         #expect(scheduler.authorizationRequestCount == 0)
         #expect(scheduler.replaceCallCount == 0)
@@ -47,7 +49,7 @@ struct NotificationSoundTests {
         try await coordinator.setEnabled(true)
         let original = scheduler.scheduledReminders
         try await coordinator.setSound(sound)
-        #expect(store.schedule.sound == sound)
+        #expect(store.notificationSound == sound)
         #expect(scheduler.scheduledReminders.map(\.time) == original.map(\.time))
         #expect(scheduler.scheduledReminders.map(\.affirmationText) == original.map(\.affirmationText))
         #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == sound })
@@ -68,8 +70,8 @@ struct NotificationSoundTests {
         await #expect(throws: NotificationSchedulerTestError.self) {
             try await coordinator.setSound(.none)
         }
-        #expect(store.schedule.sound == .magicMarimba)
-        #expect(repository.schedule?.sound == .magicMarimba)
+        #expect(store.notificationSound == .magicMarimba)
+        #expect(repository.sound == .magicMarimba)
         #expect(store.schedule.isEnabled)
         #expect(scheduler.scheduledReminders == previous)
         #expect(!coordinator.isUpdating)
@@ -85,12 +87,12 @@ struct NotificationSoundTests {
         )
         try await coordinator.setEnabled(true)
         try await coordinator.setSound(.choirHarpBless)
-        #expect(store.schedule.sound == .choirHarpBless)
+        #expect(store.notificationSound == .choirHarpBless)
         #expect(coordinator.deliveryIsPaused)
         #expect(scheduler.scheduledReminders.isEmpty)
     }
 
-    @Test("Resetting the schedule restores the default sound and cancels delivery")
+    @Test("Resetting schedules keeps the global sound and cancels delivery")
     func resetsSound() async throws {
         let store = ScheduleStore()
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
@@ -98,7 +100,7 @@ struct NotificationSoundTests {
         try await coordinator.setSound(.relaxingHarpSweep)
         try await coordinator.setEnabled(true)
         try coordinator.resetSchedule()
-        #expect(store.schedule.sound == .systemDefault)
+        #expect(store.notificationSound == .relaxingHarpSweep)
         #expect(!store.schedule.isEnabled)
         #expect(scheduler.scheduledReminders.isEmpty)
     }
@@ -110,6 +112,55 @@ struct NotificationSoundTests {
             index: 0
         )
         #expect((request.content.sound == nil) == (sound == .none))
+    }
+
+    @Test func globalSoundMigratesUpdatesAllSchedulesAndSurvivesDeletingThem() async throws {
+        let suite = "GlobalSoundTests.\(UUID())"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let first = AffirmationSchedule(isEnabled: true, notificationsPerDay: 2, sound: .magicMarimba)
+        let second = AffirmationSchedule(isEnabled: true, notificationsPerDay: 3, sound: .none)
+        try repository.saveSchedules([first, second])
+        let store = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        #expect(store.notificationSound == .magicMarimba)
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = makeCoordinator(store: store, scheduler: scheduler)
+        await coordinator.reconcileOnLaunch()
+        #expect(scheduler.scheduledReminders.count == 5)
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == .magicMarimba })
+        let previous = scheduler.scheduledReminders
+        try await coordinator.setSound(.choirHarpBless)
+        #expect(scheduler.scheduledReminders.map(\.identifier) == previous.map(\.identifier))
+        #expect(scheduler.scheduledReminders.map(\.time) == previous.map(\.time))
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == .choirHarpBless })
+        try await coordinator.deleteSchedule(id: first.id)
+        try await coordinator.deleteSchedule(id: second.id)
+        let restarted = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        #expect(restarted.schedules.isEmpty)
+        #expect(restarted.notificationSound == .choirHarpBless)
+        let restartedCoordinator = makeCoordinator(store: restarted, scheduler: scheduler)
+        try await restartedCoordinator.saveSchedule(AffirmationSchedule(isEnabled: true))
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == .choirHarpBless })
+    }
+
+    @Test func resettingAllDataRestoresGlobalDefaultSound() async throws {
+        let suite = "ResetGlobalSoundTests.\(UUID())"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let store = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        let library = AffirmationStore(affirmations: [Affirmation(text: "Hello")])
+        let coordinator = NotificationCoordinator(affirmationStore: library, scheduleStore: store,
+                                                  scheduler: NotificationSchedulerSpy(authorizationStatus: .authorized))
+        try await coordinator.setSound(.none)
+        let reset = AppDataResetCoordinator(affirmationStore: library, scheduleStore: store,
+                                           themeStore: ThemeStore(), notificationCoordinator: coordinator,
+                                           repository: repository)
+        try reset.resetAll()
+        #expect(store.notificationSound == .systemDefault)
+        let restarted = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
+        #expect(restarted.notificationSound == .systemDefault)
     }
 
     @Test("All custom sounds are bundled and decodable within the notification duration limit")
@@ -133,12 +184,20 @@ struct NotificationSoundTests {
 
 private final class SoundScheduleRepository: ScheduleRepository {
     var schedule: AffirmationSchedule?
+    var sound: NotificationSound?
     var failSave = false
 
-    func loadSchedule() throws -> AffirmationSchedule? { schedule }
+    func loadSchedules() throws -> [AffirmationSchedule]? { schedule.map { [$0] } }
 
-    func saveSchedule(_ schedule: AffirmationSchedule) throws {
+    func loadNotificationSound() throws -> NotificationSound? { sound }
+
+    func saveNotificationSound(_ sound: NotificationSound) throws {
         if failSave { throw NotificationSchedulerTestError.failed }
-        self.schedule = schedule
+        self.sound = sound
+    }
+
+    func saveSchedules(_ schedules: [AffirmationSchedule]) throws {
+        if failSave { throw NotificationSchedulerTestError.failed }
+        self.schedule = schedules.first
     }
 }

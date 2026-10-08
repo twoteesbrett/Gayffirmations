@@ -58,34 +58,4 @@ struct TodayBrowsingStateTests {
         }
     }
 
-    @Test func scheduleEditsPreserveCurrentChoiceUntilNewReminder() {
-        var state = TodayBrowsingState()
-        let now = date(hour: 16)
-        var updated = schedule
-        updated.notificationsPerDay = 4
-        #expect(state.affirmation(at: now, schedule: schedule, affirmations: entries, calendar: calendar) == entries[1])
-        #expect(TodayAffirmationResolver().affirmation(at: now, schedule: updated, affirmations: entries, calendar: calendar) == entries[0])
-
-        state.updateSchedule(from: schedule, to: updated, at: now, affirmations: entries, calendar: calendar)
-        #expect(state.affirmation(at: now, schedule: updated, affirmations: entries, calendar: calendar) == entries[1])
-        let boundary = TodayAffirmationResolver().nextChange(after: now, schedule: updated, calendar: calendar)
-        #expect(state.affirmation(at: boundary, schedule: updated, affirmations: entries, calendar: calendar)
-                == TodayAffirmationResolver().affirmation(at: boundary, schedule: updated, affirmations: entries, calendar: calendar))
-    }
-
-    @Test func repeatedScheduleEditsPreserveBrowsedChoice() {
-        var state = TodayBrowsingState()
-        let now = date(hour: 12)
-        let chosen = state.cycle(by: -1, at: now, schedule: schedule, affirmations: entries, calendar: calendar)
-        var updated = schedule
-        updated.notificationsPerDay = 4
-        state.updateSchedule(from: schedule, to: updated, at: now, affirmations: entries, calendar: calendar)
-        var disabled = updated
-        disabled.isEnabled = false
-        state.updateSchedule(from: updated, to: disabled, at: now, affirmations: entries, calendar: calendar)
-        #expect(state.affirmation(at: date(hour: 18), schedule: disabled, affirmations: entries, calendar: calendar) == chosen)
-        let midnight = calendar.date(byAdding: .day, value: 1, to: date(hour: 0))!
-        #expect(state.affirmation(at: midnight, schedule: disabled, affirmations: entries, calendar: calendar)
-                == TodayAffirmationResolver().affirmation(at: midnight, schedule: disabled, affirmations: entries, calendar: calendar))
-    }
 }

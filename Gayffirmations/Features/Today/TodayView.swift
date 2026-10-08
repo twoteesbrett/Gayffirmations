@@ -14,7 +14,6 @@ struct TodayView: View {
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @State private var errorMessage: String?
     @State private var browsingState = TodayBrowsingState()
-    @State private var displayedSchedule: AffirmationSchedule
     @State private var browsingForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.themePhoto) private var themePhoto
@@ -36,7 +35,6 @@ struct TodayView: View {
         self.selectionStore = selectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
         self.scheduleStore = scheduleStore ?? ScheduleStore()
-        _displayedSchedule = State(initialValue: self.scheduleStore.schedule)
         self.isUpdating = isUpdating
         self.themeStore = themeStore
         self.sheetDismissalID = sheetDismissalID
@@ -128,14 +126,8 @@ struct TodayView: View {
                 controls.reset()
             }
         }
-        .onChange(of: scheduleStore.schedule) { _, schedule in
-            browsingState.updateSchedule(
-                from: displayedSchedule,
-                to: schedule,
-                at: .now,
-                affirmations: selectedAffirmations
-            )
-            displayedSchedule = schedule
+        .onChange(of: scheduleStore.schedules) { _, _ in
+            browsingState.reset()
         }
         .onChange(of: selectionStore.selection) { _, _ in
             browsingState.reset()
@@ -193,26 +185,22 @@ struct TodayView: View {
     }
 
     private func currentAffirmation(at date: Date) -> Affirmation? {
-        browsingState.affirmation(
-            at: date,
-            schedule: displayedSchedule,
-            affirmations: selectedAffirmations
-        )
+        browsingState.affirmation(at: date, context: context(at: date))
     }
 
-    private var selectedAffirmations: [Affirmation] {
-        selectionStore.selection.matchingAffirmations(in: store.affirmations)
-            .compactMap { $0.resolved(name: personalizationStore.name) }
+    private func context(at date: Date) -> TodayAffirmationContext {
+        TodayAffirmationResolver().context(
+            at: date, schedules: scheduleStore.schedules, affirmations: store.affirmations,
+            fallbackSelection: selectionStore.selection, name: personalizationStore.name
+        )
     }
 
     private func cycleAffirmation(by offset: Int) {
         controls.registerInteraction()
         var updatedBrowsingState = browsingState
+        let now = Date.now
         guard let next = updatedBrowsingState.cycle(
-            by: offset,
-            at: .now,
-            schedule: displayedSchedule,
-            affirmations: selectedAffirmations
+            by: offset, at: now, context: context(at: now)
         ) else { return }
 
         browsingForward = offset > 0

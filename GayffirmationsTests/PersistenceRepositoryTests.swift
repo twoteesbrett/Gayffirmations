@@ -18,6 +18,8 @@ struct PersistenceRepositoryTests {
         let store = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
         #expect(store.persistenceErrorMessage == nil)
         #expect(store.schedule == AffirmationSchedule(
+            id: store.schedule.id,
+            name: "Daily affirmations",
             startTime: TimeOfDay(hour: 8, minute: 30),
             endTime: TimeOfDay(hour: 19, minute: 15),
             notificationsPerDay: 1, sound: .magicMarimba
@@ -35,7 +37,7 @@ struct PersistenceRepositoryTests {
         let restarted = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
         #expect(restarted.schedule == store.schedule)
         #expect(!restarted.schedule.isEnabled)
-        #expect(restarted.schedule.sound == .none)
+        #expect(restarted.notificationSound == .none)
         try await coordinator.setEnabled(true)
         #expect(scheduler.scheduledReminders.count == 1)
     }
@@ -61,7 +63,7 @@ struct PersistenceRepositoryTests {
         let store = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
         #expect(store.schedule == schedule)
         try store.reset()
-        #expect(try fixture.repository.loadSchedule() == AffirmationSchedule())
+        #expect(try fixture.repository.loadSchedule() == store.defaultSchedule)
     }
 
     @Test("Invalid saved times preserve the original data and block schedule updates",
@@ -242,7 +244,7 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let affirmations = [Affirmation(text: "Reset")]
         let schedule = AffirmationSchedule()
-        try fixture.repository.saveAppData(affirmations: affirmations, schedule: schedule, theme: .nature, selection: .favourites)
+        try fixture.repository.saveAppData(affirmations: affirmations, schedules: [schedule], theme: .nature, selection: .favourites)
         #expect(try fixture.repository.loadAffirmations() == affirmations)
         #expect(try fixture.repository.loadSchedule() == schedule)
         #expect(try fixture.repository.loadTheme() == .nature)

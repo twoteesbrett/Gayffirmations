@@ -25,10 +25,6 @@ struct ScheduleCalculator {
             throw ScheduleCalculatorError.invalidReminderCount
         }
 
-        guard schedule.notificationsPerDay > 0 else {
-            return []
-        }
-
         guard schedule.endTime > schedule.startTime else {
             throw ScheduleCalculatorError.endMustBeAfterStart
         }

@@ -122,11 +122,11 @@ private enum ScheduleRepositoryTestError: Error {
 private final class FailingScheduleRepository: ScheduleRepository {
     private(set) var saveCallCount = 0
 
-    func loadSchedule() throws -> AffirmationSchedule? {
+    func loadSchedules() throws -> [AffirmationSchedule]? {
         throw ScheduleRepositoryTestError.loadFailed
     }
 
-    func saveSchedule(_ schedule: AffirmationSchedule) throws {
+    func saveSchedules(_ schedules: [AffirmationSchedule]) throws {
         saveCallCount += 1
     }
 }
@@ -138,11 +138,11 @@ private final class InMemoryScheduleRepository: ScheduleRepository {
         self.schedule = schedule
     }
 
-    func loadSchedule() throws -> AffirmationSchedule? {
-        schedule
+    func loadSchedules() throws -> [AffirmationSchedule]? {
+        schedule.map { [$0] }
     }
 
-    func saveSchedule(_ schedule: AffirmationSchedule) throws {
-        self.schedule = schedule
+    func saveSchedules(_ schedules: [AffirmationSchedule]) throws {
+        self.schedule = schedules.first
     }
 }

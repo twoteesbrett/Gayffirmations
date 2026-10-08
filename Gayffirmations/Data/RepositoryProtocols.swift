@@ -14,8 +14,10 @@ protocol AffirmationRepository {
 }
 
 protocol ScheduleRepository {
-    func loadSchedule() throws -> AffirmationSchedule?
-    func saveSchedule(_ schedule: AffirmationSchedule) throws
+    func loadSchedules() throws -> [AffirmationSchedule]?
+    func saveSchedules(_ schedules: [AffirmationSchedule]) throws
+    func loadNotificationSound() throws -> NotificationSound?
+    func saveNotificationSound(_ sound: NotificationSound) throws
 }
 
 protocol ThemeRepository {
@@ -37,7 +39,7 @@ protocol AppDataRepository {
     // A throwing save must leave every section unchanged.
     func saveAppData(
         affirmations: [Affirmation],
-        schedule: AffirmationSchedule,
+        schedules: [AffirmationSchedule],
         theme: AppTheme,
         selection: AffirmationSelection
     ) throws

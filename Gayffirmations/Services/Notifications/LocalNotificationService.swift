@@ -1,18 +1,6 @@
 import UserNotifications
 
 final class LocalNotificationService: NotificationScheduling {
-    private enum Identifier {
-        static let prefix = "gayffirmations.daily."
-
-        static func reminder(at index: Int) -> String {
-            prefix + String(index)
-        }
-
-        static var allReminders: [String] {
-            (0..<AffirmationSchedule.notificationCountRange.upperBound).map { reminder(at: $0) }
-        }
-    }
-
     private let center: UNUserNotificationCenter
 
     init(center: UNUserNotificationCenter = .current()) {
@@ -41,7 +29,7 @@ final class LocalNotificationService: NotificationScheduling {
     func replacePendingNotifications(
         with reminders: [NotificationReminder]
     ) async throws {
-        guard AffirmationSchedule.notificationCountRange.contains(reminders.count) else {
+        guard (1...ScheduleValidation.dailyReminderLimit).contains(reminders.count) else {
             throw ScheduleCalculatorError.invalidReminderCount
         }
         removePendingNotifications()
@@ -57,9 +45,8 @@ final class LocalNotificationService: NotificationScheduling {
     }
 
     func removePendingNotifications() {
-        center.removePendingNotificationRequests(
-            withIdentifiers: Identifier.allReminders
-        )
+        // This app owns only affirmation reminders, including legacy indexed requests.
+        center.removeAllPendingNotificationRequests()
     }
 
     func request(
@@ -89,7 +76,7 @@ final class LocalNotificationService: NotificationScheduling {
         )
 
         return UNNotificationRequest(
-            identifier: Identifier.reminder(at: index),
+            identifier: reminder.identifier.isEmpty ? "gayffirmations.daily.\(index)" : reminder.identifier,
             content: content,
             trigger: trigger
         )

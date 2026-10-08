@@ -10,6 +10,7 @@ struct NotificationReminder: Equatable {
     let time: TimeOfDay
     let affirmationText: String
     var sound: NotificationSound = .systemDefault
+    var identifier: String = ""
 }
 
 protocol NotificationScheduling {

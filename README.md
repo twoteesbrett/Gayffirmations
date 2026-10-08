@@ -42,7 +42,13 @@ reminders, and Reset All App Data clears it. Templates remain saved as templates
 
 ## Scheduling behavior
 
-The scheduler uses the same schedule every day. Daily rhythm offers Evenly spaced,
+Settings → Notifications → Schedules manages independent daily routines. Each has a
+enabled state, content selection, time window, frequency, and rhythm.
+Add a schedule, tap its summary to edit, or swipe to duplicate or delete it.
+Edits use Save/Cancel; duplicates start disabled. The combined daily preview
+shows every deliverable reminder and flags shared times.
+
+Daily rhythm offers Evenly spaced,
 More early, and More late while keeping the selected daily total fixed. Evenly
 spaced divides the chosen period into equal sections and places one notification
 in the middle of each section. Existing saved schedules retain this behavior.
@@ -57,14 +63,22 @@ and expandable exact-time list preview the same times used for delivery. Rhythm
 and emphasis are saved with the schedule; resetting restores Evenly spaced and
 Balanced. At accessibility text sizes, the rhythm controls use menu pickers.
 
-Library, Today, and reminders share one saved selection managed in Library.
-Choose All, favourites, or tags. Combined
-choices include entries matching any choice, once each. The Tags button opens
-the individual tag controls. If the selected source has no entries, reminders pause while
-retaining the enabled schedule and resume when matching entries return.
+Each schedule independently selects All, favourites, or multiple tags. Combined
+choices include entries matching any choice, once each. Empty selections or
+selections without usable messages pause only that schedule; it resumes when
+matching entries become available. Library filters control browsing and Today’s
+fallback content, without changing schedule selections.
 
-Today shows the most recent scheduled affirmation, keeping the final reminder
-current overnight. With reminders off, it rotates once per local calendar day.
+Schedules are identified by their time range and affirmation selection, without
+requiring a name. Existing installations preserve all delivery settings and copy
+the old shared content selection once.
+
+Today and notifications use the same combined daily plan. Today shows the most
+recent scheduled affirmation across all enabled, deliverable schedules, keeping
+the final reminder current overnight. Tied times retain saved schedule order;
+Today shows the last of those reminders. Swiping browses the current schedule’s
+content. With no deliverable reminders, Today rotates through the Library selection
+once per local calendar day.
 Tap the screen to reveal corner icons for Library (top left), Favourite (top right),
 Themes (bottom left), and Settings (bottom right). Tap again to hide them, or leave
 them idle for five seconds. Interaction restarts the timer; opening a sheet clears
@@ -77,21 +91,23 @@ the next reminder, or at midnight without reminders. Changing the schedule or
 source selection clears the temporary choice. VoiceOver exposes equivalent
 Next and Previous actions.
 
-The first version will require the end time to be later than the start time on
+Each schedule requires the end time to be later than the start time on
 the same day. Random times, selected weekdays, and overnight schedules can be
-added later. Reminder combinations that round to duplicate delivery minutes
-are rejected; choose a longer period, fewer reminders, or gentler emphasis. Reminder counts must be
-between one and twenty-four, including changes made outside the UI.
+added later. Duplicate delivery minutes within one schedule are rejected; choose
+a longer period, fewer reminders, or gentler emphasis. Different schedules may
+share times, and both deliver. Counts must be between one and twenty-four per
+schedule, with a maximum of twenty-four across enabled schedules, including
+paused schedules. Disabled schedules do not use this budget.
 
 ## Notification sounds
 
-Settings → Notifications → Sound offers None, Default, and five custom sounds:
+The Sound picker in Settings offers None, Default, and five custom sounds:
 Flute, Marimba, Choir, Harp, and Ahem.
 Tapping a custom sound selects and previews it; tapping it again replays it.
-A checkmark on the left shows the selected sound. The selection is saved with
-the schedule and applied to all pending reminders; existing saved schedules
-retain Default. Resetting the notification schedule or all app data restores
-Default. Sound previews stop when leaving the picker or backgrounding the app.
+A checkmark shows the selected sound, which applies immediately to all schedules.
+Existing installations use the first saved schedule’s sound as the shared choice.
+The choice persists even with no schedules. Resetting schedules keeps it; resetting
+all app data restores Default. Sound previews stop when leaving the picker or backgrounding the app.
 Notification playback follows the iPhone's sound and notification settings.
 
 Custom previews use `AVAudioPlayer` and start immediately when a row is tapped.
@@ -187,8 +203,9 @@ when a save or replacement fails. Library edits notify that same coordinator thr
 store callbacks. `AppDataResetCoordinator` handles resets across all stores.
 
 `AffirmationSelection` owns matching rules; `ScheduleCalculator` owns reminder times;
-`NotificationPlanner` combines those times with affirmation text and the selected sound; and
-`TodayAffirmationResolver` uses the same slot order. An empty matching collection
+`ScheduleValidation` enforces valid schedules and the combined daily budget.
+`NotificationPlanner` builds the combined plan with schedule identities, matching
+affirmations, and sounds; `TodayAffirmationResolver` consumes that same plan. An empty matching collection
 produces no reminders. Clearing the final Library filter returns to All.
 `WrappingLayout` handles button placement without knowing about selections or storage. `TodayBrowsingState` owns temporary browsing,
 wrapping, and expiry; `TodayView` owns gestures, animation, and presentation.

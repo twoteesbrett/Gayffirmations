@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Gayffirmations
 
@@ -12,24 +13,26 @@ struct NotificationPlannerTests {
             Affirmation(text: "Second")
         ]
         let schedule = AffirmationSchedule(
+            isEnabled: true,
             startTime: TimeOfDay(hour: 9, minute: 0),
             endTime: TimeOfDay(hour: 13, minute: 0),
             notificationsPerDay: 2
         )
 
-        let reminders = try planner.reminders(
-            for: schedule,
-            affirmations: affirmations
-        )
+        let reminders = try planner.plan(
+            for: [schedule],
+            affirmations: affirmations,
+            name: ""
+        ).map(\.reminder)
 
         #expect(reminders == [
             NotificationReminder(
                 time: TimeOfDay(hour: 10, minute: 0),
-                affirmationText: "First"
+                affirmationText: "First", identifier: "gayffirmations.schedule.\(schedule.id.uuidString).0"
             ),
             NotificationReminder(
                 time: TimeOfDay(hour: 12, minute: 0),
-                affirmationText: "Second"
+                affirmationText: "Second", identifier: "gayffirmations.schedule.\(schedule.id.uuidString).1"
             )
         ])
     }
@@ -41,15 +44,17 @@ struct NotificationPlannerTests {
             Affirmation(text: "Second")
         ]
         let schedule = AffirmationSchedule(
+            isEnabled: true,
             startTime: TimeOfDay(hour: 9, minute: 0),
             endTime: TimeOfDay(hour: 15, minute: 0),
             notificationsPerDay: 3
         )
 
-        let reminders = try planner.reminders(
-            for: schedule,
-            affirmations: affirmations
-        )
+        let reminders = try planner.plan(
+            for: [schedule],
+            affirmations: affirmations,
+            name: ""
+        ).map(\.reminder)
 
         #expect(reminders.map(\.affirmationText) == [
             "First", "Second", "First"
@@ -58,27 +63,28 @@ struct NotificationPlannerTests {
 
     @Test("An empty selection still rejects invalid reminder counts", arguments: [0, 25])
     func emptySelectionRejectsInvalidCounts(count: Int) {
-        let schedule = AffirmationSchedule(notificationsPerDay: count)
+        let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: count)
 
         #expect(throws: ScheduleCalculatorError.invalidReminderCount) {
-            try planner.reminders(for: schedule, affirmations: [])
+            try planner.plan(for: [schedule], affirmations: [], name: "")
         }
     }
 
     @Test("An empty selection pauses delivery")
     func emptySelectionPausesDelivery() throws {
-        let schedule = AffirmationSchedule(notificationsPerDay: 1)
-        #expect(try planner.reminders(for: schedule, affirmations: []).isEmpty)
+        let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 1)
+        #expect(try planner.plan(for: [schedule], affirmations: [], name: "").isEmpty)
     }
 
     @Test("An empty selection still rejects invalid reminder times")
     func emptySelectionValidatesSchedule() {
         let schedule = AffirmationSchedule(
+            isEnabled: true,
             startTime: TimeOfDay(hour: 17, minute: 0),
             endTime: TimeOfDay(hour: 9, minute: 0)
         )
         #expect(throws: ScheduleCalculatorError.endMustBeAfterStart) {
-            try planner.reminders(for: schedule, affirmations: [])
+            try planner.plan(for: [schedule], affirmations: [], name: "")
         }
     }
 }

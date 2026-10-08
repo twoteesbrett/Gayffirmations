@@ -4,88 +4,68 @@ import Observation
 @MainActor
 @Observable
 final class ScheduleStore {
-    private(set) var schedule: AffirmationSchedule
+    private(set) var schedules: [AffirmationSchedule]
+    private(set) var notificationSound: NotificationSound = .systemDefault
     private(set) var persistenceErrorMessage: String?
-
     private let repository: (any ScheduleRepository)?
     let defaultSchedule: AffirmationSchedule
 
-    init(
-        schedule: AffirmationSchedule,
-        repository: (any ScheduleRepository)? = nil
-    ) {
-        self.schedule = schedule
-        self.defaultSchedule = schedule
-        self.repository = repository
+    convenience init() { self.init(schedule: AffirmationSchedule()) }
+
+    init(schedule: AffirmationSchedule) {
+        schedules = [schedule]
+        notificationSound = schedule.sound
+        defaultSchedule = AffirmationSchedule()
+        repository = nil
     }
 
-    convenience init() {
-        self.init(schedule: AffirmationSchedule())
-    }
-
-    init(
-        repository: any ScheduleRepository,
-        defaultSchedule: AffirmationSchedule
-    ) {
+    init(repository: any ScheduleRepository, defaultSchedule: AffirmationSchedule) {
         self.repository = repository
         self.defaultSchedule = defaultSchedule
-
+        schedules = [defaultSchedule]
         do {
-            if let savedSchedule = try repository.loadSchedule() {
-                schedule = savedSchedule
+            if let saved = try repository.loadSchedules() {
+                try ScheduleValidation.validate(saved)
+                schedules = saved
             } else {
-                schedule = defaultSchedule
-                try repository.saveSchedule(defaultSchedule)
+                try repository.saveSchedules(schedules)
+            }
+            // Preserve the first saved schedule's sound when migrating to one preference.
+            if let savedSound = try repository.loadNotificationSound() {
+                notificationSound = savedSound
+            } else {
+                let migratedSound = schedules.first?.sound ?? .systemDefault
+                try repository.saveNotificationSound(migratedSound)
+                notificationSound = migratedSound
             }
         } catch {
-            schedule = defaultSchedule
             persistenceErrorMessage = error.localizedDescription
         }
     }
 
-    func setEnabled(_ isEnabled: Bool) throws {
-        try update { $0.isEnabled = isEnabled }
-    }
-
-    func setStartTime(_ startTime: TimeOfDay) throws {
-        try update { $0.startTime = startTime }
-    }
-
-    func setEndTime(_ endTime: TimeOfDay) throws {
-        try update { $0.endTime = endTime }
-    }
-
-    func setNotificationsPerDay(_ notificationsPerDay: Int) throws {
-        try update { $0.notificationsPerDay = notificationsPerDay }
-    }
-
-    func replace(with schedule: AffirmationSchedule) throws {
-        try update { $0 = schedule }
-    }
-
-    func reset() throws {
-        try replace(with: defaultSchedule)
-    }
-
-    func applyPersistedDefaults() {
-        schedule = defaultSchedule
-    }
-
-    private func update(
-        _ change: (inout AffirmationSchedule) -> Void
-    ) throws {
+    func replace(with schedules: [AffirmationSchedule]) throws {
         if let persistenceErrorMessage {
             throw PersistenceUnavailableError(reason: persistenceErrorMessage)
         }
+        try ScheduleValidation.validate(schedules)
+        try repository?.saveSchedules(schedules)
+        self.schedules = schedules
+    }
 
-        var updatedSchedule = schedule
-        change(&updatedSchedule)
+    func reset() throws {
+        try replace(with: [defaultSchedule])
+    }
 
-        guard AffirmationSchedule.notificationCountRange.contains(updatedSchedule.notificationsPerDay) else {
-            throw ScheduleCalculatorError.invalidReminderCount
+    func setNotificationSound(_ sound: NotificationSound) throws {
+        if let persistenceErrorMessage {
+            throw PersistenceUnavailableError(reason: persistenceErrorMessage)
         }
+        try repository?.saveNotificationSound(sound)
+        notificationSound = sound
+    }
 
-        try repository?.saveSchedule(updatedSchedule)
-        schedule = updatedSchedule
+    func applyPersistedDefaults() {
+        schedules = [defaultSchedule]
+        notificationSound = .systemDefault
     }
 }

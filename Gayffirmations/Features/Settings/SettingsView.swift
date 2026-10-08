@@ -30,16 +30,17 @@ struct SettingsView: View {
                     Button {
                         isShowingSchedule = true
                     } label: {
-                        disclosureLabel("Schedule", value: notificationCoordinator.deliveryIsPaused
-                                        ? "Paused" : (scheduleStore.schedule.isEnabled ? "On" : "Off"))
+                        disclosureLabel("Schedules", value: notificationCoordinator.deliveryIsPaused
+                                        ? "Paused" : "\(notificationCoordinator.enabledCount) enabled")
                     }
                     .buttonStyle(.plain)
                     Button {
                         isShowingSound = true
                     } label: {
-                        disclosureLabel("Sound", value: scheduleStore.schedule.sound.title)
+                        disclosureLabel("Sound", value: scheduleStore.notificationSound.title)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityHint("Choose the notification sound for all schedules")
                 }
 
                 Section("Data") {
@@ -69,21 +70,20 @@ struct SettingsView: View {
                     }
                 }
             }
+            .sheet(isPresented: $isEditingName) {
+                NameEditorView(notificationCoordinator: notificationCoordinator)
+            }
             .sheet(isPresented: $isShowingSound) {
                 NavigationStack {
-                    NotificationSoundPickerView(
-                        store: scheduleStore,
-                        notificationCoordinator: notificationCoordinator
-                    )
+                    NotificationSoundPickerView(coordinator: notificationCoordinator)
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
                             Button("Done") { isShowingSound = false }
+                                .disabled(notificationCoordinator.isUpdating)
                         }
                     }
                 }
-            }
-            .sheet(isPresented: $isEditingName) {
-                NameEditorView(notificationCoordinator: notificationCoordinator)
+                .interactiveDismissDisabled(notificationCoordinator.isUpdating)
             }
             .confirmationDialog(
                 pendingReset?.title ?? "Reset",
@@ -169,7 +169,7 @@ private enum ResetAction {
         case .affirmations:
             "Restore Default Affirmations"
         case .schedule:
-            "Reset Schedule"
+            "Reset Schedules"
         case .all:
             "Reset All App Data"
         }
@@ -180,7 +180,7 @@ private enum ResetAction {
         case .affirmations:
             "Restore Default Affirmations?"
         case .schedule:
-            "Reset Schedule?"
+            "Reset Schedules?"
         case .all:
             "Reset All App Data?"
         }
@@ -191,7 +191,7 @@ private enum ResetAction {
         case .affirmations:
             "Restore Affirmations"
         case .schedule:
-            "Reset Schedule"
+            "Reset Schedules"
         case .all:
             "Reset Everything"
         }
@@ -202,9 +202,9 @@ private enum ResetAction {
         case .affirmations:
             "This replaces your affirmation library, including custom affirmations and favorites, with the original defaults."
         case .schedule:
-            "This turns off daily reminders, restores the default times and sound, and removes pending notifications."
+            "This replaces all schedules with one disabled default schedule and removes pending notifications."
         case .all:
-            "This restores the affirmation library, notification schedule and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
+            "This restores the affirmation library, notification schedules and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
         }
     }
 }

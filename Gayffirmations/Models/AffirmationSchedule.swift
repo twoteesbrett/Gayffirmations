@@ -44,18 +44,26 @@ enum ScheduleEmphasis: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-struct AffirmationSchedule: Codable, Equatable {
+struct AffirmationSchedule: Codable, Equatable, Identifiable {
     static let notificationCountRange = 1...24
 
+    var id: UUID
+    // Retained for compatibility with previously saved schedules.
+    var name: String
+    var selection: AffirmationSelection
     var isEnabled: Bool
     var startTime: TimeOfDay
     var endTime: TimeOfDay
     var notificationsPerDay: Int
+    // Legacy per-schedule preference, used only when migrating the global sound.
     var sound: NotificationSound
     var rhythm: ScheduleRhythm
     var emphasis: ScheduleEmphasis
 
     init(
+        id: UUID = UUID(),
+        name: String = "",
+        selection: AffirmationSelection = .all,
         isEnabled: Bool = false,
         startTime: TimeOfDay = TimeOfDay(hour: 9, minute: 0),
         endTime: TimeOfDay = TimeOfDay(hour: 17, minute: 0),
@@ -64,6 +72,9 @@ struct AffirmationSchedule: Codable, Equatable {
         rhythm: ScheduleRhythm = .evenlySpaced,
         emphasis: ScheduleEmphasis = .balanced
     ) {
+        self.id = id
+        self.name = name
+        self.selection = selection
         self.isEnabled = isEnabled
         self.startTime = startTime
         self.endTime = endTime
@@ -74,11 +85,22 @@ struct AffirmationSchedule: Codable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case isEnabled, startTime, endTime, notificationsPerDay, sound, rhythm, emphasis
+        case id, name, selection, isEnabled, startTime, endTime, notificationsPerDay, sound, rhythm, emphasis
+    }
+
+    var timeRangeDescription: String {
+        "\(startTime.date().formatted(date: .omitted, time: .shortened)) – \(endTime.date().formatted(date: .omitted, time: .shortened))"
+    }
+
+    var summary: String {
+        "\(timeRangeDescription) · \(selection.name)"
     }
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        name = try container.decodeIfPresent(String.self, forKey: .name) ?? "Daily affirmations"
+        selection = try container.decodeIfPresent(AffirmationSelection.self, forKey: .selection) ?? .all
         isEnabled = try container.decode(Bool.self, forKey: .isEnabled)
         startTime = try container.decode(TimeOfDay.self, forKey: .startTime)
         endTime = try container.decode(TimeOfDay.self, forKey: .endTime)

@@ -41,7 +41,7 @@ final class AppDataResetCoordinator {
         // Save every section before changing visible state or stopping reminders.
         try repository.saveAppData(
             affirmations: affirmationStore.defaultAffirmations,
-            schedule: scheduleStore.defaultSchedule,
+            schedules: [scheduleStore.defaultSchedule],
             theme: themeStore.defaultTheme,
             selection: .all
         )

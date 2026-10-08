@@ -12,6 +12,8 @@ final class UserDefaultsRepository:
     private enum Key {
         static let name = "gayffirmations.name"
         static let affirmations = "gayffirmations.affirmations"
+        static let schedules = "gayffirmations.schedules"
+        static let notificationSound = "gayffirmations.notificationSound"
         static let schedule = "gayffirmations.schedule"
         static let themeBackgrounds = "gayffirmations.themeBackgrounds"
         static let theme = "gayffirmations.theme"
@@ -74,12 +76,31 @@ final class UserDefaultsRepository:
         try save(name, forKey: Key.name)
     }
 
-    func loadSchedule() throws -> AffirmationSchedule? {
-        try load(AffirmationSchedule.self, forKey: Key.schedule)
+    func loadSchedules() throws -> [AffirmationSchedule]? {
+        if let schedules = try load([AffirmationSchedule].self, forKey: Key.schedules) {
+            return schedules
+        }
+        guard var legacy = try load(AffirmationSchedule.self, forKey: Key.schedule) else {
+            return nil
+        }
+        // Capture the old shared source once. Browsing changes are independent afterward.
+        legacy.selection = try loadAffirmationSelection() ?? .all
+        try ScheduleValidation.validate([legacy])
+        try saveSchedules([legacy])
+        return [legacy]
     }
 
-    func saveSchedule(_ schedule: AffirmationSchedule) throws {
-        try save(schedule, forKey: Key.schedule)
+    func saveSchedules(_ schedules: [AffirmationSchedule]) throws {
+        try save(schedules, forKey: Key.schedules)
+        userDefaults.removeObject(forKey: Key.schedule)
+    }
+
+    func loadNotificationSound() throws -> NotificationSound? {
+        try load(NotificationSound.self, forKey: Key.notificationSound)
+    }
+
+    func saveNotificationSound(_ sound: NotificationSound) throws {
+        try save(sound, forKey: Key.notificationSound)
     }
 
     func loadTheme() throws -> AppTheme? {
@@ -108,21 +129,23 @@ final class UserDefaultsRepository:
 
     func saveAppData(
         affirmations: [Affirmation],
-        schedule: AffirmationSchedule,
+        schedules: [AffirmationSchedule],
         theme: AppTheme,
         selection: AffirmationSelection
     ) throws {
         // Complete every throwing operation before changing any saved data.
         let affirmationData = try encoder.encode(affirmations)
-        let scheduleData = try encoder.encode(schedule)
+        let scheduleData = try encoder.encode(schedules)
         let themeData = try encoder.encode(theme)
         let selectionData = try encoder.encode(selection)
         userDefaults.set(affirmationData, forKey: Key.affirmations)
-        userDefaults.set(scheduleData, forKey: Key.schedule)
+        userDefaults.set(scheduleData, forKey: Key.schedules)
+        userDefaults.removeObject(forKey: Key.schedule)
         userDefaults.set(themeData, forKey: Key.theme)
         userDefaults.set(selectionData, forKey: Key.affirmationSelection)
         userDefaults.removeObject(forKey: Key.themeBackgrounds)
         userDefaults.removeObject(forKey: Key.name)
+        userDefaults.removeObject(forKey: Key.notificationSound)
     }
 
     private func load<Value: Decodable>(

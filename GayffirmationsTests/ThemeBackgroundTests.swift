@@ -34,7 +34,7 @@ struct ThemeBackgroundTests {
         let restarted = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
         #expect(restarted.backgroundChoice.usesPhoto)
         #expect(restarted.selectedPhoto != nil)
-        try repository.saveAppData(affirmations: [], schedule: AffirmationSchedule(), theme: .nature, selection: .all)
+        try repository.saveAppData(affirmations: [], schedules: [AffirmationSchedule()], theme: .nature, selection: .all)
         store.applyPersistedDefaults()
         #expect(store.backgrounds.isEmpty)
         #expect(try repository.loadThemeBackgrounds().isEmpty)

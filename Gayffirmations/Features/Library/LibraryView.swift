@@ -98,7 +98,7 @@ struct LibraryView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("These affirmations appear in Today and reminders.")
+            Text("These filters control Library and Today when no schedules are delivering. Choose reminder content within each schedule.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -142,7 +142,7 @@ struct LibraryView: View {
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Choose tags. Entries matching any selected tag or Favourites appear in Library, Today, and reminders.")
+                    Text("Choose tags. Entries matching any selected tag or Favourites appear in Library and in Today when no schedules are delivering.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,

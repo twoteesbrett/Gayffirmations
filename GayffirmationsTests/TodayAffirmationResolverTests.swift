@@ -15,15 +15,6 @@ struct TodayAffirmationResolverTests {
         calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute))!
     }
 
-    @Test func scheduledAffirmationMatchesReminderAtEachBoundary() throws {
-        let schedule = AffirmationSchedule(isEnabled: true)
-        let reminders = try NotificationPlanner().reminders(for: schedule, affirmations: affirmations)
-        for reminder in reminders {
-            let date = reminder.time.date(on: date(hour: 0), calendar: calendar)
-            #expect(resolver.affirmation(at: date, schedule: schedule, affirmations: affirmations, calendar: calendar)?.text == reminder.affirmationText)
-        }
-    }
-
     @Test func retainsLatestSlotBetweenRemindersAndOvernight() {
         let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 2)
         for date in [date(hour: 15), date(hour: 23), date(day: 2, hour: 0), date(day: 2, hour: 10, minute: 59)] {

@@ -5,390 +5,162 @@ struct ScheduleView: View {
     let store: ScheduleStore
     let notificationCoordinator: NotificationCoordinator
 
-    @State private var presentedError: PresentedError?
-    @State private var isUpdatingSchedule = false
-    @State private var showsUpdatingIndicator = false
-    @State private var showsExactTimes = false
+    @State private var editingSchedule: AffirmationSchedule?
+    @State private var pendingDeletion: AffirmationSchedule?
+    @State private var errorMessage: String?
+    @State private var permissionDenied = false
     @Environment(\.openURL) private var openURL
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private let calculator = ScheduleCalculator()
 
     var body: some View {
-        Form {
+        let plan = notificationCoordinator.dailyPlan
+        let deliveryMinutes = plan.map { $0.time.minutesSinceMidnight }
+        let hasOverlappingReminders = Set(deliveryMinutes).count != deliveryMinutes.count
+
+        List {
             Section {
-                Toggle("Daily reminders", isOn: enabledBinding)
+                ForEach(store.schedules) { schedule in
+                    scheduleRow(schedule)
+                        .padding(.vertical, 4)
+                        .swipeActions {
+                            Button("Delete", systemImage: "trash", role: .destructive) { pendingDeletion = schedule }
+                                .tint(.red)
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button("Duplicate", systemImage: "plus.square.on.square") { duplicate(schedule) }
+                        }
+                        .contextMenu {
+                            Button("Edit", systemImage: "pencil") { editingSchedule = schedule }
+                            Button("Duplicate", systemImage: "plus.square.on.square") { duplicate(schedule) }
+                            Button("Delete", systemImage: "trash", role: .destructive) { pendingDeletion = schedule }
+                        }
+                }
+                Button("Add Schedule", systemImage: "plus") {
+                    editingSchedule = AffirmationSchedule()
+                }
             } footer: {
-                if notificationCoordinator.deliveryIsPaused {
-                    Text("Reminders are paused because no selected affirmations are ready. Add matching entries or set your name in Settings to use personalised messages.")
+                Text("Each schedule has its own tags, times, and daily rhythm. Swipe right to duplicate a schedule, or left to delete it.")
+            }
+
+            Section("Daily preview") {
+                LabeledContent("Enabled reminders", value: "\(notificationCoordinator.dailyTotal) of \(ScheduleValidation.dailyReminderLimit)")
+                if plan.isEmpty {
+                    Text("No reminders are ready to deliver. Enable a schedule with matching affirmations to see your day here.")
+                        .foregroundStyle(.secondary)
                 } else {
-                    Text("Gayffirmations will ask for permission when you enable reminders.")
-                }
-            }
-
-            Section("Daily period") {
-                DatePicker(
-                    "Start",
-                    selection: startTimeBinding,
-                    displayedComponents: .hourAndMinute
-                )
-
-                DatePicker(
-                    "End",
-                    selection: endTimeBinding,
-                    displayedComponents: .hourAndMinute
-                )
-            }
-
-            Section("Frequency") {
-                Stepper(
-                    "\(store.schedule.notificationsPerDay) per day",
-                    value: notificationsPerDayBinding,
-                    in: AffirmationSchedule.notificationCountRange
-                )
-            }
-
-            Section {
-                if dynamicTypeSize.isAccessibilitySize {
-                    rhythmPicker.pickerStyle(.menu)
-                } else {
-                    rhythmPicker.pickerStyle(.segmented)
-                }
-
-                if store.schedule.rhythm != .evenlySpaced {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Emphasis")
-                        if dynamicTypeSize.isAccessibilitySize {
-                            emphasisPicker.pickerStyle(.menu)
-                        } else {
-                            emphasisPicker.pickerStyle(.segmented)
+                    ForEach(plan) { slot in
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(slot.time.date(), format: .dateTime.hour().minute())
+                                .monospacedDigit()
+                            Spacer()
+                            Text(store.schedules.first { $0.id == slot.scheduleID }?.summary ?? "")
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.trailing)
                         }
                     }
+                    if hasOverlappingReminders {
+                        Text("Some reminders share a time. Both schedules will deliver their reminders.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-            } header: {
-                Text("Daily rhythm")
-            } footer: {
-                Text(store.schedule.rhythm.explanation)
-            }
-
-            Section("Preview") {
-                preview
             }
         }
         .themedBackground()
-        .disabled(isUpdating)
-        .navigationTitle("Schedule")
+        .navigationTitle("Schedules")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if #available(iOS 26.0, *) {
-                updatingToolbarItem
-                    .sharedBackgroundVisibility(.hidden)
-            } else {
-                updatingToolbarItem
+        .disabled(notificationCoordinator.isUpdating)
+        .sheet(item: $editingSchedule) { schedule in
+            ScheduleEditorView(schedule: schedule, coordinator: notificationCoordinator)
+        }
+        .confirmationDialog("Delete schedule?", isPresented: Binding(
+            get: { pendingDeletion != nil },
+            set: { if !$0 { pendingDeletion = nil } }
+        ), titleVisibility: .visible) {
+            if let schedule = pendingDeletion {
+                Button("Delete \(schedule.summary)", role: .destructive) {
+                    pendingDeletion = nil
+                    perform { try await notificationCoordinator.deleteSchedule(id: schedule.id) }
+                }
             }
+        } message: {
+            Text("This removes the schedule and its reminders.")
         }
-        .task(id: isUpdating) {
-            showsUpdatingIndicator = false
-            guard isUpdating else { return }
-
-            do {
-                try await Task.sleep(for: .milliseconds(300))
-                try Task.checkCancellation()
-                showsUpdatingIndicator = true
-            } catch {
-                // A quick save or dismissal cancels the delayed indicator.
+        .alert("Unable to Update Schedules", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            if permissionDenied {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                }
             }
-        }
-        .alert(item: $presentedError) { presentedError in
-            alert(for: presentedError)
-        }
-    }
-
-    private var isUpdating: Bool {
-        isUpdatingSchedule || notificationCoordinator.isUpdating
-    }
-
-    private var updatingToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            ProgressView()
-                .frame(width: 24, height: 24)
-                .opacity(showsUpdatingIndicator && isUpdating ? 1 : 0)
-                .accessibilityLabel("Updating schedule")
-                .accessibilityHidden(!showsUpdatingIndicator || !isUpdating)
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "Please try again.")
         }
     }
 
-    @ViewBuilder
-    private var preview: some View {
-        if notificationCoordinator.deliveryIsPaused {
-            Text("No reminders will be delivered until the selected source has affirmations ready to use.")
-                .foregroundStyle(.secondary)
-        } else {
-            schedulePreview
-        }
-    }
-
-    @ViewBuilder
-    private var schedulePreview: some View {
-        switch Result(catching: { try calculator.notificationTimes(for: store.schedule) }) {
-        case .success(let times):
-            if times.isEmpty {
-                Text("No reminders are scheduled.")
-                    .foregroundStyle(.secondary)
-            } else {
-                reminderTimeline(times)
-
-                DisclosureGroup("Exact times", isExpanded: $showsExactTimes) {
-                    ForEach(Array(times.enumerated()), id: \.offset) { index, time in
-                        LabeledContent("Reminder \(index + 1)") {
-                            Text(time.date(), format: .dateTime.hour().minute())
+    private func scheduleRow(_ schedule: AffirmationSchedule) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: Binding(
+                get: { schedule.isEnabled },
+                set: { enabled in
+                    perform { try await notificationCoordinator.setEnabled(enabled, for: schedule.id) }
+                }
+            )) {
+                Text(schedule.timeRangeDescription).font(.headline)
+            }
+            Button {
+                editingSchedule = schedule
+            } label: {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(schedule.selection.name)
+                        Text("\(schedule.notificationsPerDay) per day")
+                        Text(schedule.rhythm.title)
+                        if notificationCoordinator.isPaused(schedule) {
+                            Label("Paused · No matching affirmations ready", systemImage: "pause.circle")
                         }
                     }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    Spacer(minLength: 8)
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
                 }
+                .contentShape(Rectangle())
             }
-        case .failure(let error):
-            Label(error.localizedDescription, systemImage: "exclamationmark.triangle")
-                .foregroundStyle(.red)
+            .buttonStyle(.plain)
+            .accessibilityLabel("Edit \(schedule.summary)")
         }
     }
 
-    private var rhythmPicker: some View {
-        Picker("Daily rhythm", selection: rhythmBinding) {
-            ForEach([ScheduleRhythm.moreEarly, .evenlySpaced, .moreLate]) { rhythm in
-                Text(rhythm.title).tag(rhythm)
-            }
-        }
+    private func duplicate(_ schedule: AffirmationSchedule) {
+        var copy = schedule
+        copy.id = UUID()
+        copy.name = ""
+        copy.isEnabled = false
+        editingSchedule = copy
     }
 
-    private var emphasisPicker: some View {
-        Picker("Emphasis", selection: emphasisBinding) {
-            ForEach(ScheduleEmphasis.allCases) { emphasis in
-                Text(emphasis.title).tag(emphasis)
-            }
-        }
-    }
-
-    private func reminderTimeline(_ times: [TimeOfDay]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("\(times.count) reminders per day")
-            GeometryReader { geometry in
-                let start = store.schedule.startTime.minutesSinceMidnight
-                let duration = store.schedule.endTime.minutesSinceMidnight - start
-                let width = max(0, geometry.size.width - 12)
-
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(.secondary.opacity(0.2))
-                        .frame(height: 2)
-                    ForEach(Array(times.enumerated()), id: \.offset) { _, time in
-                        Circle()
-                            .fill(.tint)
-                            .frame(width: 12, height: 12)
-                            .offset(x: width * Double(time.minutesSinceMidnight - start) / Double(duration))
-                    }
-                }
-                .frame(height: 32)
-                .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: times)
-            }
-            .frame(height: 32)
-            HStack {
-                Text(store.schedule.startTime.date(), format: .dateTime.hour().minute())
-                Spacer()
-                Text(store.schedule.endTime.date(), format: .dateTime.hour().minute())
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Reminder timeline")
-        .accessibilityValue(times.map { $0.date().formatted(date: .omitted, time: .shortened) }.joined(separator: ", "))
-    }
-
-    private var rhythmBinding: Binding<ScheduleRhythm> {
-        Binding(
-            get: { store.schedule.rhythm },
-            set: { rhythm in
-                performScheduleChange {
-                    try await notificationCoordinator.setRhythm(rhythm)
-                }
-            }
-        )
-    }
-
-    private var emphasisBinding: Binding<ScheduleEmphasis> {
-        Binding(
-            get: { store.schedule.emphasis },
-            set: { emphasis in
-                performScheduleChange {
-                    try await notificationCoordinator.setEmphasis(emphasis)
-                }
-            }
-        )
-    }
-
-    private var enabledBinding: Binding<Bool> {
-        Binding(
-            get: { store.schedule.isEnabled },
-            set: { isEnabled in
-                performScheduleChange {
-                    try await notificationCoordinator.setEnabled(isEnabled)
-                }
-            }
-        )
-    }
-
-    private var startTimeBinding: Binding<Date> {
-        Binding(
-            get: { store.schedule.startTime.date() },
-            set: { date in
-                performScheduleChange {
-                    try await notificationCoordinator.setStartTime(
-                        TimeOfDay(date: date)
-                    )
-                }
-            }
-        )
-    }
-
-    private var endTimeBinding: Binding<Date> {
-        Binding(
-            get: { store.schedule.endTime.date() },
-            set: { date in
-                performScheduleChange {
-                    try await notificationCoordinator.setEndTime(
-                        TimeOfDay(date: date)
-                    )
-                }
-            }
-        )
-    }
-
-    private var notificationsPerDayBinding: Binding<Int> {
-        Binding(
-            get: { store.schedule.notificationsPerDay },
-            set: { notificationsPerDay in
-                performScheduleChange {
-                    try await notificationCoordinator.setNotificationsPerDay(
-                        notificationsPerDay
-                    )
-                }
-            }
-        )
-    }
-
-    private func performScheduleChange(
-        _ change: @escaping @MainActor () async throws -> Void
-    ) {
-        guard !isUpdatingSchedule, !notificationCoordinator.isUpdating else {
-            return
-        }
-
-        isUpdatingSchedule = true
-
+    private func perform(_ change: @escaping @MainActor () async throws -> Void) {
         Task {
-            defer { isUpdatingSchedule = false }
-
-            do {
-                try await change()
-            } catch {
-                presentedError = PresentedError(
-                    title: "Unable to Update Schedule",
-                    message: error.localizedDescription,
-                    offersSettings: (error as? NotificationCoordinatorError)
-                        == .permissionDenied
-                )
+            do { try await change() }
+            catch {
+                permissionDenied = (error as? NotificationCoordinatorError) == .permissionDenied
+                errorMessage = error.localizedDescription
             }
         }
     }
-
-    private func alert(for error: PresentedError) -> Alert {
-        guard error.offersSettings else {
-            return Alert(
-                title: Text(error.title),
-                message: Text(error.message),
-                dismissButton: .cancel(Text("OK"))
-            )
-        }
-
-        return Alert(
-            title: Text("Notifications Are Off"),
-            message: Text(error.message),
-            primaryButton: .default(Text("Open Settings")) {
-                openAppSettings()
-            },
-            secondaryButton: .cancel()
-        )
-    }
-
-    private func openAppSettings() {
-        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
-            return
-        }
-
-        openURL(settingsURL)
-    }
 }
 
-private struct PresentedError: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-    let offersSettings: Bool
-}
-
-#if DEBUG
 #Preview {
-    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
-    let scheduleStore = ScheduleStore()
-
+    let store = ScheduleStore()
     NavigationStack {
-        ScheduleView(
-            store: scheduleStore,
-            notificationCoordinator: NotificationCoordinator(
-                affirmationStore: affirmationStore,
-                scheduleStore: scheduleStore,
-                scheduler: PreviewNotificationScheduler()
-            )
-        )
+        ScheduleView(store: store, notificationCoordinator: NotificationCoordinator(
+            affirmationStore: AffirmationStore(affirmations: PreviewContent.affirmations),
+            scheduleStore: store, scheduler: PreviewNotificationScheduler()
+        ))
     }
 }
-
-#Preview("Accessibility text size") {
-    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
-    let scheduleStore = ScheduleStore()
-
-    NavigationStack {
-        ScheduleView(
-            store: scheduleStore,
-            notificationCoordinator: NotificationCoordinator(
-                affirmationStore: affirmationStore,
-                scheduleStore: scheduleStore,
-                scheduler: PreviewNotificationScheduler()
-            )
-        )
-        .environment(\.dynamicTypeSize, .accessibility5)
-    }
-}
-
-#Preview("More late") {
-    let affirmationStore = AffirmationStore(affirmations: PreviewContent.affirmations)
-    let scheduleStore = ScheduleStore(schedule: AffirmationSchedule(
-        endTime: TimeOfDay(hour: 23, minute: 0),
-        notificationsPerDay: 6,
-        rhythm: .moreLate
-    ))
-
-    NavigationStack {
-        ScheduleView(
-            store: scheduleStore,
-            notificationCoordinator: NotificationCoordinator(
-                affirmationStore: affirmationStore,
-                scheduleStore: scheduleStore,
-                scheduler: PreviewNotificationScheduler()
-            )
-        )
-    }
-}
-
-#endif
