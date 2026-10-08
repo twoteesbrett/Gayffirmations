@@ -251,7 +251,7 @@ struct PersistenceRepositoryTests {
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
-    @Test("Removed themes fall back to Nature and allow subsequent selections", arguments: ["together", "fruity"])
+    @Test("Removed themes fall back to Nature and allow subsequent selections", arguments: ["together", "fruity", "refined"])
     func removedThemeMigration(name: String) throws {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }

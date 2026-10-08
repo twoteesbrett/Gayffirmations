@@ -364,11 +364,6 @@ struct TodayView: View {
         .themeAppearance(.steel)
 }
 
-#Preview("Refined") {
-    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
-        .themeAppearance(.refined)
-}
-
 #Preview("Disco") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
         .themeAppearance(.disco)

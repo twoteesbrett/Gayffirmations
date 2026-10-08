@@ -73,8 +73,6 @@ extension AppTheme {
                 ThemePhoto(id: "concrete-stairway", name: "Stairway", focalPoint: .center,
                            overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of concrete stairs rising between angular walls toward an open sky", textColor: .white)
             ]
-        case .refined:
-            return []
         }
     }
 }

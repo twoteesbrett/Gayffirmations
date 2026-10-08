@@ -143,7 +143,6 @@ private struct ThemePreviewRow: View {
         switch theme {
         case .nature: photoID = "nature-forest"
         case .steel: photoID = "steel-strength"
-        case .refined: photoID = nil
         case .disco: photoID = "disco-mirrorball"
         case .concrete: photoID = "concrete-oculus"
         }

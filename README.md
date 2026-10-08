@@ -129,8 +129,7 @@ selections continue to work. Audio preparation and file sizes are in
 
 ## Themes and photos
 
-The five themes are Nature, Steel, Refined, Disco, and Concrete. Nature, Steel,
-Disco, and Concrete each have six photos; Refined uses a colour background.
+The four themes are Nature, Disco, Steel, and Concrete. Each has six photos.
 Themes with photos use them by default and offer a Use photos switch saved
 separately for each theme. Turning it off uses the theme's colour background.
 The picker shows thumbnail previews. Steel renders photos in greyscale;
@@ -161,8 +160,8 @@ seeded once, using stable IDs and matching text to avoid duplicates; later
 launches preserve edits and deletions. The earlier content-rebuild reset is
 no longer performed, including for installations with an old rebuild marker.
 
-Retired theme identifiers decode as Nature; current identifiers retain their
-identity. Unknown or malformed data reports an error rather than silently
+Retired theme identifiers, including Refined, decode as Nature; current identifiers
+retain their identity. Unknown or malformed data reports an error rather than silently
 replacing saved content. Legacy fixed photo IDs are ignored when decoding
 background preferences. Reset All clears saved background choices. Schedules
 saved before sound selection was added load with Default sound.

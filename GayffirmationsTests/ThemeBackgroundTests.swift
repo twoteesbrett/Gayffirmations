@@ -46,7 +46,7 @@ struct ThemeBackgroundTests {
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let repository = UserDefaultsRepository(userDefaults: defaults)
-        let store = ThemeStore(repository: repository, defaultTheme: .refined, backgroundRepository: repository)
+        let store = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
         for theme in AppTheme.allCases {
             try store.select(theme)
             #expect(store.backgroundChoice.usesPhoto == !theme.photos.isEmpty)
@@ -72,15 +72,13 @@ struct ThemeBackgroundTests {
         let data = Data(#"{"usesPhoto":true,"photoID":"removed"}"#.utf8)
         let choice = try JSONDecoder().decode(ThemeBackgroundChoice.self, from: data)
         #expect(choice.usesPhoto)
-        let store = ThemeStore(selectedTheme: .refined)
-        try store.setUsesPhoto(true)
-        #expect(store.selectedPhoto == nil)
-        #expect(!store.backgroundChoice.usesPhoto)
     }
 
-    @Test("Enabling photos after viewing a theme without photos advances on the next affirmation")
+    @Test("Enabling photos after viewing a colour background advances on the next affirmation")
     func enablesAfterColours() throws {
-        let store = ThemeStore(selectedTheme: .refined)
+        let store = ThemeStore(selectedTheme: .nature)
+        try store.setUsesPhoto(false)
+        #expect(store.selectedPhoto == nil)
         store.updateDisplayedAffirmation(UUID())
         try store.select(.steel)
         try store.setUsesPhoto(true)
