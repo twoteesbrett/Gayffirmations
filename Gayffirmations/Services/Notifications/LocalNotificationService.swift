@@ -1,16 +1,37 @@
 import UserNotifications
 
-final class LocalNotificationService: NotificationScheduling {
-    private let center: UNUserNotificationCenter
+/// The system boundary keeps OS request submission separate from app planning.
+protocol NotificationCenterClient {
+    func authorizationStatus() async -> UNAuthorizationStatus
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+    func add(_ request: UNNotificationRequest) async throws
+    func removeAllPendingNotificationRequests()
+}
 
-    init(center: UNUserNotificationCenter = .current()) {
-        self.center = center
+private final class SystemNotificationCenterClient: NotificationCenterClient {
+    private let center: UNUserNotificationCenter
+    init(center: UNUserNotificationCenter) { self.center = center }
+    func authorizationStatus() async -> UNAuthorizationStatus {
+        await center.notificationSettings().authorizationStatus
+    }
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        try await center.requestAuthorization(options: options)
+    }
+    func add(_ request: UNNotificationRequest) async throws { try await center.add(request) }
+    func removeAllPendingNotificationRequests() { center.removeAllPendingNotificationRequests() }
+}
+
+final class LocalNotificationService: NotificationScheduling {
+    private let center: any NotificationCenterClient
+
+    convenience init(center: UNUserNotificationCenter = .current()) {
+        self.init(client: SystemNotificationCenterClient(center: center))
     }
 
-    func authorizationStatus() async -> NotificationAuthorizationStatus {
-        let settings = await center.notificationSettings()
+    init(client: any NotificationCenterClient) { center = client }
 
-        switch settings.authorizationStatus {
+    func authorizationStatus() async -> NotificationAuthorizationStatus {
+        switch await center.authorizationStatus() {
         case .notDetermined:
             return .notDetermined
         case .denied:
@@ -32,11 +53,14 @@ final class LocalNotificationService: NotificationScheduling {
         guard (1...ScheduleValidation.dailyReminderLimit).contains(reminders.count) else {
             throw ScheduleCalculatorError.invalidReminderCount
         }
+        try Task.checkCancellation()
         removePendingNotifications()
 
         do {
             for (index, reminder) in reminders.enumerated() {
+                try Task.checkCancellation()
                 try await center.add(request(for: reminder, index: index))
+                try Task.checkCancellation()
             }
         } catch {
             removePendingNotifications()

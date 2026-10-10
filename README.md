@@ -7,6 +7,8 @@ visual polish will follow once the core behavior is working.
 This README covers app behaviour and development. [SOURCES.md](SOURCES.md)
 records bundled asset origins and preparation; [TODO.md](TODO.md) tracks
 remaining work and verification.
+Notification adapter coverage and outstanding device release checks are recorded in
+[DEVICE_VALIDATION.md](DEVICE_VALIDATION.md).
 
 ## Build validation
 
