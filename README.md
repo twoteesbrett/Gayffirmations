@@ -36,6 +36,19 @@ Before distribution, verify it in the signed archive and run Apple's archive
 validation. Review App Store Connect privacy answers against the app's actual
 behavior separately; a bundled manifest does not establish those answers.
 
+## Recovering unreadable saved data
+
+Unreadable saved sections are preserved on launch and block ordinary edits.
+Settings identifies those sections. Confirming Reset All App Data repairs them by
+resetting every section, including healthy data. Recovery keeps the previous raw
+values in local UserDefaults under `gayffirmations.recoveryBackups`; the app does
+not currently provide an export or automatic restore interface for these backups.
+After successful recovery, a subsequent Reset All with no unreadable sections
+also removes recovery backups.
+Load errors clear only after the reset save succeeds, allowing edits immediately.
+A failed save leaves the existing values and visible state untouched. Separate
+UserDefaults writes do not provide crash-atomic persistence.
+
 ## First release
 
 The first version should let someone:

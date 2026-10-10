@@ -67,5 +67,6 @@ final class ScheduleStore {
     func applyPersistedDefaults() {
         schedules = [defaultSchedule]
         notificationSound = .systemDefault
+        persistenceErrorMessage = nil
     }
 }

@@ -22,20 +22,20 @@ final class AppDataResetCoordinator {
         self.repository = repository
     }
 
+    var unreadableSections: [String] {
+        [
+            affirmationStore.persistenceErrorMessage.map { _ in "Affirmations" },
+            scheduleStore.persistenceErrorMessage.map { _ in "Schedules and sound" },
+            themeStore.persistenceErrorMessage.map { _ in "Theme and backgrounds" },
+            notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage.map { _ in "Today fallback" },
+            notificationCoordinator.personalizationStore.persistenceErrorMessage.map { _ in "Name" }
+        ].compactMap { $0 }
+    }
+
+    // Only the explicitly confirmed Reset All action bypasses load-error guards.
     func resetAll() throws {
         guard !notificationCoordinator.isUpdating else {
             throw NotificationCoordinatorError.updateInProgress
-        }
-
-        let failures = [
-            affirmationStore.persistenceErrorMessage,
-            scheduleStore.persistenceErrorMessage,
-            themeStore.persistenceErrorMessage,
-            notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage,
-            notificationCoordinator.personalizationStore.persistenceErrorMessage
-        ].compactMap { $0 }
-        guard failures.isEmpty else {
-            throw PersistenceUnavailableError(reason: failures.joined(separator: "\n"))
         }
 
         // Save every section before changing visible state or stopping reminders.
@@ -43,7 +43,8 @@ final class AppDataResetCoordinator {
             affirmations: affirmationStore.defaultAffirmations,
             schedules: [scheduleStore.defaultSchedule],
             theme: themeStore.defaultTheme,
-            selection: .all
+            selection: .all,
+            preservingExistingData: !unreadableSections.isEmpty
         )
         affirmationStore.applyPersistedDefaults()
         scheduleStore.applyPersistedDefaults()

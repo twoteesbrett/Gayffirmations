@@ -41,8 +41,19 @@ protocol AppDataRepository {
         affirmations: [Affirmation],
         schedules: [AffirmationSchedule],
         theme: AppTheme,
-        selection: AffirmationSelection
+        selection: AffirmationSelection,
+        preservingExistingData: Bool
     ) throws
+}
+
+extension AppDataRepository {
+    func saveAppData(
+        affirmations: [Affirmation], schedules: [AffirmationSchedule],
+        theme: AppTheme, selection: AffirmationSelection
+    ) throws {
+        try saveAppData(affirmations: affirmations, schedules: schedules,
+                        theme: theme, selection: selection, preservingExistingData: false)
+    }
 }
 
 protocol ThemeBackgroundRepository {

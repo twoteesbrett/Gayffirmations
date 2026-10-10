@@ -104,8 +104,8 @@ struct ContentView: View {
         } message: {
             Text(
                 "Gayffirmations is showing default data and will not save changes "
-                    + "to the affected section during this session. Your existing "
-                    + "saved data has not been overwritten.\n\n"
+                    + "to the affected section until you explicitly reset all app data "
+                    + "from Settings. Your existing saved data has not been overwritten.\n\n"
                     + (startupPersistenceErrorMessage ?? "")
             )
         }

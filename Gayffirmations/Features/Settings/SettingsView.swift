@@ -48,6 +48,10 @@ struct SettingsView: View {
                 }
 
                 Section("Data") {
+                    if !resetCoordinator.unreadableSections.isEmpty {
+                        Text("Unable to read: \(resetCoordinator.unreadableSections.joined(separator: ", ")). Reset All App Data can repair this installation. It resets every section, including healthy data, and keeps a local backup of the previous saved values.")
+                            .foregroundStyle(.secondary)
+                    }
                     resetButton(.affirmations)
                     resetButton(.schedule)
                     resetButton(.all)
@@ -102,7 +106,9 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 if let pendingReset {
-                    Text(pendingReset.message)
+                    Text(pendingReset.message + (pendingReset == .all && !resetCoordinator.unreadableSections.isEmpty
+                         ? " Unreadable sections: \(resetCoordinator.unreadableSections.joined(separator: ", ")). Previous saved values will be kept in a local recovery backup."
+                         : ""))
                 }
             }
             .alert("Unable to Save Settings", isPresented: errorIsPresented) {
@@ -208,7 +214,7 @@ private enum ResetAction {
         case .schedule:
             "This replaces all schedules with one disabled default schedule and removes pending notifications."
         case .all:
-            "This restores the affirmation library, notification schedules and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, and pending notifications will be cancelled."
+            "This restores the affirmation library, notification schedules and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, pending notifications will be cancelled, and previous recovery backups will be removed unless unreadable data needs to be preserved."
         }
     }
 }

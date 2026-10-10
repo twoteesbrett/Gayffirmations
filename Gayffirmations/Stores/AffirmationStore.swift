@@ -148,6 +148,7 @@ final class AffirmationStore {
 
     func applyPersistedDefaults() {
         affirmations = defaultAffirmations
+        persistenceErrorMessage = nil
     }
 
     private func persist(_ updatedAffirmations: [Affirmation]) throws {

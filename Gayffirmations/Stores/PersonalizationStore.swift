@@ -27,5 +27,8 @@ final class PersonalizationStore {
         self.name = trimmed
     }
 
-    func applyPersistedDefaults() { name = "" }
+    func applyPersistedDefaults() {
+        name = ""
+        persistenceErrorMessage = nil
+    }
 }

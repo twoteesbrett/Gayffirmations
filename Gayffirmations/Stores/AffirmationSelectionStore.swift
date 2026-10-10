@@ -33,6 +33,7 @@ final class AffirmationSelectionStore {
 
     func applyPersistedDefaults() {
         selection = .all
+        persistenceErrorMessage = nil
     }
 
     func select(_ selection: AffirmationSelection) throws {

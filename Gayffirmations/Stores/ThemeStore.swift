@@ -101,6 +101,7 @@ final class ThemeStore {
     }
 
     func applyPersistedDefaults() {
+        persistenceErrorMessage = nil
         backgrounds = [:]
         photoRotation = AffirmationPhotoRotation()
         selectedTheme = defaultTheme

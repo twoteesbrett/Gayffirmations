@@ -19,6 +19,7 @@ final class UserDefaultsRepository:
         static let theme = "gayffirmations.theme"
         static let affirmationSelection = "gayffirmations.affirmationSelection"
         static let initialAffirmationsSeeded = "gayffirmations.initialAffirmationsSeeded"
+        static let recoveryBackups = "gayffirmations.recoveryBackups"
     }
 
     private let userDefaults: UserDefaults
@@ -132,13 +133,26 @@ final class UserDefaultsRepository:
         affirmations: [Affirmation],
         schedules: [AffirmationSchedule],
         theme: AppTheme,
-        selection: AffirmationSelection
+        selection: AffirmationSelection,
+        preservingExistingData: Bool
     ) throws {
         // Complete every throwing operation before changing any saved data.
         let affirmationData = try encoder.encode(affirmations)
         let scheduleData = try encoder.encode(schedules)
         let themeData = try encoder.encode(theme)
         let selectionData = try encoder.encode(selection)
+        if preservingExistingData {
+            let keys = [Key.affirmations, Key.schedules, Key.schedule, Key.theme,
+                        Key.affirmationSelection, Key.themeBackgrounds, Key.name,
+                        Key.notificationSound, Key.initialAffirmationsSeeded]
+            var values: [String: Any] = [:]
+            for key in keys { values[key] = userDefaults.object(forKey: key) }
+            var backups = userDefaults.array(forKey: Key.recoveryBackups) ?? []
+            backups.append(["savedAt": Date(), "values": values])
+            userDefaults.set(backups, forKey: Key.recoveryBackups)
+        } else {
+            userDefaults.removeObject(forKey: Key.recoveryBackups)
+        }
         userDefaults.set(affirmationData, forKey: Key.affirmations)
         userDefaults.set(scheduleData, forKey: Key.schedules)
         userDefaults.removeObject(forKey: Key.schedule)
