@@ -443,8 +443,8 @@ struct NotificationCoordinatorTests {
         #expect(coordinator.deliveryIsPaused)
     }
 
-    @Test("Failed recovery stops reminders and disables the saved schedule")
-    func failedRecoveryDisablesReminders() async throws {
+    @Test("Failed recovery stops delivery and preserves the saved enabled schedule")
+    func failedRecoveryPreservesSchedules() async throws {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let (coordinator, schedule) = makeCoordinator(scheduler: scheduler)
         try await coordinator.setEnabled(true)
@@ -452,8 +452,14 @@ struct NotificationCoordinatorTests {
         await #expect(throws: NotificationCoordinatorError.self) {
             try await coordinator.setNotificationsPerDay(6)
         }
-        #expect(!schedule.schedule.isEnabled)
+        #expect(schedule.schedule.isEnabled)
+        #expect(schedule.schedule.notificationsPerDay == 2)
+        #expect(coordinator.deliveryState == .failed)
         #expect(scheduler.scheduledReminders.isEmpty)
+        scheduler.replacementError = nil
+        await coordinator.reconcileOnForeground()
+        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(coordinator.errorMessage == nil)
     }
 
     @Test("A library refresh failure is visible and stops reminders")
@@ -469,8 +475,13 @@ struct NotificationCoordinatorTests {
         try library.update(id: library.affirmations[0].id, text: "Edited")
         await coordinator.waitForLibraryRefresh()
         #expect(coordinator.errorMessage != nil)
-        #expect(!schedule.schedule.isEnabled)
+        #expect(schedule.schedule.isEnabled)
         #expect(scheduler.scheduledReminders.isEmpty)
+        scheduler.replacementError = nil
+        await coordinator.reconcileOnForeground()
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Edited" })
+        #expect(!scheduler.scheduledReminders.isEmpty)
+        #expect(coordinator.errorMessage == nil)
     }
 
     @Test("Overlapping library and reset changes are rejected during a refresh")
@@ -538,6 +549,8 @@ final class NotificationSchedulerSpy: NotificationScheduling {
     private(set) var replaceCallCount = 0
     var failuresRemaining = 0
     var replacementError: (any Error)?
+    var replacementSuspension: NotificationSuspension?
+    var authorizationStatusResults: [NotificationAuthorizationStatus] = []
 
     init(
         authorizationStatus: NotificationAuthorizationStatus,
@@ -550,7 +563,8 @@ final class NotificationSchedulerSpy: NotificationScheduling {
     }
 
     func authorizationStatus() async -> NotificationAuthorizationStatus {
-        authorizationStatusValue
+        if !authorizationStatusResults.isEmpty { return authorizationStatusResults.removeFirst() }
+        return authorizationStatusValue
     }
 
     func requestAuthorization() async throws -> Bool {
@@ -563,6 +577,11 @@ final class NotificationSchedulerSpy: NotificationScheduling {
         with reminders: [NotificationReminder]
     ) async throws {
         replaceCallCount += 1
+
+        if let gate = replacementSuspension {
+            replacementSuspension = nil
+            await gate.pause()
+        }
 
         scheduledReminders = []
         if failuresRemaining > 0 {

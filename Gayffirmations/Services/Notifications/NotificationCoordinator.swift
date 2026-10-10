@@ -11,11 +11,15 @@ enum NotificationCoordinatorError: LocalizedError, Equatable {
         case .updateInProgress:
             "Reminders are being updated. Please try again in a moment."
         case .recoveryFailed(let reason):
-            "Reminders could not be restored and have been stopped. \(reason)"
+            "Saved settings are unchanged, but reminders could not be restored. Delivery is stopped until retry. \(reason)"
         case .permissionDenied:
             "Notifications are turned off for Gayffirmations. You can enable them in Settings."
         }
     }
+}
+
+enum NotificationDeliveryState: Equatable {
+    case disabled, contentPaused, permissionBlocked, updating, failed, active
 }
 
 @MainActor
@@ -24,6 +28,9 @@ final class NotificationCoordinator {
     private(set) var isUpdating = false
     var errorMessage: String?
     private var refreshTask: Task<Void, Never>?
+    private var reconciliationTask: Task<Void, Never>?
+    private var reconciliationPending = false
+    private var deliveryIssue: NotificationDeliveryState?
     let fallbackSelectionStore: AffirmationSelectionStore
     let personalizationStore: PersonalizationStore
     private let affirmationStore: AffirmationStore
@@ -59,6 +66,24 @@ final class NotificationCoordinator {
         (try? plan(for: scheduleStore.schedules)) ?? []
     }
     var deliveryIsPaused: Bool { enabledCount > 0 && dailyPlan.isEmpty }
+
+    var deliveryState: NotificationDeliveryState {
+        if isUpdating { return .updating }
+        if enabledCount == 0 { return .disabled }
+        if let deliveryIssue { return deliveryIssue }
+        return deliveryIsPaused ? .contentPaused : .active
+    }
+
+    var deliverySummary: String {
+        switch deliveryState {
+        case .disabled: "Disabled"
+        case .contentPaused: "Paused · no matching content"
+        case .permissionBlocked: "Blocked · permission off"
+        case .updating: "Updating"
+        case .failed: "Delivery failed · retry"
+        case .active: "\(enabledCount) enabled"
+        }
+    }
 
     func matchingAffirmations(for schedule: AffirmationSchedule) -> [Affirmation] {
         schedule.selection.matchingAffirmations(in: affirmationStore.affirmations)
@@ -110,15 +135,23 @@ final class NotificationCoordinator {
     func resetSchedule() throws {
         try checkIdle()
         try scheduleStore.reset()
-        scheduler.removePendingNotifications()
+        removePendingReminders()
     }
 
     func setSound(_ sound: NotificationSound) async throws {
         try checkIdle()
+        try Task.checkCancellation()
         guard sound != scheduleStore.notificationSound else { return }
         isUpdating = true
-        defer { isUpdating = false }
-        try checkDeliveryData()
+        defer { finishUpdate() }
+        // Sound is a saved preference even when system permission is unavailable.
+        if enabledCount > 0, await scheduler.authorizationStatus() != .authorized {
+            try Task.checkCancellation()
+            try scheduleStore.setNotificationSound(sound)
+            await reconcileSavedReminders()
+            return
+        }
+        if enabledCount > 0 { try checkDeliveryData() }
         let reminders = try planner.plan(
             for: scheduleStore.schedules,
             affirmations: affirmationStore.affirmations,
@@ -132,8 +165,9 @@ final class NotificationCoordinator {
 
     private func apply(_ schedules: [AffirmationSchedule]) async throws {
         try checkIdle()
+        try Task.checkCancellation()
         isUpdating = true
-        defer { isUpdating = false }
+        defer { finishUpdate() }
         try ScheduleValidation.validate(schedules)
         let oldEnabled = scheduleStore.schedules.filter(\.isEnabled)
         let newEnabled = schedules.filter(\.isEnabled)
@@ -142,17 +176,27 @@ final class NotificationCoordinator {
             try scheduleStore.replace(with: schedules)
             return
         }
-        let reminders: [NotificationReminder]
-        if newEnabled.isEmpty {
-            reminders = []
-        } else {
-            try checkDeliveryData()
-            reminders = try plan(for: schedules).map(\.reminder)
-            let newlyEnabled = newEnabled.contains { schedule in
-                !oldEnabled.contains(where: { $0.id == schedule.id })
-            }
-            if newlyEnabled { try await ensureAuthorization() }
+        // Reductions must save even if delivery, library data, or permission is
+        // unavailable. Failed delivery cannot undo a user's decision to stop it.
+        let isReduction = newEnabled.allSatisfy { oldEnabled.contains($0) }
+        if isReduction {
+            try scheduleStore.replace(with: schedules)
+            await reconcileSavedReminders()
+            return
         }
+        let newlyEnabled = newEnabled.contains { schedule in
+            !oldEnabled.contains(where: { $0.id == schedule.id })
+        }
+        if newlyEnabled {
+            try await ensureAuthorization()
+        } else if await scheduler.authorizationStatus() != .authorized {
+            try Task.checkCancellation()
+            try scheduleStore.replace(with: schedules)
+            await reconcileSavedReminders()
+            return
+        }
+        try checkDeliveryData()
+        let reminders = try plan(for: schedules).map(\.reminder)
         try await replaceRemindersAndSave(reminders) {
             try scheduleStore.replace(with: schedules)
         }
@@ -165,9 +209,17 @@ final class NotificationCoordinator {
     ) async throws {
         do {
             try await replaceReminders(with: reminders)
+            try Task.checkCancellation()
             try save()
+            clearDeliveryIssue()
         } catch {
-            try await restoreSavedReminders()
+            do {
+                try await restoreSavedReminders()
+            } catch {
+                recordDeliveryFailure(error)
+                if (error as? NotificationCoordinatorError) == .permissionDenied { throw error }
+                throw NotificationCoordinatorError.recoveryFailed(error.localizedDescription)
+            }
             throw error
         }
     }
@@ -189,39 +241,56 @@ final class NotificationCoordinator {
 
     private func restoreSavedReminders() async throws {
         do {
-            try checkDeliveryData()
+            if enabledCount > 0 { try checkDeliveryData() }
+            try await replaceReminders(with: plan(for: scheduleStore.schedules).map(\.reminder))
+            clearDeliveryIssue()
         } catch {
             scheduler.removePendingNotifications()
             throw error
         }
-        do {
-            try await replaceReminders(with: plan(for: scheduleStore.schedules).map(\.reminder))
-        } catch {
-            scheduler.removePendingNotifications()
-            // System permission can change independently of the saved routines.
-            // Keep their enabled preferences so reconciliation can resume delivery.
-            if (error as? NotificationCoordinatorError) == .permissionDenied {
-                throw error
-            }
-            var disabled = scheduleStore.schedules
-            for index in disabled.indices { disabled[index].isEnabled = false }
-            do {
-                try scheduleStore.replace(with: disabled)
-            } catch {
-                throw NotificationCoordinatorError.recoveryFailed("The saved enabled settings could not be changed: \(error.localizedDescription)")
-            }
-            throw NotificationCoordinatorError.recoveryFailed(error.localizedDescription)
-        }
     }
 
     func reconcileOnLaunch() async {
-        guard !isUpdating else { return }
+        await reconcileOnForeground()
+    }
+
+    // Foreground and explicit retry use the same saved intent, without prompting.
+    func reconcileOnForeground() async {
+        guard !isUpdating else {
+            reconciliationPending = true
+            return
+        }
         isUpdating = true
-        defer { isUpdating = false }
+        defer { finishUpdate() }
+        await reconcileSavedReminders()
+    }
+
+    private func reconcileSavedReminders() async {
         do {
             try await restoreSavedReminders()
         } catch {
-            errorMessage = error.localizedDescription
+            recordDeliveryFailure(error)
+        }
+    }
+
+    private func clearDeliveryIssue() {
+        deliveryIssue = nil
+        errorMessage = nil
+    }
+
+    private func recordDeliveryFailure(_ error: any Error) {
+        deliveryIssue = (error as? NotificationCoordinatorError) == .permissionDenied
+            ? .permissionBlocked : .failed
+        errorMessage = deliveryIssue == .permissionBlocked ? error.localizedDescription
+            : "Saved routines are kept, but reminder delivery failed. Retry from Settings or return to the app. \(error.localizedDescription)"
+    }
+
+    private func finishUpdate() {
+        isUpdating = false
+        guard reconciliationPending else { return }
+        reconciliationPending = false
+        reconciliationTask = Task { [weak self] in
+            await self?.reconcileOnForeground()
         }
     }
 
@@ -236,6 +305,7 @@ final class NotificationCoordinator {
     }
 
     private func replaceReminders(with reminders: [NotificationReminder]) async throws {
+        try Task.checkCancellation()
         guard !reminders.isEmpty else {
             scheduler.removePendingNotifications()
             return
@@ -243,7 +313,9 @@ final class NotificationCoordinator {
         guard await scheduler.authorizationStatus() == .authorized else {
             throw NotificationCoordinatorError.permissionDenied
         }
+        try Task.checkCancellation()
         try await scheduler.replacePendingNotifications(with: reminders)
+        try Task.checkCancellation()
     }
 
     private func checkIdle() throws {
@@ -267,15 +339,15 @@ final class NotificationCoordinator {
         isUpdating = true
         refreshTask = Task { [weak self] in
             guard let self else { return }
-            defer { isUpdating = false }
-            do {
-                try await self.restoreSavedReminders()
-            } catch {
-                self.errorMessage = error.localizedDescription
-            }
+            defer { finishUpdate() }
+            await self.reconcileSavedReminders()
         }
     }
 
     func waitForLibraryRefresh() async { await refreshTask?.value }
-    func removePendingReminders() { scheduler.removePendingNotifications() }
+    func waitForReconciliation() async { await reconciliationTask?.value }
+    func removePendingReminders() {
+        scheduler.removePendingNotifications()
+        clearDeliveryIssue()
+    }
 }

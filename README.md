@@ -82,6 +82,21 @@ Add a schedule, tap its summary to edit, or swipe to duplicate or delete it.
 Edits use Save/Cancel; duplicates start disabled. The combined daily preview
 shows every deliverable reminder and flags shared times.
 
+Saved enabled choices are kept when reminder delivery fails. Settings distinguishes
+disabled schedules, missing content, blocked permission, updates, and delivery
+failures. Retry Reminder Delivery retries a failure without requesting permission;
+returning to the foreground also rebuilds reminders from saved settings. Foreground
+events during an update are coalesced into a follow-up reconciliation.
+
+Disabling or deleting an active routine saves the reduced collection even when
+permission or delivery data is unavailable. Existing enabled routines and sound
+preferences can be edited while permission is off, without a prompt. Explicitly
+enabling a routine still requires authorization. With authorization available,
+schedule and sound edits restore the previous saved plan if replacement or saving
+fails. Library and name edits remain saved if their subsequent delivery refresh
+fails. Failed delivery clears pending requests and can be retried; it never turns
+off the user's saved routines automatically.
+
 Daily rhythm offers Evenly spaced,
 More early, and More late while keeping the selected daily total fixed. Evenly
 spaced divides the chosen period into equal sections and places one notification

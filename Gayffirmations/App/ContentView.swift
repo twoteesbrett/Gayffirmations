@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
     let themeStore: ThemeStore
@@ -81,6 +82,11 @@ struct ContentView: View {
         .themeAppearance(themeStore.selectedTheme)
         .task {
             await notificationCoordinator.reconcileOnLaunch()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task { await notificationCoordinator.reconcileOnForeground() }
+            }
         }
         .alert("Unable to Update Reminders", isPresented: Binding(
             get: { notificationCoordinator.errorMessage != nil },

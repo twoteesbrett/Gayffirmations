@@ -30,8 +30,7 @@ struct SettingsView: View {
                     Button {
                         isShowingSchedule = true
                     } label: {
-                        disclosureLabel("Schedules", value: notificationCoordinator.deliveryIsPaused
-                                        ? "Paused" : "\(notificationCoordinator.enabledCount) enabled")
+                        disclosureLabel("Schedules", value: notificationCoordinator.deliverySummary)
                     }
                     .buttonStyle(.plain)
                     Button {
@@ -41,6 +40,11 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint("Choose the notification sound for all schedules")
+                    if notificationCoordinator.deliveryState == .failed {
+                        Button("Retry Reminder Delivery") {
+                            Task { await notificationCoordinator.reconcileOnForeground() }
+                        }
+                    }
                 }
 
                 Section("Data") {
