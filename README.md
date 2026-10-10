@@ -22,6 +22,20 @@ To use another installed simulator, run:
 TEST_DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' bash scripts/validate.sh
 ```
 
+## Privacy declarations
+
+`Gayffirmations/PrivacyInfo.xcprivacy` declares app-only UserDefaults access
+with [Apple's reason `CA92.1`](https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitypereasons).
+The app stores affirmations, an optional name, and settings
+locally; the current app code has no tracking, analytics, or data transmission.
+The manifest therefore declares no tracking domains or collected data types.
+Revisit these declarations when adding networking or third-party SDKs.
+
+The validation script checks that the manifest is included in the Release app.
+Before distribution, verify it in the signed archive and run Apple's archive
+validation. Review App Store Connect privacy answers against the app's actual
+behavior separately; a bundled manifest does not establish those answers.
+
 ## First release
 
 The first version should let someone:

@@ -16,6 +16,11 @@ xcodebuild -project Gayffirmations.xcodeproj -scheme Gayffirmations \
     }
 echo "Release build passed."
 
+manifest="$validation_dir/Release/Build/Products/Release-iphoneos/Gayffirmations.app/PrivacyInfo.xcprivacy"
+plutil -lint "$manifest"
+cmp Gayffirmations/PrivacyInfo.xcprivacy "$manifest"
+echo "Privacy manifest is included in the Release app."
+
 xcodebuild -project Gayffirmations.xcodeproj -scheme Gayffirmations \
     -configuration Debug -destination "$destination" \
     -derivedDataPath "$validation_dir/Debug" \
