@@ -72,7 +72,19 @@ extension AppTheme {
     }
 
     var affirmationFont: Font {
-        .system(.largeTitle, design: fontDesign, weight: affirmationWeight)
+        if self == .eden {
+            .custom("Baskerville", size: 34, relativeTo: .largeTitle)
+        } else {
+            .system(.largeTitle, design: fontDesign, weight: affirmationWeight)
+        }
+    }
+
+    var affirmationPreviewFont: Font {
+        if self == .eden {
+            .custom("Baskerville", size: 22, relativeTo: .title2)
+        } else {
+            .system(.title2, design: fontDesign, weight: affirmationWeight)
+        }
     }
 }
 
@@ -100,7 +112,7 @@ extension View {
         environment(\.appTheme, theme)
             .environment(\.colorScheme, theme.colorScheme)
             .tint(theme.accentColor)
-            .fontDesign(theme.fontDesign)
+            .fontDesign(theme == .disco ? .rounded : nil)
     }
 
     func themedBackground() -> some View {
