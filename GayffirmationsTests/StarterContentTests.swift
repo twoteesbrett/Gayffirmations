@@ -6,33 +6,12 @@ struct StarterContentTests {
     @Test("Initial affirmations match the supplied text and tag combinations")
     func initialContent() {
         let entries = Affirmation.starterAffirmations
-        let expected: [(String, [String])] = [
-            ("Hey handsome, the pantry isn't going anywhere.", ["food", "self-kindness"]),
-            ("A craving called. You don't have to answer.", ["food", "confidence"]),
-            ("Your body deserves kindness, not another guilt trip.", ["body", "food", "self-kindness"]),
-            ("One treat is a treat. It doesn't need a sequel.", ["food", "self-kindness"]),
-            ("You've got this. Yes, even with biscuits in the house.", ["food", "confidence"]),
-            ("Gay looks good on you.", ["gay", "confidence"]),
-            ("You don't have to follow the straight instruction manual.", ["gay", "confidence"]),
-            ("There's no dress code for being a gay man.", ["gay", "self-kindness"]),
-            ("You like men. Excellent taste.", ["gay", "confidence"]),
-            ("Be as gay as you damn well please.", ["gay", "confidence"]),
-            ("Hey handsome. Yes, I'm talking to you.", ["body", "confidence"]),
-            ("Your body isn't auditioning for anyone.", ["body", "confidence", "self-kindness"]),
-            ("You don't need a six-pack to be a whole snack.", ["body", "confidence", "self-kindness"]),
-            ("Grey hairs? You've earned the highlights.", ["body", "confidence", "self-kindness"]),
-            ("Stop comparing. You're the only {name} in the room.", ["confidence", "self-kindness"]),
-        ]
-        #expect(entries.count == expected.count)
-        for (entry, expectedEntry) in zip(entries, expected) {
-            #expect(entry.text == expectedEntry.0)
-            #expect(entry.tags == expectedEntry.1)
-            #expect(!entry.isFavorite)
-        }
-        #expect(Set(entries.map(\.id)).count == 15)
+        #expect(entries.count == 50)
+        #expect(Set(entries.map(\.id)).count == 50)
+        #expect(entries.allSatisfy { $0.isBundled && !$0.isFavorite && !$0.text.isEmpty && !$0.tags.isEmpty })
         #expect(Set(entries.flatMap(\.tags)) == Set(AffirmationTag.allCases.map(\.rawValue)))
-        #expect(entries.first?.id.uuidString == "B7E77000-0000-4000-8000-000000000001")
-        #expect(entries.last?.id.uuidString == "B7E77000-0000-4000-8000-000000000015")
+        #expect(entries.first?.text == "You've got this. Yes, you, gorgeous.")
+        #expect(entries.last?.text == "Be gentle with yourself. The world has enough critics already.")
     }
 
     @Test("Retired themes load as Nature", arguments: [

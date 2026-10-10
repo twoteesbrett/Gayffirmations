@@ -44,11 +44,16 @@ nonisolated struct Affirmation: Codable, Identifiable, Equatable {
         } else {
             // Preserve previously customised starter messages as editable user content.
             let savedID = id
-            let starter = Self.starterAffirmations.first { $0.id == savedID }
+            let candidates = (Self.legacyStarterAffirmations + Self.starterAffirmations)
+                .filter { $0.id == savedID }
             let isOriginalNameMessage = id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
                 && text == "Stop comparing. You're the only Brett in the room."
-            let hasOriginalText = starter?.text == text || isOriginalNameMessage
-            source = (hasOriginalText && starter?.tags == tags) ? .bundled : .user
+            let savedText = text
+            let savedTags = tags
+            let matchesBundle = candidates.contains {
+                ($0.text == savedText || isOriginalNameMessage) && $0.tags == savedTags
+            }
+            source = matchesBundle ? .bundled : .user
         }
     }
 }

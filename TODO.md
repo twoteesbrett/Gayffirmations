@@ -193,6 +193,9 @@ Notification sounds are selectable in Settings and saved with the schedule.
 
 ## Starter content and tag controls
 
+- [ ] Remove the original `legacyStarterAffirmations` catalogue from
+      `Affirmation+StarterContent.swift` when legacy saved-content migration no
+      longer needs it; update the decoder and migration tests accordingly.
 - [x] Bundle 15 starter affirmations with combinations of the five predefined
       tags: Body, Food, Confidence, Gay, and Self-kindness. Existing saved
       libraries are preserved; restoring defaults loads the starter collection.

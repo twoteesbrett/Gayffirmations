@@ -58,6 +58,21 @@ extension AppTheme {
                 ThemePhoto(id: "disco-mirrorball", name: "Mirrorball", focalPoint: UnitPoint(x: 0.60, y: 0.5),
                            overlayOpacity: 0.50, accessibilityDescription: "A mirrorball glowing under pink and blue disco spotlights", textColor: .white)
             ]
+        case .outAndAbout:
+            return [
+                ThemePhoto(id: "out-and-about-lakeside", name: "Lakeside", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a sunlit alpine lakeside campground with people relaxing beneath trees beside blue water", textColor: .white),
+                ThemePhoto(id: "out-and-about-market", name: "Market", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a bustling Mediterranean market street lined with flowers and stalls overlooking a sunny harbour", textColor: .white),
+                ThemePhoto(id: "out-and-about-pool-club", name: "Pool Club", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a lively cliffside pool club with swimmers and sun loungers overlooking the Mediterranean Sea", textColor: .white),
+                ThemePhoto(id: "out-and-about-park", name: "Park", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of people picnicking and strolling through a sunny flower-filled city park beside a fountain", textColor: .white),
+                ThemePhoto(id: "out-and-about-harbour", name: "Harbour", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a flower-lined Mediterranean harbour street filled with people and glowing lamps at golden hour", textColor: .white),
+                ThemePhoto(id: "out-and-about-carnival", name: "Carnival", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated image of a seaside carnival with a glowing Ferris wheel and crowds beneath a colourful sunset", textColor: .white)
+            ]
         case .concrete:
             return [
                 ThemePhoto(id: "concrete-fjord", name: "Fjord", focalPoint: .center,

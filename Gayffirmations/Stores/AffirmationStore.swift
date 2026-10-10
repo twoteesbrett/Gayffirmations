@@ -57,7 +57,23 @@ final class AffirmationStore {
 
         do {
             if let savedAffirmations = try repository.loadAffirmations() {
-                affirmations = savedAffirmations
+                // Refresh shipped content while retaining user entries and favourite choices.
+                let bundledDefaults = defaultAffirmations.filter(\.isBundled)
+                if bundledDefaults.isEmpty {
+                    affirmations = savedAffirmations
+                } else {
+                    let users = savedAffirmations.filter { !$0.isBundled }
+                    let userIDs = Set(users.map(\.id))
+                    let favourites = Set(savedAffirmations.filter(\.isFavorite).map(\.id))
+                    affirmations = bundledDefaults.filter { !userIDs.contains($0.id) }.map {
+                        var updated = $0
+                        updated.isFavorite = favourites.contains($0.id)
+                        return updated
+                    } + users
+                    if affirmations != savedAffirmations {
+                        try repository.saveAffirmations(affirmations)
+                    }
+                }
             } else {
                 affirmations = defaultAffirmations
                 try repository.saveAffirmations(defaultAffirmations)

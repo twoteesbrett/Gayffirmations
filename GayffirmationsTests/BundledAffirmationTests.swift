@@ -5,7 +5,7 @@ import Testing
 @MainActor
 struct BundledAffirmationTests {
     @Test func bundledTextAndTagsAreProtectedWhileFavouritesRemainAvailable() throws {
-        let entry = try #require(Affirmation.starterAffirmations.last)
+        let entry = try #require(Affirmation.legacyStarterAffirmations.last)
         let store = AffirmationStore(affirmations: [entry])
         #expect(entry.isBundled)
         #expect(throws: AffirmationStoreError.bundledMessage) {
@@ -33,7 +33,7 @@ struct BundledAffirmationTests {
     }
 
     @Test func legacySourcesPreserveCustomisations() throws {
-        let starter = try #require(Affirmation.starterAffirmations.first)
+        let starter = try #require(Affirmation.legacyStarterAffirmations.first)
         func legacy(_ entry: Affirmation) throws -> Affirmation {
             var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(entry)) as? [String: Any])
             object.removeValue(forKey: "source")
@@ -57,7 +57,7 @@ struct BundledAffirmationTests {
           arguments: [false, true], [["Mine"], []] as [[String]])
     func legacyTagCustomisations(useOriginalNameMessage: Bool, tags: [String]) throws {
         let starter = try #require(useOriginalNameMessage
-            ? Affirmation.starterAffirmations.last : Affirmation.starterAffirmations.first)
+            ? Affirmation.legacyStarterAffirmations.last : Affirmation.legacyStarterAffirmations.first)
         var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(starter)) as? [String: Any])
         object.removeValue(forKey: "source")
         if useOriginalNameMessage {
@@ -81,7 +81,7 @@ struct BundledAffirmationTests {
     }
 
     @Test func originalLegacyNameMessageRemainsBundled() throws {
-        let starter = try #require(Affirmation.starterAffirmations.last)
+        let starter = try #require(Affirmation.legacyStarterAffirmations.last)
         var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(starter)) as? [String: Any])
         object.removeValue(forKey: "source")
         object["text"] = "Stop comparing. You're the only Brett in the room."

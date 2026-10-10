@@ -1,16 +1,17 @@
 import Foundation
 
 nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
-    case nature, disco, steel, concrete
+    case nature, disco, steel, concrete, outAndAbout
 
     var id: Self { self }
-    var name: String { rawValue.capitalized }
+    var name: String { self == .outAndAbout ? "Out & About" : rawValue.capitalized }
     var description: String {
         switch self {
         case .nature: "Sea-glass tones. Room to breathe."
         case .steel: "Cool gunmetal. Quiet strength."
         case .disco: "Electric colour. Permission to play."
         case .concrete: "Sculpted space. Stillness in structure."
+        case .outAndAbout: "Sunlit adventures. Into the evening."
         }
     }
 

@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Gayffirmations
 
@@ -183,7 +184,26 @@ struct AffirmationStoreTests {
             defaultAffirmations: Affirmation.starterAffirmations
         )
 
-        #expect(store.affirmations == savedAffirmations)
+        #expect(store.affirmations == Affirmation.starterAffirmations + savedAffirmations)
+    }
+
+    @Test("Updated bundles replace old content and retain favourites and custom messages")
+    func refreshesBundledContent() throws {
+        var old = Affirmation.legacyStarterAffirmations
+        old[0].isFavorite = true
+        var custom = old.removeLast()
+        custom = Affirmation(id: custom.id, text: "My rewrite", isFavorite: true, tags: ["Mine"])
+        let repository = InMemoryAffirmationRepository(affirmations: old + [custom])
+        let store = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
+        let updated = try #require(store.affirmations.first { $0.id == old[0].id })
+        #expect(updated.tags == ["food"])
+        #expect(updated.isFavorite)
+        #expect(store.affirmations.last == custom)
+        #expect(!store.affirmations.contains { $0.id.uuidString == "B7E77000-0000-4000-8000-000000000003" })
+        #expect(store.affirmations.count == 50)
+        #expect(repository.affirmations == store.affirmations)
+        let restarted = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
+        #expect(restarted.affirmations == store.affirmations)
     }
 
     @Test("Default affirmations are saved on first launch")

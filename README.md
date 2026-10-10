@@ -129,7 +129,9 @@ selections continue to work. Audio preparation and file sizes are in
 
 ## Themes and photos
 
-The four themes are Nature, Disco, Steel, and Concrete. Each has six photos.
+The five themes are Nature, Disco, Steel, Concrete, and Out & About. Each has six photos.
+Out & About rotates from morning through midday to evening: Lakeside, Market,
+Pool Club, Park, Harbour, and Carnival.
 Themes with photos use them by default and offer a Use photos switch saved
 separately for each theme. Turning it off uses the theme's colour background.
 The picker shows thumbnail previews. Steel renders photos in greyscale;

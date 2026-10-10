@@ -121,3 +121,20 @@ Concrete uses six user-supplied AI-generated images, preserving their original r
 | Pillar | concrete-pillar.png | `concrete-pillar` |
 | Ivy | concrete-ivy.png | `concrete-ivy` |
 | Stairway | concrete-stairway.png | `concrete-stairway` |
+
+## Out & About
+
+Out & About uses six user-supplied AI-generated images from
+`/Users/brett/Desktop/gayffirmations-assets`, preserving their original resolution
+and aspect ratio. Photos rotate from morning through midday to evening.
+
+| Photo | Original source filename | Renamed source / bundled asset identifier |
+| --- | --- | --- |
+| Lakeside | Sunlit Alpine Lakeside Campground.png | `out-and-about-lakeside` |
+| Market | Mediterranean Market Street by the Harbour.png | `out-and-about-market` |
+| Pool Club | Mediterranean Cliffside Pool Club.png | `out-and-about-pool-club` |
+| Park | Sunny Urban Park Celebration.png | `out-and-about-park` |
+| Harbour | Golden-Hour Mediterranean Harbour Life.png | `out-and-about-harbour` |
+| Carnival | Sunset Carnival by the Sea.png | `out-and-about-carnival` |
+
+Renamed source files retain the `.png` extension; bundled copies use `photo.png`.

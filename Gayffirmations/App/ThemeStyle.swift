@@ -3,7 +3,7 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .nature: .light
+        case .nature, .outAndAbout: .light
         case .steel, .disco, .concrete: .dark
         }
     }
@@ -14,6 +14,7 @@ extension AppTheme {
         case .steel: Color(hex: 0xA7C9E0)
         case .disco: Color(hex: 0xFFB276)
         case .concrete: Color(hex: 0xC9C8BF)
+        case .outAndAbout: Color(hex: 0x98602D)
         }
     }
 
@@ -23,6 +24,7 @@ extension AppTheme {
         case .steel: Color(hex: 0xF0F4F7)
         case .disco: Color(hex: 0xFFF2FA)
         case .concrete: Color(hex: 0xF3F2ED)
+        case .outAndAbout: Color(hex: 0x493625)
         }
     }
 
@@ -30,6 +32,9 @@ extension AppTheme {
         switch self {
         case .nature:
             LinearGradient(colors: [Color(hex: 0xF0F3E9), Color(hex: 0xC9E4DD)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .outAndAbout:
+            LinearGradient(colors: [Color(hex: 0xFFF3DC), Color(hex: 0xD5E8E5)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
         case .steel:
             LinearGradient(colors: [Color(hex: 0x202830), Color(hex: 0x354350)],
@@ -45,14 +50,14 @@ extension AppTheme {
 
     var fontDesign: Font.Design {
         switch self {
-        case .nature, .steel, .concrete: .default
+        case .nature, .steel, .concrete, .outAndAbout: .default
         case .disco: .rounded
         }
     }
 
     var affirmationWeight: Font.Weight {
         switch self {
-        case .nature, .concrete: .regular
+        case .nature, .concrete, .outAndAbout: .regular
         case .steel: .bold
         case .disco: .semibold
         }
@@ -60,7 +65,7 @@ extension AppTheme {
 
     var affirmationLineSpacing: CGFloat {
         switch self {
-        case .nature: 8
+        case .nature, .outAndAbout: 8
         case .steel: 4
         case .disco: 6
         case .concrete: 8

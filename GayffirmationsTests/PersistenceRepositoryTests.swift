@@ -129,7 +129,7 @@ struct PersistenceRepositoryTests {
         let selection = AffirmationSelectionStore(repository: repository)
         let reminders = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
 
-        #expect(library.affirmations.first == saved[0])
+        #expect(library.affirmations.last == saved[0])
         #expect(theme.selectedTheme == .steel)
         #expect(theme.backgrounds == backgrounds)
         #expect(selection.selection == .favourites)
@@ -179,7 +179,7 @@ struct PersistenceRepositoryTests {
         let saved = try seeded.loadAffirmations()
         let loaded = try #require(saved)
         #expect(Array(loaded.prefix(3)) == [custom, edited, sameText])
-        #expect(loaded.count == 16)
+        #expect(loaded.count == Affirmation.starterAffirmations.count + 1)
     }
 
     @Test("Missing saved data is reported as absent")
