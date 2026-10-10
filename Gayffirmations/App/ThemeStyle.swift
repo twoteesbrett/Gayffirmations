@@ -3,8 +3,7 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .outAndAbout: .light
-        case .eden, .steel, .disco, .concrete: .dark
+        case .eden, .steel, .disco, .concrete, .outAndAbout: .dark
         }
     }
 
@@ -14,7 +13,7 @@ extension AppTheme {
         case .steel: Color(hex: 0xA7C9E0)
         case .disco: Color(hex: 0xFFB276)
         case .concrete: Color(hex: 0xC9C8BF)
-        case .outAndAbout: Color(hex: 0x176B9A)
+        case .outAndAbout: Color(hex: 0xB9E2F5)
         }
     }
 
@@ -24,7 +23,7 @@ extension AppTheme {
         case .steel: Color(hex: 0xF0F4F7)
         case .disco: Color(hex: 0xFFF2FA)
         case .concrete: Color(hex: 0xF3F2ED)
-        case .outAndAbout: Color(hex: 0x173D55)
+        case .outAndAbout: Color(hex: 0xF0F7FC)
         }
     }
 
@@ -34,7 +33,7 @@ extension AppTheme {
             LinearGradient(colors: [Color(hex: 0x4C8240), Color(hex: 0x123D27)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
         case .outAndAbout:
-            LinearGradient(colors: [Color(hex: 0xA8D8F4), Color(hex: 0xE8F5FD)],
+            LinearGradient(colors: [Color(hex: 0x327FA8), Color(hex: 0x123E5A)],
                            startPoint: .top, endPoint: .bottom)
         case .steel:
             LinearGradient(colors: [Color(hex: 0x202830), Color(hex: 0x354350)],
