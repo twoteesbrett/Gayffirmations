@@ -167,6 +167,7 @@ struct ScheduleView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let store = ScheduleStore()
     NavigationStack {
@@ -176,3 +177,4 @@ struct ScheduleView: View {
         ))
     }
 }
+#endif

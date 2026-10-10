@@ -8,6 +8,20 @@ This README covers app behaviour and development. [SOURCES.md](SOURCES.md)
 records bundled asset origins and preparation; [TODO.md](TODO.md) tracks
 remaining work and verification.
 
+## Build validation
+
+With Xcode selected and an iOS simulator installed, run `bash scripts/validate.sh`.
+The shared Gayffirmations scheme runs a clean unsigned generic-iOS Release build
+and the Debug test suite. Logs, derived data, and the test result bundle are saved
+in a new temporary directory printed by the script. This does not validate a signed archive.
+
+The default test destination is iPhone 18 Pro on the latest installed runtime.
+To use another installed simulator, run:
+
+```sh
+TEST_DESTINATION='platform=iOS Simulator,name=iPhone 17,OS=latest' bash scripts/validate.sh
+```
+
 ## First release
 
 The first version should let someone:

@@ -1,0 +1,136 @@
+**Gayffirmations production-readiness review — 10 October 2026**
+
+The app is not ready to release yet. The Release build fails, there is a confirmed restoration data-loss path, and notification recovery needs changes. The existing separation between models, repositories, stores, planning, and system notification delivery is useful; this does not require a wholesale rewrite.
+
+Reviewed commit: `f6d1ea5`. All 54 application Swift files, 21 test files, the test support file, project configuration, and repository documentation were reviewed. No application code, tests, configuration, or repository documentation was changed. This report is saved outside the repository.
+
+**Evidence and limits**
+
+- Debug simulator build and tests succeeded on iPhone 18 Pro / iOS 27.0. Xcode reports 182 tests, 258 executions including parameterized cases, zero failures, and zero skips. [Result bundle](/private/tmp/Gayffirmations-review-20261010-1752.xcresult) and [build/test log](/private/tmp/Gayffirmations-review-20261010-1752.log).
+- An unsigned Release build for generic iOS failed in `ScheduleView.swift` with two missing-symbol errors. [Release log](/private/tmp/Gayffirmations-review-release-20261010.log).
+- Temporary probes compiled unchanged production models, repositories, stores, and notification orchestration with the project's MainActor default isolation. They reproduced restoration data loss, denied-permission edit failures, permanent disabling after one transient failure, the ambiguous theme initializer, and acceptance of duplicate saved affirmation identities. The probes used a disposable preferences suite and a fake notification scheduler, not real notification delivery. [Probe source](/private/tmp/gayffirmations-review-probes-20261010/Probe.swift) and [results](/private/tmp/gayffirmations-review-probes-20261010/results.txt).
+- No physical-device delivery, UI automation, Instruments session, signed archive, or App Store validation was performed. The minimum deployment target is iOS 17.6, but that runtime was not available for this test run. A successful current-simulator suite does not verify those areas.
+
+Priority meanings: **P1** blocks release or risks losing user content; **P2** is a correctness or reliability issue to resolve before release; **P3** is cleanup or hardening. Items explicitly marked as risks or decisions are not claimed as reproduced failures.
+
+1. **P1 — Release configuration does not compile. Confirmed by build.**
+
+   [ScheduleView.swift:170](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Features/Schedule/ScheduleView.swift:170) contains an unguarded `#Preview` that uses `PreviewContent` and `PreviewNotificationScheduler`. Both helper declarations are inside `#if DEBUG`. Debug tests therefore pass while Release compilation reports that neither helper exists.
+
+   **Fix:** Guard the preview consistently with its dependencies. Audit the other preview blocks for the same dependency pattern. Add a Release build check alongside tests, and commit a shared scheme or test plan so clean-checkout validation is reproducible. Keep preview services separate from production services.
+
+   **Acceptance:** The existing tests pass; a clean unsigned generic-iOS Release build succeeds; a signed archive and its validation subsequently succeed. Do not solve this by enabling DEBUG in Release.
+
+2. **P1 — Restoring bundled content deletes migrated personal content. Reproduced.**
+
+   The [legacy decoder](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Models/Affirmation.swift:45) intentionally classifies customized legacy starters as `.user`, retaining their original UUIDs. [AffirmationStore.restoreDefaults](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Stores/AffirmationStore.swift:107) then preserves personal entries only when their IDs are absent from the current bundled catalogue. A migrated personal rewrite whose UUID still belongs to that catalogue is dropped and replaced by the bundled original. This contradicts both the migration's intent and the restore dialog's promise to preserve personal additions.
+
+   **Fix:** Define ownership independently of the bundled UUID collision. Preserve the personal copy, including tags and favourite state, and restore the bundled original with a distinct identity. Resolve existing collisions in an idempotent migration or restoration operation. If a personal entry receives a new UUID, persist that once rather than regenerating it each launch. Review the editor's ID-only eligibility check for Restore Original as part of the same change so personal ownership is consistent across the UI and store.
+
+   **Acceptance:** Start with actual legacy JSON lacking `source`; customize text and, separately, tags; migrate; restore bundled content; relaunch twice. Both the personal content and original bundled content remain, identities are unique, favourites/tags survive, and another restoration creates no extra copies. Include a former bundled ID no longer present in the current catalogue.
+
+3. **P1 — Required UserDefaults privacy declaration is absent. Confirmed source/package gap.**
+
+   The app uses [UserDefaultsRepository](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Data/UserDefaultsRepository.swift:3), but the repository contains no `PrivacyInfo.xcprivacy`. Apple lists UserDefaults as a required-reason API; `CA92.1` covers preferences accessible only to the app. See [Apple's required API declarations](https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitype) and [manifest guidance](https://developer.apple.com/documentation/technotes/tn3183-adding-required-reason-api-entries-to-your-privacy-manifest).
+
+   **Fix:** Add the app's privacy manifest with the appropriate UserDefaults reason and accurate remaining declarations. Verify target membership and the final archived bundle. Review the App Store privacy answers against actual app behavior; do not infer those answers merely from having a manifest.
+
+   **Acceptance:** The manifest is present in the archive and Apple's validation accepts its required-reason declarations. Actual App Store validation remains outstanding; this review did not submit anything.
+
+4. **P2 — Permission denial prevents disabling or deleting an individual active schedule. Reproduced.**
+
+   In [NotificationCoordinator.apply](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Services/Notifications/NotificationCoordinator.swift:133), every change to the enabled collection must replace the remaining reminders before saving. With two enabled schedules and permission denied, disabling or deleting one leaves a nonempty desired plan. Replacement throws permissionDenied, restoration throws again, and the requested change never saves. The user cannot turn off schedules individually until permission returns; resetting all schedules is an unintended workaround. The delivery-data check can similarly obstruct reducing schedules when unrelated delivery data is unreadable.
+
+   **Fix:** Separate changes to saved user preferences from the ability to deliver notifications. Always permit safe reductions such as disable/delete when delivery is unavailable. Save the validated reduced collection and clear pending delivery, retaining a permission-blocked status for the remaining enabled routines. Keep permission requests tied to explicit enabling. Specify how sound and other preference edits should behave while permission is denied.
+
+   **Acceptance:** With two or more active schedules, exercise disable, delete, edit, and reset while denied; verify saved state after restart and no permission prompt. Cover unreadable library/name data separately. When permission returns, only the remaining enabled routines resume.
+
+5. **P2 — Returning from system Settings does not reconcile notifications. Confirmed lifecycle wiring gap.**
+
+   [ContentView.swift:82](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/App/ContentView.swift:82) reconciles in its initial view task. The only active-scene handler in [TodayView.swift:160](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Features/Today/TodayView.swift:160) refreshes the display date. Once a denied-permission reconciliation has cleared pending requests, granting permission in system Settings and returning to the same app session does not explicitly rebuild them. The existing permission recovery test constructs a new coordinator, covering restart rather than resume. Settings also reports saved enabled counts without reflecting current authorization.
+
+   **Fix:** Reconcile authorization and desired delivery on foreground activation at the app/dependency level. Coalesce activation events with ongoing updates instead of dropping a needed reconciliation through the current `guard !isUpdating`. Expose distinct states for disabled, content-paused, permission-blocked, updating, and failed delivery. Clear obsolete error state following successful recovery.
+
+   **Acceptance:** Deny/revoke permission, clear pending requests through reconciliation, grant permission in Settings, and return without force-quitting. Reminders resume automatically without a new authorization prompt. Test an activation arriving while a save is suspended and ensure one reconciliation follows it.
+
+6. **P2 — A single transient refresh error permanently disables all routines. Reproduced; currently codified by tests.**
+
+   [restoreSavedReminders](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Services/Notifications/NotificationCoordinator.swift:190) is used for launch, post-library/name refresh, and rollback. For a non-permission error, it saves every schedule with `isEnabled = false`. During a library refresh or launch this happens after just one failed replacement, not after an exhausted recovery policy. The probe made one replacement fail and then restored a healthy scheduler; later reconciliation still scheduled nothing because the enabled preference had been lost.
+
+   **Fix:** Preserve user intent separately from delivery health. On an unrecoverable attempt, clear partial pending requests and record a recoverable delivery failure; keep the user's enabled choices. Add bounded retry or explicit retry plus foreground reconciliation. Keep schedule-edit rollback and reconciliation of already-saved library/name changes as distinct operations with accurate error wording. Avoid retry loops or repeated prompts.
+
+   **Acceptance:** Inject one transient failure at launch, library edit, name edit, sound change, and schedule change. Verify the appropriate saved state, no stale/partial delivery, and eventual recovery. Test persistent failures and cancellation. Update the existing tests that currently require permanent disabling, because those assertions encode the behavior being corrected.
+
+7. **P2 — Saved-data corruption has no in-app recovery path. Confirmed and intentionally tested today.**
+
+   Preserving unreadable data and blocking ordinary writes is sensible. However, [AppDataResetCoordinator.swift:30](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Features/Settings/AppDataResetCoordinator.swift:30) also blocks the explicitly confirmed Reset All action whenever any store has a load error. The flags never clear in-session, and restart reloads the same corruption. One malformed section can therefore leave the installation permanently unable to repair itself through the app.
+
+   **Fix:** Retain non-destructive behavior for normal launches and edits, but add an explicit recovery operation. Preserve/export the raw unreadable payload where practical, explain the affected section, and allow a deliberate section reset or reset-all. Write defaults through the repository, reload all affected stores, and clear errors only after success. Avoid silently replacing data on launch.
+
+   **Acceptance:** For each corrupt section, verify that launch preserves its bytes, ordinary edits cannot overwrite it, deliberate recovery succeeds, and healthy sections remain intact during a section-only reset. If recovery saving fails, preserve the original data and state. Adjust the existing corruption-reset test to distinguish ordinary protection from authorized recovery.
+
+8. **P2 — The theme migration test bypasses loading; store initialization is easy to misuse. Reproduced.**
+
+   [removedThemeMigration](/Users/brett/src/Xcode/Gayffirmations/GayffirmationsTests/PersistenceRepositoryTests.swift:320) calls `ThemeStore(repository:)`. That resolves to the [initializer starting at line 41](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Stores/ThemeStore.swift:41), which accepts a repository but never reads it. The test sees the default Eden theme and passes even if decoding the retired theme would fail. A probe with Steel saved returned Eden through this initializer and Steel through the actual loading initializer. AppDependencies uses the correct overload, so this is a confirmed test defect and API trap, not a claim that normal app startup ignores themes.
+
+   **Fix:** Make memory-only and persistent initialization unambiguous. Prefer a clearly labeled memory initializer/factory without a repository, and one persistent path that always loads. Apply the same clarity to AffirmationStore's similar construction choices. Correct the migration test and add a load-call assertion or independent decoder fixture. Verify all retired identifiers, including together/fruity/refined, using the production loading path.
+
+   **Acceptance:** A persistent initializer cannot silently ignore saved Steel. Corrupt theme data blocks ordinary writes. Removing a retired-theme mapping makes the corresponding migration test fail.
+
+9. **P2 — Loaded affirmations bypass collection invariants. Reproduced for duplicate identities.**
+
+   [AffirmationStore.swift:55](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Stores/AffirmationStore.swift:55) assigns decoded entries directly. Unlike schedule loading, there is no collection validation. Valid JSON can contain duplicate UUIDs or blank text and still load successfully. Duplicate UUIDs make SwiftUI list identity ambiguous; update/favourite changes affect the first matching record, while delete removes every matching record. The probe loaded duplicate identities with no persistence error.
+
+   **Fix:** Validate identity uniqueness and essential content invariants at the persistence boundary before migration writes or publication. Preserve invalid raw data and route it through the recovery flow. Define normalization separately from destructive deduplication; never silently discard one of two user messages. Reuse canonical text/tag rules where appropriate, but account for legitimate historical data.
+
+   **Acceptance:** Fixtures with duplicate IDs, blank text, malformed source values, and irregular tags either load through a documented non-lossy migration or produce a recoverable load error. Verify original bytes remain unchanged on rejection and the UI never receives duplicate identities.
+
+**Tests: retain the useful coverage and repair the gaps**
+
+The suite already provides useful coverage of schedule count limits, duplicate delivery minutes, rhythm calculations, source matching, failure rollback, migration formats, fallback selection, photo rotation, audio cancellation during preparation, and bundled resource availability. Keep these tests through the changes above.
+
+The most important additions are these:
+
+- **Real notification adapter contract:** The only direct LocalNotificationService test checks whether sound is nil. Put the system center behind a narrow injectable interface and test request identifiers, title/body, hour/minute components, repeating behavior, exact custom sound mapping where observable, removal, partial add failure, and recovery. Keep a small device integration check for actual delivery; a fake cannot prove OS behavior.
+- **Async interleavings:** NotificationSchedulerSpy's async methods return immediately. Introduce controllable continuations for authorization and replacement so tests can suspend at actual await boundaries, initiate a second action, and then resume. Cover save/delete/reset versus refresh, foreground activation during an update, and permission changes between status lookup and scheduling. Avoid timing sleeps as synchronization.
+- **Tests that must observe a real change:** AppDataResetCoordinatorTests selects Eden before resetting to Eden, so its theme assertions cannot detect a missing theme reset. Start from Steel or Disco, assert the precondition, then verify visible and reloaded defaults. Audit similar unchanged-default assertions.
+- **Audio assertions:** Record explicit creation/play/stop counts and the exact injected error. The current background-queue test puts assertions inside player callbacks without asserting they ran; the error test accepts any error, including a resource lookup failure. Add rapid A→B preview, stop during preparation, stale-error suppression, and a player whose play() returns false. Use bounded completion expectations and ensure blocked test work is released on failure.
+- **Fixtures and helpers:** Replace the global test-only ScheduleRepository extension's no-op sound methods with explicit fakes that implement persistence. Keep legacy single-schedule convenience wrappers where useful, but do not let `schedules[0]` helpers substitute for zero/multiple-schedule cases. Prefer `#require` where fixture assumptions could fail.
+- **UI and lifecycle:** Add a focused UI-test target for launch, editor Save/Cancel, nested sheet dismissal, notification Settings return, reset recovery, long text scrolling with horizontal swipes, and controls accessible under VoiceOver. Creating a LibraryView value in a unit test does not exercise its SwiftUI lifecycle.
+- **Time/calendar integration:** Current DST coverage verifies fallback midnight on a 23-hour day. Add scheduled reminders in missing and repeated hours, autumn rollback, midnight boundaries, device timezone changes, and clock changes while a manual selection exists. Agree on a policy and verify Today against the system trigger's actual next firing behavior; the current wall-clock comparison and Calendar conversion are not proof of DST parity.
+- **Build matrix:** Run tests and an unsigned Release build in CI. Include a supported older runtime, current iOS, and an iPad layout run. Current simulator success does not establish iOS 17.6 or physical-device readiness.
+
+**Fragile implementation and redundancy — follow after the correctness fixes**
+
+- [TransitioningPhotoBackground.swift:48](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/App/TransitioningPhotoBackground.swift:48) sleeps for 16 ms to stage a transition. That is a timing workaround, not a render-completion guarantee. Replace it with explicit transition identity/state or a supported animation phase. Exercise interrupted and rapid transitions, Reduce Motion, and app backgrounding. No visual failure was reproduced in this review.
+- [TodayView.swift:299](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Features/Today/TodayView.swift:299) combines gesture thresholds, cached text/photo snapshots, animation completion, browsing commits, and lifecycle handling. Extract the swipe state machine and invalidate a pending swipe on viewport/context changes. Its final guard compares only the current affirmation UUID; that does not establish that the schedule, next destination, size, or content revision is unchanged. Keep SwiftUI layout and animation in the view.
+- [dailyPlan](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Services/Notifications/NotificationCoordinator.swift:58) and [TodayAffirmationResolver](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Features/Today/TodayAffirmationResolver.swift:18) convert planner failures into empty plans. Represent invalid/unavailable delivery separately from a legitimately empty source. Provide an explicit fallback with an error state instead of making invalid state look like an ordinary pause.
+- The planner validates schedules by calculating times, then calculates enabled schedules' times again. Editor validation and preview repeat the calculation too. Consolidate validated planning results where it improves clarity. This is redundant work, not a demonstrated performance bottleneck at the 24-reminder limit.
+- The coordinator's library-change detector compares the entire selected text arrays rather than the actual planned reminder output. Editing an unused entry beyond the first daily slots unnecessarily rebuilds all reminders. Compare the effective requests once the fixed-versus-rotating content policy is decided. Likewise, avoid refreshing delivery for a name edit when no effective reminder text changes.
+- Public assignable `willChangeAffirmations` / `didChangeAffirmations` callbacks are implicit coordinator wiring. Replacing them or constructing a second coordinator for one store silently replaces synchronization. Make ownership explicit with a single mutation boundary or restricted subscription mechanism. Avoid a generic event framework for this small app.
+- Remove the unused `name` property and initializer argument in [AffirmationEditorView.swift:7](/Users/brett/src/Xcode/Gayffirmations/Gayffirmations/Features/Library/AffirmationEditorView.swift:7). Review production helpers only referenced by tests, such as `affirmations(tagged:)` and ThemeStore.reset(), before deciding whether they justify their API surface.
+- Legacy schedule `name` and per-schedule `sound` are migration data but remain mutable live fields and part of synthesized equality. Isolate them in a legacy decoding representation when the persistence schema is made explicit. Preserve compatibility fixtures; do not simply delete decoding support.
+- The full legacy affirmation catalogue is still required by source inference. The TODO to remove it is unsafe until migration no longer depends on it. Move historical fixtures and migration logic behind a versioned boundary rather than inferring ownership forever from today's catalogue.
+- Per-schedule limit, combined limit, and the literal 24 in an error message duplicate policy values. Keep separate semantic limits if intentional, and derive displayed values from their owning constants. Consolidate case-insensitive tag comparison/normalization without changing legacy matching behavior.
+- The sound preview's `@unchecked Sendable` is supported by serial-queue confinement and a lock; it is not automatically a bug. However, its injectable DispatchQueue permits a concurrent queue that would violate that assumption. Own the serial queue or make the confinement invariant enforceable and keep explicit cancellation tests.
+- `saveAppData` encodes all values before performing separate UserDefaults writes. It satisfies the stated “throw before any mutation” contract for encoding errors, but does not establish crash-atomic multi-section persistence. If crash consistency is required, use a versioned single snapshot/transactional persistence boundary and test interrupted migration/reset. Do not claim the current mock tests prove disk durability.
+- PhotoBackground loads full asset images for thumbnails as well as full-screen display. Source assets total about 70 MB and the Debug app bundle about 69 MB. Profile image decoding, scrolling, swipe frame time, and memory on an older supported device before choosing thumbnail/downsampling work. File size alone is not evidence of a memory defect.
+- Update stale documentation after behavior is finalized: TODO still describes 15 starters and following system appearance, while current content has 50 starters and every theme explicitly uses dark appearance. Replace blanket “verified” claims with the actual device/runtime and scenario exercised.
+
+**Product behavior to settle without treating it as a proven bug**
+
+The planner always assigns `affirmations[index % count]` starting at zero, and requests repeat daily. With four reminders and a large All selection, the same first four usable affirmations repeat every day; later entries never appear in notifications. Today follows that fixed plan, while only the no-schedule fallback rotates by date. This is consistent with the current implementation but may not match the intended experience. Explicitly choose fixed daily content or rotation before expanding the delivery tests. Rotation requires a date-aware scheduling strategy, renewal policy, and OS pending-request budget; merely changing Today would break agreement with notifications.
+
+Also specify foreground notification presentation and what tapping an older notification should show. There is no notification delegate/navigation handling in this app. Verify the intended defaults on device before adding behavior.
+
+**Recommended implementation order and completion criteria**
+
+1. **Establish the release gate.** Fix the preview guard, add the privacy manifest, and create repeatable Debug-test plus Release-build validation. This makes subsequent fixes reviewable against both configurations.
+2. **Protect existing content.** Add the legacy collision regression first, fix ownership/restoration, validate loaded identities, and introduce explicit corruption recovery. Use real persisted fixtures and restart checks for every migration change.
+3. **Repair notification state transitions.** Separate desired schedules from delivery status; permit disabling/deleting while blocked; preserve intent on transient errors; reconcile on foreground; add suspended async tests and adapter contract tests. Make error messages describe whether content saved, delivery paused, or rollback failed.
+4. **Make the tests trustworthy.** Correct initializer misuse, non-changing theme reset assertions, no-op repository stubs, and weak audio expectations. Add the small UI suite and calendar edge cases. Avoid a coverage-percentage target that rewards trivial assertions.
+5. **Simplify and profile.** Remove confirmed dead arguments and redundant work; extract gesture state; replace the timed photo-transition workaround. Keep migration compatibility and established behavior intact. Optimize assets only with measurements.
+6. **Verify the release candidate.** Test an upgrade with customized legacy content, a clean install, persistence across termination, permission changes without relaunch, notification delivery while backgrounded/terminated, every sound including None, smallest supported phone and iPad layouts, long affirmations, accessibility text sizes, VoiceOver, and Reduce Motion. Run a signed archive through validation after the unsigned Release build passes.
+
+Release acceptance requires the P1 issues resolved, the P2 scenarios covered and passing, Debug tests and Release compilation both green, and the device/upgrade checks above recorded. The existing passing suite is a useful baseline, but it is not sufficient evidence of production readiness on its own.
+
