@@ -6,6 +6,7 @@ struct AffirmationEditorView: View {
     let affirmation: Affirmation?
     let name: String
     let availableTags: [String]
+    let onRestore: (() throws -> Void)?
     let onSave: (String, [String]) throws -> Void
 
     @State private var text: String
@@ -19,11 +20,13 @@ struct AffirmationEditorView: View {
         affirmation: Affirmation? = nil,
         availableTags: [String] = [],
         name: String = "",
+        onRestore: (() throws -> Void)? = nil,
         onSave: @escaping (String, [String]) throws -> Void
     ) {
         self.name = name
         self.affirmation = affirmation
         self.availableTags = availableTags
+        self.onRestore = onRestore
         self.onSave = onSave
         _text = State(initialValue: affirmation?.text ?? "")
         _selectedTags = State(initialValue: affirmation?.tags ?? [])
@@ -33,24 +36,10 @@ struct AffirmationEditorView: View {
         NavigationStack {
             Form {
                 Section("Affirmation") {
-                    if let affirmation, affirmation.isBundled {
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text(affirmation.resolved(name: name)?.text ?? affirmation.text)
-                            Image(systemName: "lock.fill")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .accessibilityLabel("Read-only message")
-                        }
-                    } else {
-                        TextField(
-                            "I am...",
-                            text: $text,
-                            axis: .vertical
-                        )
+                    TextField("I am...", text: $text, axis: .vertical)
                         .lineLimit(3...8)
                         .focused($textFieldIsFocused)
                         .accessibilityLabel("Affirmation text")
-                    }
 
                     if let validationMessage {
                         Text(validationMessage)
@@ -59,12 +48,25 @@ struct AffirmationEditorView: View {
                             .accessibilityFocused($validationMessageIsFocused)
                     }
                 }
-                if affirmation?.isBundled != true {
-                    tagSection
+                tagSection
+                if let onRestore {
+                    Section {
+                        Button("Restore Original") {
+                            do {
+                                try onRestore()
+                                dismiss()
+                            } catch {
+                                validationMessage = error.localizedDescription
+                                validationMessageIsFocused = true
+                            }
+                        }
+                    } footer: {
+                        Text("Restore this affirmation’s original text and tags. Your favourite choice is kept.")
+                    }
                 }
             }
             .themedBackground()
-            .navigationTitle(affirmation == nil ? "New Affirmation" : (affirmation?.isBundled == true ? "Affirmation" : "Edit Affirmation"))
+            .navigationTitle(affirmation == nil ? "New Affirmation" : "Edit Affirmation")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -74,15 +76,11 @@ struct AffirmationEditorView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    if affirmation?.isBundled == true {
-                        Button("Done") { dismiss() }
-                    } else {
-                        Button("Save") { save() }
-                    }
+                    Button("Save") { save() }
                 }
             }
             .onAppear {
-                textFieldIsFocused = affirmation?.isBundled != true
+                textFieldIsFocused = true
             }
         }
     }

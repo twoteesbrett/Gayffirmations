@@ -4,23 +4,25 @@ import Testing
 
 @MainActor
 struct BundledAffirmationTests {
-    @Test func bundledTextAndTagsAreProtectedWhileFavouritesRemainAvailable() throws {
+    @Test func bundledEditsAndDeletionSurviveReloadAndCanBeRestored() throws {
         let entry = try #require(Affirmation.legacyStarterAffirmations.last)
-        let store = AffirmationStore(affirmations: [entry])
-        #expect(entry.isBundled)
-        #expect(throws: AffirmationStoreError.bundledMessage) {
-            try store.update(id: entry.id, text: "Changed")
-        }
-        #expect(store.affirmations == [entry])
-        #expect(throws: AffirmationStoreError.bundledMessage) {
-            try store.update(id: entry.id, text: entry.text, tags: ["Mine"])
-        }
-        #expect(store.affirmations == [entry])
+        let repository = BundledMessageRepository()
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [entry])
+        try store.update(id: entry.id, text: "Changed", tags: ["Mine"])
         try store.toggleFavorite(id: entry.id)
-        #expect(store.affirmations[0].text == entry.text)
-        #expect(store.affirmations[0].tags == entry.tags)
-        #expect(store.affirmations[0].isFavorite)
-        #expect(store.affirmations[0].isBundled)
+        let restarted = AffirmationStore(repository: repository, defaultAffirmations: [entry])
+        #expect(restarted.affirmations[0].text == "Changed")
+        #expect(restarted.affirmations[0].tags == ["Mine"])
+        try restarted.restoreOriginal(id: entry.id)
+        #expect(restarted.affirmations[0].text == entry.text)
+        #expect(restarted.affirmations[0].tags == entry.tags)
+        #expect(restarted.affirmations[0].isFavorite)
+        try restarted.delete(id: entry.id)
+        let deleted = AffirmationStore(repository: repository, defaultAffirmations: [entry])
+        #expect(deleted.affirmations.isEmpty)
+        let personal = try deleted.add(text: "Personal")
+        try deleted.restoreDefaults()
+        #expect(deleted.affirmations == [entry, personal])
     }
 
     @Test func userMessagesRemainEditableAfterReload() throws {
@@ -87,5 +89,15 @@ struct BundledAffirmationTests {
         object["text"] = "Stop comparing. You're the only Brett in the room."
         let migrated = try JSONDecoder().decode(Affirmation.self, from: JSONSerialization.data(withJSONObject: object))
         #expect(migrated.isBundled)
+    }
+}
+
+private final class BundledMessageRepository: AffirmationRepository {
+    var affirmations: [Affirmation]?
+
+    func loadAffirmations() throws -> [Affirmation]? { affirmations }
+
+    func saveAffirmations(_ affirmations: [Affirmation]) throws {
+        self.affirmations = affirmations
     }
 }

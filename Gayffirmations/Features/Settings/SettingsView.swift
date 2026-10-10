@@ -167,7 +167,7 @@ private enum ResetAction {
     var label: String {
         switch self {
         case .affirmations:
-            "Restore Default Affirmations"
+            "Restore Bundled Affirmations"
         case .schedule:
             "Reset Schedules"
         case .all:
@@ -178,7 +178,7 @@ private enum ResetAction {
     var title: String {
         switch self {
         case .affirmations:
-            "Restore Default Affirmations?"
+            "Restore Bundled Affirmations?"
         case .schedule:
             "Reset Schedules?"
         case .all:
@@ -189,7 +189,7 @@ private enum ResetAction {
     var confirmationLabel: String {
         switch self {
         case .affirmations:
-            "Restore Affirmations"
+            "Restore Bundled Affirmations"
         case .schedule:
             "Reset Schedules"
         case .all:
@@ -200,7 +200,7 @@ private enum ResetAction {
     var message: String {
         switch self {
         case .affirmations:
-            "This replaces your affirmation library, including custom affirmations and favorites, with the original defaults."
+            "This restores bundled affirmations, including deleted ones. Personal additions and favorites are kept."
         case .schedule:
             "This replaces all schedules with one disabled default schedule and removes pending notifications."
         case .all:

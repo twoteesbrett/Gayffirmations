@@ -83,8 +83,8 @@ struct AffirmationStoreTests {
         #expect(store.affirmations.isEmpty)
     }
 
-    @Test("Bundled affirmations cannot be deleted or change persisted data")
-    func rejectBundledDeletion() {
+    @Test("Bundled affirmations can be deleted and notify observers")
+    func bundledDeletion() throws {
         let bundled = Affirmation(text: "System", source: .bundled)
         let custom = Affirmation(text: "Custom")
         let original = [bundled, custom]
@@ -94,12 +94,10 @@ struct AffirmationStoreTests {
         store.willChangeAffirmations = { _ in notified = true }
         store.didChangeAffirmations = { _ in notified = true }
 
-        #expect(throws: AffirmationStoreError.bundledMessage) {
-            try store.delete(id: bundled.id)
-        }
-        #expect(store.affirmations == original)
-        #expect(repository.affirmations == original)
-        #expect(!notified)
+        try store.delete(id: bundled.id)
+        #expect(store.affirmations == [custom])
+        #expect(repository.affirmations == [custom])
+        #expect(notified)
     }
 
     @Test("An affirmation can be favorited and unfavorited")
@@ -184,10 +182,10 @@ struct AffirmationStoreTests {
             defaultAffirmations: Affirmation.starterAffirmations
         )
 
-        #expect(store.affirmations == Affirmation.starterAffirmations + savedAffirmations)
+        #expect(store.affirmations == savedAffirmations)
     }
 
-    @Test("Updated bundles replace old content and retain favourites and custom messages")
+    @Test("Loading preserves saved bundled content and custom messages")
     func refreshesBundledContent() throws {
         var old = Affirmation.legacyStarterAffirmations
         old[0].isFavorite = true
@@ -196,11 +194,10 @@ struct AffirmationStoreTests {
         let repository = InMemoryAffirmationRepository(affirmations: old + [custom])
         let store = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
         let updated = try #require(store.affirmations.first { $0.id == old[0].id })
-        #expect(updated.tags == ["food"])
+        #expect(updated.tags == old[0].tags)
         #expect(updated.isFavorite)
         #expect(store.affirmations.last == custom)
-        #expect(!store.affirmations.contains { $0.id.uuidString == "B7E77000-0000-4000-8000-000000000003" })
-        #expect(store.affirmations.count == 50)
+        #expect(store.affirmations == old + [custom])
         #expect(repository.affirmations == store.affirmations)
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
         #expect(restarted.affirmations == store.affirmations)
@@ -239,7 +236,7 @@ struct AffirmationStoreTests {
         #expect(restartedStore.affirmations.first?.isFavorite == true)
     }
 
-    @Test("Restoring defaults replaces custom affirmations and favorites")
+    @Test("Restoring defaults preserves personal additions and favorites")
     func restoreDefaults() throws {
         let defaults = [Affirmation(text: "Default")]
         let repository = InMemoryAffirmationRepository()
@@ -248,12 +245,14 @@ struct AffirmationStoreTests {
             defaultAffirmations: defaults
         )
 
-        _ = try store.add(text: "Custom")
+        let custom = try store.add(text: "Custom")
         try store.toggleFavorite(id: defaults[0].id)
         try store.restoreDefaults()
 
-        #expect(store.affirmations == defaults)
-        #expect(repository.affirmations == defaults)
+        var restored = defaults[0]
+        restored.isFavorite = true
+        #expect(store.affirmations == [restored, custom])
+        #expect(repository.affirmations == [restored, custom])
     }
 
     @Test("An edited affirmation survives recreating the store")

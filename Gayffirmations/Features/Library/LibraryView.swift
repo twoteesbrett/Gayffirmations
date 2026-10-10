@@ -10,7 +10,7 @@ struct LibraryView: View {
     @State private var editorDestination: EditorDestination?
     @State private var persistenceErrorMessage: String?
     @State private var isTagPickerPresented = false
-    @State private var showsOnlyMine = false
+    @State private var sourceFilter: Affirmation.Source?
 
     @State private var filter: AffirmationSelection
 
@@ -50,7 +50,7 @@ struct LibraryView: View {
                         ContentUnavailableView {
                             Label("No Matching Affirmations", systemImage: "text.quote")
                         } description: {
-                            Text(showsOnlyMine ? "Add your own affirmation or clear filters to see more entries." : filter.emptyMessage)
+                            Text(sourceFilter == .user ? "Add your own affirmation or clear filters to see more entries." : sourceFilter == .bundled ? "Clear filters or restore default affirmations in Settings to see bundled messages." : filter.emptyMessage)
                         } actions: {
                             Button("Show All Affirmations") {
                                 clearFilters()
@@ -61,8 +61,8 @@ struct LibraryView: View {
                         affirmationList
                     }
                 } footer: {
-                    if filteredAffirmations.contains(where: { !$0.isBundled }) {
-                        Text("Swipe right on your affirmations to edit, or left to delete. System affirmations are read-only.")
+                    if !filteredAffirmations.isEmpty {
+                        Text("Tap an affirmation to edit, swipe right to edit, or left to delete.")
                     }
                 }
             }
@@ -104,9 +104,9 @@ struct LibraryView: View {
                 filterControls
             }
 
-            if filter != .all || showsOnlyMine {
+            if filter != .all || sourceFilter != nil {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(showsOnlyMine ? (filter == .all ? "Mine" : "Mine · \(filter.name)") : filter.name)
+                    Text(activeFilterName)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     Button("Clear filters") { clearFilters() }
@@ -126,11 +126,14 @@ struct LibraryView: View {
 
     private var filterControls: some View {
         Group {
-            filterButton("All", systemImage: "square.stack", isSelected: filter == .all && !showsOnlyMine) {
+            filterButton("All", systemImage: "square.stack", isSelected: filter == .all && sourceFilter == nil) {
                 clearFilters()
             }
-            filterButton("Mine", systemImage: "person", isSelected: showsOnlyMine) {
-                showsOnlyMine.toggle()
+            filterButton("Bundled", systemImage: "shippingbox", isSelected: sourceFilter == .bundled) {
+                sourceFilter = sourceFilter == .bundled ? nil : .bundled
+            }
+            filterButton("Mine", systemImage: "person", isSelected: sourceFilter == .user) {
+                sourceFilter = sourceFilter == .user ? nil : .user
             }
             filterButton("Favourites", systemImage: "heart", isSelected: filter.includesFavourites) {
                 setFilter(filter.selectingFavourites(!filter.includesFavourites))
@@ -154,7 +157,7 @@ struct LibraryView: View {
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Show entries matching any selected tag or Favourites. With Mine selected, only your own affirmations are shown. These filters only change the Library list.")
+                    Text("Show entries matching any selected tag or Favourites. Mine shows your own affirmations; Bundled shows messages included with the app. These filters only change the Library list.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,
@@ -210,7 +213,13 @@ struct LibraryView: View {
 
     private func clearFilters() {
         filter = .all
-        showsOnlyMine = false
+        sourceFilter = nil
+    }
+
+    private var activeFilterName: String {
+        guard let sourceFilter else { return filter.name }
+        let sourceName = sourceFilter == .user ? "Mine" : "Bundled"
+        return filter == .all ? sourceName : "\(sourceName) · \(filter.name)"
     }
 
     private var hasSelectedTags: Bool {
@@ -219,23 +228,19 @@ struct LibraryView: View {
 
     private var filteredAffirmations: [Affirmation] {
         let matches = filter.matchingAffirmations(in: store.affirmations)
-        return showsOnlyMine ? matches.filter { !$0.isBundled } : matches
+        return sourceFilter.map { source in matches.filter { $0.source == source } } ?? matches
     }
 
     private var affirmationList: some View {
         ForEach(filteredAffirmations) { affirmation in
             HStack(spacing: 12) {
-                if affirmation.isBundled {
+                Button {
+                    editorDestination = .edit(affirmation)
+                } label: {
                     affirmationLabel(affirmation)
-                } else {
-                    Button {
-                        editorDestination = .edit(affirmation)
-                    } label: {
-                        affirmationLabel(affirmation)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens the affirmation editor")
                 }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens the affirmation editor")
 
                 Button {
                     performPersistedChange {
@@ -257,22 +262,18 @@ struct LibraryView: View {
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 12))
             .swipeActions(edge: .leading) {
-                if !affirmation.isBundled {
-                    Button("Edit", systemImage: "pencil") {
-                        editorDestination = .edit(affirmation)
-                    }
-                    .tint(appTheme.accentColor)
+                Button("Edit", systemImage: "pencil") {
+                    editorDestination = .edit(affirmation)
                 }
+                .tint(appTheme.accentColor)
             }
             .swipeActions(edge: .trailing) {
-                if !affirmation.isBundled {
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        performPersistedChange {
-                            try store.delete(id: affirmation.id)
-                        }
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    performPersistedChange {
+                        try store.delete(id: affirmation.id)
                     }
-                    .tint(.red)
                 }
+                .tint(.red)
             }
         }
     }
@@ -287,19 +288,15 @@ struct LibraryView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            if affirmation.isBundled || !affirmation.tags.isEmpty {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    if affirmation.isBundled {
-                        Image(systemName: "lock.fill")
-                            .accessibilityLabel("Read-only message")
-                    }
-                    if !affirmation.tags.isEmpty {
-                        Text(affirmation.tags.map { $0.lowercased() }.joined(separator: " · "))
-                    }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: affirmation.isBundled ? "shippingbox" : "person")
+                    .accessibilityLabel(affirmation.isBundled ? "Bundled affirmation" : "Your affirmation")
+                if !affirmation.tags.isEmpty {
+                    Text(affirmation.tags.map { $0.lowercased() }.joined(separator: " · "))
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
             }
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
@@ -332,7 +329,9 @@ struct LibraryView: View {
                 try store.add(text: text, tags: tags)
             }
         case .edit(let affirmation):
-            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, name: notificationCoordinator.personalizationStore.name) { text, tags in
+            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, name: notificationCoordinator.personalizationStore.name, onRestore: store.defaultAffirmations.contains(where: { $0.id == affirmation.id }) ? {
+                try store.restoreOriginal(id: affirmation.id)
+            } : nil) { text, tags in
                 try store.update(id: affirmation.id, text: text, tags: tags)
             }
         }

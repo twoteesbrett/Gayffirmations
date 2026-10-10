@@ -194,7 +194,7 @@ struct PersistenceRepositoryTests {
         let selection = AffirmationSelectionStore(repository: repository)
         let reminders = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
 
-        #expect(library.affirmations.last == saved[0])
+        #expect(library.affirmations.contains(saved[0]))
         #expect(theme.selectedTheme == .steel)
         #expect(theme.backgrounds == backgrounds)
         #expect(selection.selection == .favourites)

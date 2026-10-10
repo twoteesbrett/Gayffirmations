@@ -26,8 +26,10 @@ intentionally outside the first release.
 
 ## Bundled and personal messages
 
-Bundled messages have read-only text and tags. You can favourite them, but
-cannot delete them. Messages you create remain editable and deletable.
+All messages can be edited, tagged, favourited, and deleted. Edits and deletions
+survive relaunch. Restore Original in the editor restores one bundled message;
+Restore Bundled Affirmations recovers bundled messages while keeping personal additions
+and favourites. Reset All App Data still clears everything.
 Existing starter messages with previously customised text or tags are preserved as
 editable personal messages; untouched starter messages become bundled messages.
 

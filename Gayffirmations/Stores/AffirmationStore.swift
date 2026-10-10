@@ -2,14 +2,11 @@ import Foundation
 import Observation
 
 enum AffirmationStoreError: LocalizedError, Equatable {
-    case bundledMessage
     case blankText
     case duplicateText
 
     var errorDescription: String? {
         switch self {
-        case .bundledMessage:
-            "This affirmation is read-only."
         case .blankText:
             "An affirmation needs some text."
         case .duplicateText:
@@ -57,23 +54,7 @@ final class AffirmationStore {
 
         do {
             if let savedAffirmations = try repository.loadAffirmations() {
-                // Refresh shipped content while retaining user entries and favourite choices.
-                let bundledDefaults = defaultAffirmations.filter(\.isBundled)
-                if bundledDefaults.isEmpty {
-                    affirmations = savedAffirmations
-                } else {
-                    let users = savedAffirmations.filter { !$0.isBundled }
-                    let userIDs = Set(users.map(\.id))
-                    let favourites = Set(savedAffirmations.filter(\.isFavorite).map(\.id))
-                    affirmations = bundledDefaults.filter { !userIDs.contains($0.id) }.map {
-                        var updated = $0
-                        updated.isFavorite = favourites.contains($0.id)
-                        return updated
-                    } + users
-                    if affirmations != savedAffirmations {
-                        try repository.saveAffirmations(affirmations)
-                    }
-                }
+                affirmations = savedAffirmations
             } else {
                 affirmations = defaultAffirmations
                 try repository.saveAffirmations(defaultAffirmations)
@@ -100,9 +81,6 @@ final class AffirmationStore {
             return
         }
 
-        guard !affirmations[index].isBundled else {
-            throw AffirmationStoreError.bundledMessage
-        }
         let text = try validatedText(text, excluding: id)
         var updatedAffirmations = affirmations
         updatedAffirmations[index].text = text
@@ -113,10 +91,6 @@ final class AffirmationStore {
     }
 
     func delete(id: Affirmation.ID) throws {
-        guard let affirmation = affirmations.first(where: { $0.id == id }) else { return }
-        guard !affirmation.isBundled else {
-            throw AffirmationStoreError.bundledMessage
-        }
         try persist(affirmations.filter { $0.id != id })
     }
 
@@ -131,7 +105,26 @@ final class AffirmationStore {
     }
 
     func restoreDefaults() throws {
-        try persist(defaultAffirmations)
+        let defaultIDs = Set(defaultAffirmations.map(\.id))
+        let personal = affirmations.filter { !$0.isBundled && !defaultIDs.contains($0.id) }
+        let favourites = Set(affirmations.filter(\.isFavorite).map(\.id))
+        try persist(defaultAffirmations.map {
+            var original = $0
+            original.isFavorite = favourites.contains($0.id)
+            return original
+        } + personal)
+    }
+
+    func restoreOriginal(id: Affirmation.ID) throws {
+        guard var original = defaultAffirmations.first(where: { $0.id == id }) else { return }
+        var updated = affirmations
+        if let index = updated.firstIndex(where: { $0.id == id }) {
+            original.isFavorite = updated[index].isFavorite
+            updated[index] = original
+        } else {
+            updated.append(original)
+        }
+        try persist(updated)
     }
 
     func applyPersistedDefaults() {

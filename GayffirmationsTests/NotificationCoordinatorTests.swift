@@ -427,13 +427,16 @@ struct NotificationCoordinatorTests {
         #expect(scheduler.scheduledReminders.isEmpty)
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Edited" })
-        try library.add(text: "Added")
+        let added = try library.add(text: "Added")
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.scheduledReminders.contains { $0.affirmationText == "Added" })
         try library.restoreDefaults()
         await coordinator.waitForLibraryRefresh()
-        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Default" })
+        #expect(scheduler.scheduledReminders.allSatisfy { ["Default", "Added"].contains($0.affirmationText) })
+        #expect(library.affirmations.contains(added))
         try library.delete(id: defaults[0].id)
+        await coordinator.waitForLibraryRefresh()
+        try library.delete(id: added.id)
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.scheduledReminders.isEmpty)
         #expect(schedule.schedule.isEnabled)
@@ -479,7 +482,7 @@ struct NotificationCoordinatorTests {
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
         )
         try await coordinator.setEnabled(true)
-        try library.add(text: "Added")
+        try library.update(id: library.affirmations[0].id, text: "Edited")
         #expect(throws: NotificationCoordinatorError.updateInProgress) {
             try library.restoreDefaults()
         }
