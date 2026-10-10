@@ -41,6 +41,10 @@ final class UserDefaultsRepository:
 
     func loadAffirmations() throws -> [Affirmation]? {
         var saved = try load([Affirmation].self, forKey: Key.affirmations)
+        // Reject invalid collections before name migration or first-launch seeding
+        // can overwrite the bytes needed for deliberate recovery.
+        if let saved { try AffirmationValidation.validate(saved) }
+        try AffirmationValidation.validate(initialAffirmations)
         if let index = saved?.firstIndex(where: {
             $0.isBundled
                 && $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
@@ -67,6 +71,7 @@ final class UserDefaultsRepository:
     }
 
     func saveAffirmations(_ affirmations: [Affirmation]) throws {
+        try AffirmationValidation.validate(affirmations)
         try save(affirmations, forKey: Key.affirmations)
     }
 
@@ -137,6 +142,7 @@ final class UserDefaultsRepository:
         preservingExistingData: Bool
     ) throws {
         // Complete every throwing operation before changing any saved data.
+        try AffirmationValidation.validate(affirmations)
         let affirmationData = try encoder.encode(affirmations)
         let scheduleData = try encoder.encode(schedules)
         let themeData = try encoder.encode(theme)

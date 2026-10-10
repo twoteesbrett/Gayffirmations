@@ -51,15 +51,19 @@ final class AffirmationStore {
         self.repository = repository
         self.defaultAffirmations = defaultAffirmations
 
+        var fallback: [Affirmation] = []
         do {
+            try AffirmationValidation.validate(defaultAffirmations)
+            fallback = defaultAffirmations
             if let savedAffirmations = try repository.loadAffirmations() {
+                try AffirmationValidation.validate(savedAffirmations)
                 affirmations = savedAffirmations
             } else {
                 affirmations = defaultAffirmations
                 try repository.saveAffirmations(defaultAffirmations)
             }
         } catch {
-            affirmations = defaultAffirmations
+            affirmations = fallback
             persistenceErrorMessage = error.localizedDescription
         }
     }
@@ -155,6 +159,7 @@ final class AffirmationStore {
             throw PersistenceUnavailableError(reason: persistenceErrorMessage)
         }
 
+        try AffirmationValidation.validate(updatedAffirmations)
         guard updatedAffirmations != affirmations else { return }
         try willChangeAffirmations?(updatedAffirmations)
         try repository?.saveAffirmations(updatedAffirmations)

@@ -46,6 +46,14 @@ defaults only when saved data is absent, or as a protected fallback after a load
 
 ## Recovering unreadable saved data
 
+Saved affirmation collections must have unique IDs, nonblank text, and trimmed,
+nonblank tags without case-insensitive duplicates within an entry. Validation runs
+before migration writes or UI publication. Invalid collections are preserved and
+reported through the recovery flow; loading never silently discards or normalizes
+messages. Distinct messages may share text, tag spelling may differ across entries,
+and nonblank historical text retains its original formatting. Missing legacy tags
+and source fields remain supported; explicit null or malformed fields are rejected.
+
 Unreadable saved sections are preserved on launch and block ordinary edits.
 Settings identifies those sections. Confirming Reset All App Data repairs them by
 resetting every section, including healthy data. Recovery keeps the previous raw

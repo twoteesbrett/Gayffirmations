@@ -38,9 +38,9 @@ nonisolated struct Affirmation: Codable, Identifiable, Equatable {
         text = try container.decode(String.self, forKey: .text)
         isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
         // Entries saved before tags were introduced have no tags field.
-        tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
-        if let savedSource = try container.decodeIfPresent(Source.self, forKey: .source) {
-            source = savedSource
+        tags = container.contains(.tags) ? try container.decode([String].self, forKey: .tags) : []
+        if container.contains(.source) {
+            source = try container.decode(Source.self, forKey: .source)
         } else {
             // Preserve previously customised starter messages as editable user content.
             let savedID = id
