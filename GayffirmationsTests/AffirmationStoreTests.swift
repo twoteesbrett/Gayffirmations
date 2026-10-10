@@ -183,6 +183,8 @@ struct AffirmationStoreTests {
         )
 
         #expect(store.affirmations == savedAffirmations)
+        #expect(repository.loadCallCount == 1)
+        #expect(repository.saveCallCount == 0)
     }
 
     @Test("Loading preserves saved bundled content and custom messages")
@@ -311,16 +313,20 @@ private final class FailingAffirmationRepository: AffirmationRepository {
 
 private final class InMemoryAffirmationRepository: AffirmationRepository {
     var affirmations: [Affirmation]?
+    private(set) var loadCallCount = 0
+    private(set) var saveCallCount = 0
 
     init(affirmations: [Affirmation]? = nil) {
         self.affirmations = affirmations
     }
 
     func loadAffirmations() throws -> [Affirmation]? {
-        affirmations
+        loadCallCount += 1
+        return affirmations
     }
 
     func saveAffirmations(_ affirmations: [Affirmation]) throws {
+        saveCallCount += 1
         self.affirmations = affirmations
     }
 }

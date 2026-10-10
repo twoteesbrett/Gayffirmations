@@ -375,17 +375,38 @@ struct PersistenceRepositoryTests {
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
-    @Test("Removed themes fall back to Eden and allow subsequent selections", arguments: ["together", "fruity", "refined"])
+    @Test("Removed themes decode and load as Eden without replacing the saved value", arguments: [
+        "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
+        "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
+        "bubblegum", "daydream", "muscle", "spectrum", "together", "fruity", "refined"
+    ])
     func removedThemeMigration(name: String) throws {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
-        fixture.userDefaults.set(try JSONEncoder().encode(name), forKey: "gayffirmations.theme")
+        let raw = try JSONEncoder().encode(name)
+        fixture.userDefaults.set(raw, forKey: "gayffirmations.theme")
+        #expect(try JSONDecoder().decode(AppTheme.self, from: raw) == .eden)
 
         let store = ThemeStore(repository: fixture.repository)
         #expect(store.selectedTheme == .eden)
         #expect(store.persistenceErrorMessage == nil)
+        #expect(fixture.userDefaults.data(forKey: "gayffirmations.theme") == raw)
         try store.select(.steel)
         #expect(try fixture.repository.loadTheme() == .steel)
+    }
+
+    @Test("Persistent theme initialization preserves unreadable bytes and blocks edits",
+          arguments: ["unknown-theme", "{malformed"])
+    func invalidThemeInitialization(value: String) throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let raw = value == "unknown-theme" ? try JSONEncoder().encode(value) : Data(value.utf8)
+        fixture.userDefaults.set(raw, forKey: "gayffirmations.theme")
+        let store = ThemeStore(repository: fixture.repository)
+        #expect(store.selectedTheme == .eden)
+        #expect(store.persistenceErrorMessage != nil)
+        #expect(throws: PersistenceUnavailableError.self) { try store.select(.steel) }
+        #expect(fixture.userDefaults.data(forKey: "gayffirmations.theme") == raw)
     }
 
     @Test("A theme can be saved and loaded")

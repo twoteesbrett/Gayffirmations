@@ -36,6 +36,14 @@ Before distribution, verify it in the signed archive and run Apple's archive
 validation. Review App Store Connect privacy answers against the app's actual
 behavior separately; a bundled manifest does not establish those answers.
 
+## Store initialization
+
+Theme and affirmation stores have separate initialization paths: constructors
+with a repository always load saved data, while `ThemeStore(selectedTheme:)` and
+`AffirmationStore(affirmations:)` create in-memory state for previews and tests.
+Memory constructors cannot accept repositories. Persistent constructors use
+defaults only when saved data is absent, or as a protected fallback after a load error.
+
 ## Recovering unreadable saved data
 
 Unreadable saved sections are preserved on launch and block ordinary edits.

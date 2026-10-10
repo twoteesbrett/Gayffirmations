@@ -36,15 +36,14 @@ final class AffirmationStore {
         AffirmationSelection.tag(tag).matchingAffirmations(in: affirmations)
     }
 
-    init(
-        affirmations: [Affirmation] = [],
-        repository: (any AffirmationRepository)? = nil
-    ) {
+    /// Creates an in-memory library for previews and isolated UI tests.
+    init(affirmations: [Affirmation] = []) {
         self.affirmations = affirmations
         self.defaultAffirmations = affirmations
-        self.repository = repository
+        self.repository = nil
     }
 
+    /// A repository always loads saved content before using first-launch defaults.
     init(
         repository: any AffirmationRepository,
         defaultAffirmations: [Affirmation]

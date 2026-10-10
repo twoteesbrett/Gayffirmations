@@ -168,7 +168,7 @@ struct ThemeBackgroundTests {
     @Test("A failed background save preserves the current choice")
     func failedSave() {
         let repository = UnavailableBackgroundRepository()
-        let store = ThemeStore(selectedTheme: .steel, backgroundRepository: repository)
+        let store = ThemeStore(repository: repository, defaultTheme: .steel, backgroundRepository: repository)
         #expect(throws: BackgroundTestError.self) { try store.setUsesPhoto(false) }
         #expect(store.selectedPhoto != nil)
         #expect(store.backgroundChoice.usesPhoto)
@@ -177,7 +177,9 @@ struct ThemeBackgroundTests {
 }
 
 private enum BackgroundTestError: Error { case saveFailed }
-private struct UnavailableBackgroundRepository: ThemeBackgroundRepository {
+private struct UnavailableBackgroundRepository: ThemeBackgroundRepository, ThemeRepository {
+    func loadTheme() throws -> AppTheme? { .steel }
+    func saveTheme(_ theme: AppTheme) throws { throw BackgroundTestError.saveFailed }
     func loadThemeBackgrounds() throws -> [String: ThemeBackgroundChoice] { [:] }
     func saveThemeBackgrounds(_ backgrounds: [String: ThemeBackgroundChoice]) throws {
         throw BackgroundTestError.saveFailed

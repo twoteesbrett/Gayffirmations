@@ -38,20 +38,18 @@ final class ThemeStore {
     private let repository: (any ThemeRepository)?
     let defaultTheme: AppTheme
 
-    init(
-        selectedTheme: AppTheme = .eden,
-        repository: (any ThemeRepository)? = nil,
-        backgroundRepository: (any ThemeBackgroundRepository)? = nil
-    ) {
+    /// Creates an in-memory store for previews and isolated UI tests.
+    init(selectedTheme: AppTheme = .eden) {
         self.selectedTheme = selectedTheme
         self.defaultTheme = selectedTheme
-        self.repository = repository
-        self.backgroundRepository = backgroundRepository
+        self.repository = nil
+        self.backgroundRepository = nil
     }
 
+    /// A repository always loads saved theme and background preferences.
     init(
         repository: any ThemeRepository,
-        defaultTheme: AppTheme,
+        defaultTheme: AppTheme = .eden,
         backgroundRepository: (any ThemeBackgroundRepository)? = nil
     ) {
         self.repository = repository

@@ -27,9 +27,11 @@ struct ThemeStoreTests {
     func loadsSavedTheme() {
         let repository = InMemoryThemeRepository(theme: .steel)
 
-        let store = ThemeStore(repository: repository, defaultTheme: .eden)
+        let store = ThemeStore(repository: repository)
 
         #expect(store.selectedTheme == .steel)
+        #expect(repository.loadCallCount == 1)
+        #expect(repository.saveCallCount == 0)
     }
 
     @Test("The default theme is saved on first launch")
@@ -84,16 +86,20 @@ struct ThemeStoreTests {
 
 private final class InMemoryThemeRepository: ThemeRepository {
     var theme: AppTheme?
+    private(set) var loadCallCount = 0
+    private(set) var saveCallCount = 0
 
     init(theme: AppTheme? = nil) {
         self.theme = theme
     }
 
     func loadTheme() throws -> AppTheme? {
-        theme
+        loadCallCount += 1
+        return theme
     }
 
     func saveTheme(_ theme: AppTheme) throws {
+        saveCallCount += 1
         self.theme = theme
     }
 }
