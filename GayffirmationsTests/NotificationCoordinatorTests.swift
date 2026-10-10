@@ -416,7 +416,7 @@ struct NotificationCoordinatorTests {
     @Test("Library edits, deletions, and restores refresh reminder text")
     func libraryChangesRefreshReminders() async throws {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
-        let defaults = [Affirmation(text: "Default")]
+        let defaults = [Affirmation(text: "Default", source: .bundled)]
         let library = AffirmationStore(affirmations: defaults)
         let schedule = ScheduleStore()
         let coordinator = NotificationCoordinator(

@@ -4,6 +4,34 @@ import Testing
 
 @MainActor
 struct BundledAffirmationTests {
+    @Test func failedRestorationPreservesPersonalContentUntilRetry() throws {
+        let original = try #require(Affirmation.starterAffirmations.first)
+        let personal = Affirmation(
+            id: original.id, text: "My rewrite", isFavorite: true, tags: ["Mine"]
+        )
+        let repository = BundledMessageRepository()
+        repository.affirmations = [personal]
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [original])
+        repository.failSave = true
+        #expect(throws: RestorationTestError.saveFailed) { try store.restoreDefaults() }
+        #expect(store.affirmations == [personal])
+        #expect(repository.affirmations == [personal])
+        repository.failSave = false
+        try store.restoreDefaults()
+        let saved = store.affirmations
+        #expect(saved.count == 2)
+        #expect(saved.first == original)
+        let copy = try #require(saved.last)
+        #expect(copy.id != original.id)
+        #expect(copy.text == personal.text)
+        #expect(copy.tags == personal.tags)
+        #expect(copy.isFavorite)
+        #expect(copy.source == .user)
+        try store.restoreDefaults()
+        #expect(store.affirmations == saved)
+        #expect(repository.affirmations == saved)
+    }
+
     @Test func bundledEditsAndDeletionSurviveReloadAndCanBeRestored() throws {
         let entry = try #require(Affirmation.legacyStarterAffirmations.last)
         let repository = BundledMessageRepository()
@@ -94,10 +122,16 @@ struct BundledAffirmationTests {
 
 private final class BundledMessageRepository: AffirmationRepository {
     var affirmations: [Affirmation]?
+    var failSave = false
 
     func loadAffirmations() throws -> [Affirmation]? { affirmations }
 
     func saveAffirmations(_ affirmations: [Affirmation]) throws {
+        if failSave { throw RestorationTestError.saveFailed }
         self.affirmations = affirmations
     }
+}
+
+private enum RestorationTestError: Error {
+    case saveFailed
 }

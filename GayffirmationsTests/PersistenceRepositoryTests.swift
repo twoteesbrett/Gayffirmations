@@ -4,6 +4,65 @@ import Testing
 
 @MainActor
 struct PersistenceRepositoryTests {
+    @Test("Restoration preserves legacy personal content across repeated restores and relaunches",
+          arguments: [false, true])
+    func restoreLegacyPersonalContent(tagsOnly: Bool) throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let current = Affirmation.starterAffirmations
+        let starter = try #require(Affirmation.legacyStarterAffirmations.first {
+            entry in current.contains { $0.id == entry.id }
+        })
+        let retired = try #require(Affirmation.legacyStarterAffirmations.first {
+            entry in !current.contains { $0.id == entry.id }
+        })
+        var objects = try #require(JSONSerialization.jsonObject(
+            with: JSONEncoder().encode([starter, retired])
+        ) as? [[String: Any]])
+        for index in objects.indices {
+            objects[index].removeValue(forKey: "source")
+            objects[index]["isFavorite"] = true
+            if tagsOnly {
+                objects[index]["tags"] = ["Personal"]
+            } else {
+                objects[index]["text"] = "My rewrite \(index)"
+            }
+        }
+        let raw = try JSONSerialization.data(withJSONObject: objects)
+        fixture.userDefaults.set(raw, forKey: "gayffirmations.affirmations")
+        let store = AffirmationStore(repository: fixture.repository, defaultAffirmations: current)
+        let personal = store.affirmations
+        #expect(personal.allSatisfy { !$0.isBundled })
+        #expect(!store.canRestoreOriginal(id: starter.id))
+        try store.restoreOriginal(id: starter.id)
+        #expect(store.affirmations == personal)
+        try store.restoreDefaults()
+
+        let saved = store.affirmations
+        let restored = try #require(saved.first { $0.id == starter.id })
+        #expect(restored.isBundled)
+        #expect(restored.text == current.first { $0.id == starter.id }?.text)
+        #expect(!restored.isFavorite)
+        #expect(store.canRestoreOriginal(id: starter.id))
+        let copies = saved.filter { !$0.isBundled }
+        #expect(copies.count == 2)
+        for original in personal {
+            let copy = try #require(copies.first { $0.text == original.text && $0.tags == original.tags })
+            #expect(copy.isFavorite)
+            #expect(copy.id == original.id || original.id == starter.id)
+        }
+        #expect(copies.allSatisfy { $0.id != starter.id })
+        #expect(Set(saved.map(\.id)).count == saved.count)
+        #expect(try fixture.repository.loadAffirmations() == saved)
+        for _ in 0..<2 {
+            let restarted = AffirmationStore(repository: fixture.repository, defaultAffirmations: current)
+            #expect(restarted.affirmations == saved)
+            try restarted.restoreDefaults()
+            #expect(restarted.affirmations == saved)
+            #expect(try fixture.repository.loadAffirmations() == saved)
+        }
+    }
+
     @Test("Denied permission preserves saved routines and delivery resumes after permission returns")
     func permissionChangesPreserveSchedules() async throws {
         let fixture = RepositoryFixture()

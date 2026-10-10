@@ -329,7 +329,7 @@ struct LibraryView: View {
                 try store.add(text: text, tags: tags)
             }
         case .edit(let affirmation):
-            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, name: notificationCoordinator.personalizationStore.name, onRestore: store.defaultAffirmations.contains(where: { $0.id == affirmation.id }) ? {
+            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, name: notificationCoordinator.personalizationStore.name, onRestore: store.canRestoreOriginal(id: affirmation.id) ? {
                 try store.restoreOriginal(id: affirmation.id)
             } : nil) { text, tags in
                 try store.update(id: affirmation.id, text: text, tags: tags)

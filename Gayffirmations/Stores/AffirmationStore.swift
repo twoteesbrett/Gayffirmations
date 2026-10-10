@@ -106,8 +106,20 @@ final class AffirmationStore {
 
     func restoreDefaults() throws {
         let defaultIDs = Set(defaultAffirmations.map(\.id))
-        let personal = affirmations.filter { !$0.isBundled && !defaultIDs.contains($0.id) }
-        let favourites = Set(affirmations.filter(\.isFavorite).map(\.id))
+        var reservedIDs = Set(affirmations.map(\.id)).union(defaultIDs)
+        let personal = affirmations.filter { !$0.isBundled }.map { entry in
+            guard defaultIDs.contains(entry.id) else { return entry }
+            // Legacy personal rewrites retain bundled IDs. Move the personal copy
+            // once, in the same save that restores the catalogue's stable identity.
+            var newID = UUID()
+            while reservedIDs.contains(newID) { newID = UUID() }
+            reservedIDs.insert(newID)
+            return Affirmation(
+                id: newID, text: entry.text, isFavorite: entry.isFavorite,
+                tags: entry.tags, source: .user
+            )
+        }
+        let favourites = Set(affirmations.filter { $0.isBundled && $0.isFavorite }.map(\.id))
         try persist(defaultAffirmations.map {
             var original = $0
             original.isFavorite = favourites.contains($0.id)
@@ -115,7 +127,14 @@ final class AffirmationStore {
         } + personal)
     }
 
+    func canRestoreOriginal(id: Affirmation.ID) -> Bool {
+        affirmations.contains { $0.id == id && $0.isBundled }
+            && defaultAffirmations.contains { $0.id == id }
+    }
+
     func restoreOriginal(id: Affirmation.ID) throws {
+        // Personal ownership takes precedence over a historical catalogue ID.
+        guard !affirmations.contains(where: { $0.id == id && !$0.isBundled }) else { return }
         guard var original = defaultAffirmations.first(where: { $0.id == id }) else { return }
         var updated = affirmations
         if let index = updated.firstIndex(where: { $0.id == id }) {

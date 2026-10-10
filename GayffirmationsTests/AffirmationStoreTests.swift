@@ -238,7 +238,7 @@ struct AffirmationStoreTests {
 
     @Test("Restoring defaults preserves personal additions and favorites")
     func restoreDefaults() throws {
-        let defaults = [Affirmation(text: "Default")]
+        let defaults = [Affirmation(text: "Default", source: .bundled)]
         let repository = InMemoryAffirmationRepository()
         let store = AffirmationStore(
             repository: repository,

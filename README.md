@@ -46,6 +46,10 @@ Restore Bundled Affirmations recovers bundled messages while keeping personal ad
 and favourites. Reset All App Data still clears everything.
 Existing starter messages with previously customised text or tags are preserved as
 editable personal messages; untouched starter messages become bundled messages.
+When restoring bundled content, a personal message that still has a bundled ID
+receives a new saved ID. Its text, tags, and favourite choice stay with the personal
+copy; the bundled original is restored separately. Restore Original is available
+only for bundled messages.
 
 ## Personalised messages
 
