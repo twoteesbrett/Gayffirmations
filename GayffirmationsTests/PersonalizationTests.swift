@@ -40,13 +40,15 @@ struct PersonalizationTests {
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let repository = UserDefaultsRepository(userDefaults: defaults)
-        let original = Affirmation(id: UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")!, text: "Stop comparing. You're the only Brett in the room.", isFavorite: true, tags: ["Mine"])
+        var original = try #require(Affirmation.legacyStarterAffirmations.last)
+        original.text = "Stop comparing. You're the only Brett in the room."
+        original.isFavorite = true
         let custom = Affirmation(text: "Brett is great")
         try repository.saveAffirmations([original, custom])
         let migrated = try #require(try repository.loadAffirmations())
         #expect(migrated[0].usesName)
         #expect(migrated[0].isFavorite)
-        #expect(migrated[0].tags == ["Mine"])
+        #expect(migrated[0].tags == original.tags)
         #expect(migrated[0].resolved(name: "") == nil)
         #expect(migrated[1] == custom)
         let profile = PersonalizationStore(repository: repository)

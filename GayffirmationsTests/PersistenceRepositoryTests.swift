@@ -4,6 +4,71 @@ import Testing
 
 @MainActor
 struct PersistenceRepositoryTests {
+    @Test("Denied permission preserves saved routines and delivery resumes after permission returns")
+    func permissionChangesPreserveSchedules() async throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let schedules = [
+            AffirmationSchedule(isEnabled: true, notificationsPerDay: 2),
+            AffirmationSchedule(isEnabled: true, notificationsPerDay: 3),
+            AffirmationSchedule(isEnabled: false)
+        ]
+        try fixture.repository.saveSchedules(schedules)
+        let store = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        let library = AffirmationStore(affirmations: [Affirmation(text: "Original")])
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: store, scheduler: scheduler
+        )
+        await coordinator.reconcileOnLaunch()
+        #expect(scheduler.scheduledReminders.count == 5)
+
+        scheduler.authorizationStatusValue = .denied
+        await coordinator.reconcileOnLaunch()
+        #expect(store.schedules == schedules)
+        #expect(try fixture.repository.loadSchedules() == schedules)
+        #expect(scheduler.scheduledReminders.isEmpty)
+        #expect(coordinator.errorMessage == NotificationCoordinatorError.permissionDenied.localizedDescription)
+
+        try library.update(id: library.affirmations[0].id, text: "Edited while denied")
+        await coordinator.waitForLibraryRefresh()
+        #expect(try fixture.repository.loadSchedules() == schedules)
+
+        scheduler.authorizationStatusValue = .authorized
+        let restartedStore = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        let restarted = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: restartedStore, scheduler: scheduler
+        )
+        await restarted.reconcileOnLaunch()
+        #expect(restartedStore.schedules == schedules)
+        #expect(scheduler.scheduledReminders.count == 5)
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Edited while denied" })
+        #expect(scheduler.authorizationRequestCount == 0)
+    }
+
+    @Test("Name migration preserves user content and still upgrades bundled content",
+          arguments: [false, true], [false, true])
+    func nameMigrationRespectsOwnership(bundled: Bool, legacy: Bool) throws {
+        let fixture = RepositoryFixture()
+        defer { fixture.removeSavedData() }
+        let starter = try #require(Affirmation.legacyStarterAffirmations.last)
+        let original = Affirmation(
+            id: starter.id, text: "Stop comparing. You're the only Brett in the room.",
+            isFavorite: true, tags: bundled ? starter.tags : ["Mine"],
+            source: bundled ? .bundled : .user
+        )
+        var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(original)) as? [String: Any])
+        if legacy { object.removeValue(forKey: "source") }
+        fixture.userDefaults.set(try JSONSerialization.data(withJSONObject: [object]), forKey: "gayffirmations.affirmations")
+
+        let loaded = try #require(fixture.repository.loadAffirmations()?.first)
+        var expected = original
+        if bundled { expected.text = "Stop comparing. You're the only {name} in the room." }
+        #expect(loaded == expected)
+        #expect(try fixture.repository.loadAffirmations() == [expected])
+        if !bundled { #expect(loaded.resolved(name: "") == original) }
+    }
+
     @Test("Legacy zero-reminder schedules remain off and support updates after loading",
           arguments: [false, true])
     func legacyZeroReminderMigration(enabled: Bool) async throws {

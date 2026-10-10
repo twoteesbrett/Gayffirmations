@@ -41,7 +41,8 @@ final class UserDefaultsRepository:
     func loadAffirmations() throws -> [Affirmation]? {
         var saved = try load([Affirmation].self, forKey: Key.affirmations)
         if let index = saved?.firstIndex(where: {
-            $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
+            $0.isBundled
+                && $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
                 && $0.text == "Stop comparing. You're the only Brett in the room."
         }) {
             saved?[index].text = "Stop comparing. You're the only {name} in the room."

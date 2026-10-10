@@ -26,8 +26,8 @@ intentionally outside the first release.
 
 ## Bundled and personal messages
 
-Bundled messages have read-only text and tags. You can still favourite them
-or remove them from your library. Messages you create remain editable.
+Bundled messages have read-only text and tags. You can favourite them, but
+cannot delete them. Messages you create remain editable and deletable.
 Existing starter messages with previously customised text or tags are preserved as
 editable personal messages; untouched starter messages become bundled messages.
 

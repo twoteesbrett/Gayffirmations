@@ -198,6 +198,11 @@ final class NotificationCoordinator {
             try await replaceReminders(with: plan(for: scheduleStore.schedules).map(\.reminder))
         } catch {
             scheduler.removePendingNotifications()
+            // System permission can change independently of the saved routines.
+            // Keep their enabled preferences so reconciliation can resume delivery.
+            if (error as? NotificationCoordinatorError) == .permissionDenied {
+                throw error
+            }
             var disabled = scheduleStore.schedules
             for index in disabled.indices { disabled[index].isEnabled = false }
             do {
