@@ -154,8 +154,7 @@ private struct ThemePreviewRow: View {
         theme.backgroundGradient
             .overlay {
                 Text("Aa")
-                    .font(theme.affirmationPreviewFont)
-                    .fontDesign(nil)
+                    .affirmationTypography(theme, role: .preview)
                     .foregroundStyle(theme.textColor)
             }
             .frame(width: 72, height: 58)

@@ -47,18 +47,10 @@ extension AppTheme {
         }
     }
 
-    var fontDesign: Font.Design {
+    var interfaceFontDesign: Font.Design? {
         switch self {
-        case .eden, .steel, .concrete, .outAndAbout: .default
         case .disco: .rounded
-        }
-    }
-
-    var affirmationWeight: Font.Weight {
-        switch self {
-        case .eden, .concrete, .outAndAbout: .regular
-        case .steel: .bold
-        case .disco: .semibold
+        case .eden, .steel, .concrete, .outAndAbout: nil
         }
     }
 
@@ -71,19 +63,35 @@ extension AppTheme {
         }
     }
 
-    var affirmationFont: Font {
-        if self == .eden {
-            .custom("Baskerville", size: 34, relativeTo: .largeTitle)
-        } else {
-            .system(.largeTitle, design: fontDesign, weight: affirmationWeight)
+    func affirmationFont(for role: AffirmationTextRole) -> Font {
+        switch self {
+        case .eden:
+            .custom("Baskerville", size: role.baseSize, relativeTo: role.textStyle)
+        case .steel:
+            .system(role.textStyle, design: .default, weight: .bold)
+        case .disco:
+            .system(role.textStyle, design: .rounded, weight: .semibold)
+        case .concrete, .outAndAbout:
+            .system(role.textStyle, design: .default, weight: .regular)
         }
     }
 
-    var affirmationPreviewFont: Font {
-        if self == .eden {
-            .custom("Baskerville", size: 22, relativeTo: .title2)
-        } else {
-            .system(.title2, design: fontDesign, weight: affirmationWeight)
+}
+
+enum AffirmationTextRole {
+    case message, preview
+
+    var textStyle: Font.TextStyle {
+        switch self {
+        case .message: .largeTitle
+        case .preview: .title2
+        }
+    }
+
+    var baseSize: CGFloat {
+        switch self {
+        case .message: 34
+        case .preview: 22
         }
     }
 }
@@ -112,7 +120,13 @@ extension View {
         environment(\.appTheme, theme)
             .environment(\.colorScheme, theme.colorScheme)
             .tint(theme.accentColor)
-            .fontDesign(theme == .disco ? .rounded : nil)
+            .fontDesign(theme.interfaceFontDesign)
+    }
+
+    func affirmationTypography(_ theme: AppTheme, role: AffirmationTextRole = .message) -> some View {
+        // Affirmation typefaces own their design, independently of interface typography.
+        font(theme.affirmationFont(for: role))
+            .fontDesign(nil)
     }
 
     func themedBackground() -> some View {

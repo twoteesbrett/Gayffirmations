@@ -238,7 +238,7 @@ struct TodayView: View {
 
     private func affirmationMessage(_ affirmation: Affirmation) -> some View {
         Text(affirmation.text)
-            .font(appTheme.affirmationFont)
+            .affirmationTypography(appTheme)
             .lineSpacing(appTheme.affirmationLineSpacing)
             .frame(maxWidth: 560)
             .multilineTextAlignment(.center)
