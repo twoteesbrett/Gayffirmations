@@ -129,7 +129,7 @@ selections continue to work. Audio preparation and file sizes are in
 
 ## Themes and photos
 
-The five themes are Nature, Disco, Steel, Concrete, and Out & About. Each has six photos.
+The five themes are Eden, Disco, Steel, Concrete, and Out & About. Each has six photos.
 Out & About rotates from morning through midday to evening: Lakeside, Market,
 Pool Club, Park, Harbour, and Carnival.
 Themes with photos use them by default and offer a Use photos switch saved
@@ -162,7 +162,7 @@ seeded once, using stable IDs and matching text to avoid duplicates; later
 launches preserve edits and deletions. The earlier content-rebuild reset is
 no longer performed, including for installations with an old rebuild marker.
 
-Retired theme identifiers, including Refined, decode as Nature; current identifiers
+Retired theme identifiers, including Nature and Refined, decode as Eden; current identifiers
 retain their identity. Unknown or malformed data reports an error rather than silently
 replacing saved content. Legacy fixed photo IDs are ignored when decoding
 background preferences. Reset All clears saved background choices. Schedules

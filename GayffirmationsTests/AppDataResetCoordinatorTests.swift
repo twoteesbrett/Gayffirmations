@@ -23,7 +23,7 @@ struct AppDataResetCoordinatorTests {
             repository: repository
         )
         try library.add(text: "Custom")
-        try theme.select(.nature)
+        try theme.select(.eden)
         try await coordinator.setEnabled(true)
         try await coordinator.setSound(.choirHarpBless)
         try coordinator.setFallbackSelection(.tag("Work"))
@@ -36,14 +36,14 @@ struct AppDataResetCoordinatorTests {
         }
         #expect(library.affirmations == originalLibrary)
         #expect(schedule.schedule == originalSchedule)
-        #expect(theme.selectedTheme == .nature)
+        #expect(theme.selectedTheme == .eden)
         #expect(coordinator.fallbackSelectionStore.selection == .tag("Work"))
         #expect(scheduler.scheduledReminders == originalReminders)
         repository.shouldFail = false
         try resetCoordinator.resetAll()
         #expect(library.affirmations == defaults)
         #expect(schedule.schedule == schedule.defaultSchedule)
-        #expect(theme.selectedTheme == .nature)
+        #expect(theme.selectedTheme == .eden)
         #expect(coordinator.fallbackSelectionStore.selection == .all)
         #expect(scheduler.scheduledReminders.isEmpty)
         #expect(repository.didSave)
@@ -58,7 +58,7 @@ struct AppDataResetCoordinatorTests {
         let defaults = [Affirmation(text: "Default")]
         let library = AffirmationStore(repository: repository, defaultAffirmations: defaults)
         let schedule = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let theme = ThemeStore(repository: repository, defaultTheme: .nature)
+        let theme = ThemeStore(repository: repository, defaultTheme: .eden)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule,
             scheduler: NotificationSchedulerSpy(authorizationStatus: .authorized),
@@ -72,14 +72,14 @@ struct AppDataResetCoordinatorTests {
             repository: repository
         )
         try library.add(text: "Custom")
-        try theme.select(.nature)
+        try theme.select(.eden)
         try await coordinator.setEnabled(true)
         try coordinator.setFallbackSelection(.favourites)
         try resetCoordinator.resetAll()
         #expect(try repository.loadAffirmationSelection() == .all)
         #expect(try repository.loadAffirmations() == defaults)
         #expect(try repository.loadSchedule() == schedule.defaultSchedule)
-        #expect(try repository.loadTheme() == .nature)
+        #expect(try repository.loadTheme() == .eden)
     }
 
     @Test("A corrupt section blocks reset all without altering healthy sections")
@@ -90,12 +90,12 @@ struct AppDataResetCoordinatorTests {
         let repository = UserDefaultsRepository(userDefaults: userDefaults)
         let custom = [Affirmation(text: "Custom")]
         try repository.saveAffirmations(custom)
-        try repository.saveTheme(.nature)
+        try repository.saveTheme(.eden)
         let corruptData = Data("invalid JSON".utf8)
         userDefaults.set(corruptData, forKey: "gayffirmations.schedule")
         let library = AffirmationStore(repository: repository, defaultAffirmations: [])
         let schedule = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let theme = ThemeStore(repository: repository, defaultTheme: .nature)
+        let theme = ThemeStore(repository: repository, defaultTheme: .eden)
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
@@ -111,7 +111,7 @@ struct AppDataResetCoordinatorTests {
             try resetCoordinator.resetAll()
         }
         #expect(try repository.loadAffirmations() == custom)
-        #expect(try repository.loadTheme() == .nature)
+        #expect(try repository.loadTheme() == .eden)
         #expect(userDefaults.data(forKey: "gayffirmations.schedule") == corruptData)
         #expect(scheduler.removeCallCount == 0)
     }

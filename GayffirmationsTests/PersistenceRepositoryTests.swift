@@ -125,7 +125,7 @@ struct PersistenceRepositoryTests {
             initialAffirmations: Affirmation.starterAffirmations
         )
         let library = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
-        let theme = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
+        let theme = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
         let selection = AffirmationSelectionStore(repository: repository)
         let reminders = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
 
@@ -244,21 +244,21 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let affirmations = [Affirmation(text: "Reset")]
         let schedule = AffirmationSchedule()
-        try fixture.repository.saveAppData(affirmations: affirmations, schedules: [schedule], theme: .nature, selection: .favourites)
+        try fixture.repository.saveAppData(affirmations: affirmations, schedules: [schedule], theme: .eden, selection: .favourites)
         #expect(try fixture.repository.loadAffirmations() == affirmations)
         #expect(try fixture.repository.loadSchedule() == schedule)
-        #expect(try fixture.repository.loadTheme() == .nature)
+        #expect(try fixture.repository.loadTheme() == .eden)
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
-    @Test("Removed themes fall back to Nature and allow subsequent selections", arguments: ["together", "fruity", "refined"])
+    @Test("Removed themes fall back to Eden and allow subsequent selections", arguments: ["together", "fruity", "refined"])
     func removedThemeMigration(name: String) throws {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
         fixture.userDefaults.set(try JSONEncoder().encode(name), forKey: "gayffirmations.theme")
 
         let store = ThemeStore(repository: fixture.repository)
-        #expect(store.selectedTheme == .nature)
+        #expect(store.selectedTheme == .eden)
         #expect(store.persistenceErrorMessage == nil)
         try store.select(.steel)
         #expect(try fixture.repository.loadTheme() == .steel)
@@ -269,9 +269,9 @@ struct PersistenceRepositoryTests {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
 
-        try fixture.repository.saveTheme(.nature)
+        try fixture.repository.saveTheme(.eden)
 
-        #expect(try fixture.repository.loadTheme() == .nature)
+        #expect(try fixture.repository.loadTheme() == .eden)
     }
 }
 

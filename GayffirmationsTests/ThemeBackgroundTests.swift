@@ -5,6 +5,22 @@ import UIKit
 
 @MainActor
 struct ThemeBackgroundTests {
+    @Test("Nature's gradient preference migrates to Eden across restarts")
+    func migratesNatureBackground() throws {
+        let suite = "gayffirmations.eden.migration.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        try repository.saveThemeBackgrounds(["nature": ThemeBackgroundChoice(usesPhoto: false)])
+        for _ in 0..<2 {
+            let store = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
+            #expect(!store.backgroundChoice.usesPhoto)
+            #expect(store.selectedPhoto == nil)
+            try store.setUsesPhoto(false)
+        }
+        #expect(try repository.loadThemeBackgrounds()["eden"]?.usesPhoto == false)
+    }
+
     @Test("Photo mode persists, rotates with affirmations and resets with app data")
     func photoModeAndRotation() throws {
         let suite = "gayffirmations.photos.tests.\(UUID())"
@@ -27,14 +43,14 @@ struct ThemeBackgroundTests {
         #expect(store.selectedPhoto == nil)
         try store.setUsesPhoto(true)
         #expect(store.selectedPhoto?.id == rotatedPhoto)
-        try store.select(.nature)
+        try store.select(.eden)
         #expect(store.selectedPhoto != nil)
         try store.select(.steel)
         #expect(store.selectedPhoto?.id == rotatedPhoto)
-        let restarted = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
+        let restarted = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
         #expect(restarted.backgroundChoice.usesPhoto)
         #expect(restarted.selectedPhoto != nil)
-        try repository.saveAppData(affirmations: [], schedules: [AffirmationSchedule()], theme: .nature, selection: .all)
+        try repository.saveAppData(affirmations: [], schedules: [AffirmationSchedule()], theme: .eden, selection: .all)
         store.applyPersistedDefaults()
         #expect(store.backgrounds.isEmpty)
         #expect(try repository.loadThemeBackgrounds().isEmpty)
@@ -46,7 +62,7 @@ struct ThemeBackgroundTests {
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let repository = UserDefaultsRepository(userDefaults: defaults)
-        let store = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
+        let store = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
         for theme in AppTheme.allCases {
             try store.select(theme)
             #expect(store.backgroundChoice.usesPhoto == !theme.photos.isEmpty)
@@ -54,11 +70,11 @@ struct ThemeBackgroundTests {
         }
         try store.select(.steel)
         try store.setUsesPhoto(false)
-        try store.select(.nature)
+        try store.select(.eden)
         #expect(store.backgroundChoice.usesPhoto)
         try store.select(.steel)
         #expect(!store.backgroundChoice.usesPhoto)
-        let restarted = ThemeStore(repository: repository, defaultTheme: .nature, backgroundRepository: repository)
+        let restarted = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
         #expect(restarted.selectedTheme == .steel)
         #expect(!restarted.backgroundChoice.usesPhoto)
         #expect(restarted.selectedPhoto == nil)
@@ -76,7 +92,7 @@ struct ThemeBackgroundTests {
 
     @Test("Enabling photos after viewing a colour background advances on the next affirmation")
     func enablesAfterColours() throws {
-        let store = ThemeStore(selectedTheme: .nature)
+        let store = ThemeStore(selectedTheme: .eden)
         try store.setUsesPhoto(false)
         #expect(store.selectedPhoto == nil)
         store.updateDisplayedAffirmation(UUID())
@@ -130,23 +146,23 @@ struct ThemeBackgroundTests {
         }
     }
 
-    @Test("Nature and Steel save independent photo modes and rotate within their own collection")
+    @Test("Eden and Steel save independent photo modes and rotate within their own collection")
     func independentThemeModes() throws {
-        let store = ThemeStore(selectedTheme: .nature)
+        let store = ThemeStore(selectedTheme: .eden)
         try store.setUsesPhoto(true)
         let first = UUID()
         store.updateDisplayedAffirmation(first)
-        #expect(store.selectedPhoto?.id == AppTheme.nature.photos.first?.id)
+        #expect(store.selectedPhoto?.id == AppTheme.eden.photos.first?.id)
         store.updateDisplayedAffirmation(UUID())
-        #expect(store.selectedPhoto?.id == AppTheme.nature.photos[1].id)
+        #expect(store.selectedPhoto?.id == AppTheme.eden.photos[1].id)
         try store.select(.steel)
         #expect(store.selectedPhoto != nil)
         try store.setUsesPhoto(true)
         #expect(store.selectedPhoto?.id.hasPrefix("steel-") == true)
         try store.setUsesPhoto(false)
-        try store.select(.nature)
+        try store.select(.eden)
         #expect(store.backgroundChoice.usesPhoto)
-        #expect(store.selectedPhoto?.id.hasPrefix("nature-") == true)
+        #expect(store.selectedPhoto?.id.hasPrefix("eden-") == true)
     }
 
     @Test("A failed background save preserves the current choice")

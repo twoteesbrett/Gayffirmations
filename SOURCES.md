@@ -16,18 +16,18 @@ Steel uses six user-supplied AI-generated images from `/Users/brett/Desktop/gayf
 | Squat | steel-squat.png | User-supplied AI-generated image |
 | Pull-up | steel-pull-up.png | User-supplied AI-generated image |
 
-Nature uses six user-supplied Pexels photos from `/Users/brett/Desktop/gayffirmations-assets`. Bundled JPEGs preserve their aspect ratios and are resized to a maximum dimension of 3,000 pixels to keep background decoding lightweight.
+Eden uses six user-supplied images from `/Users/brett/Desktop/gayffirmations-assets`, preserving their original resolution and aspect ratio. It replaces the retired Nature collection.
 
-| Photo | Source filename identifier | Original file / source ID |
+| Photo | Original filename | Source file / bundled identifier |
 | --- | --- | --- |
-| Canyon | austin-sullivan | pexels-austin-sullivan-48171954-13386963.jpg / 13386963 |
-| Meadow | koolshooters | pexels-koolshooters-8530929.jpg / 8530929 |
-| Forest | sargonsama | pexels-sargonsama-38440480.jpg / 38440480 |
-| Beach | ramesh-chaudhary | pexels-ramesh-chaudhary-39043125-30519147.jpg / 30519147 |
-| River | baro | pexels-baro-405354470-14942582.jpg / 14942582 |
-| Waterfall | angshupurkait | pexels-angshupurkait-8056705.jpg / 8056705 |
+| Monstera | Dewy Monstera in Tropical Light.png | `eden-monstera.png` / `eden-monstera` |
+| Peace Lily | Dewy White Peace Lily in Rainforest Light.png | `eden-peace-lily.png` / `eden-peace-lily` |
+| Stream | Mossy Jungle Stream in Sunlight.png | `eden-stream.png` / `eden-stream` |
+| Ferns | Rain-Kissed Ferns in a Forest Stream.png | `eden-ferns.png` / `eden-ferns` |
+| Ivy | Sunlit Dew on Jungle Ivy.png | `eden-ivy.png` / `eden-ivy` |
+| Tropical Leaves | Sunlit Tropical Leaves After Rain.png | `eden-tropical-leaves.png` / `eden-tropical-leaves` |
 
-Nature retains colour; Steel renders in greyscale.
+Eden retains colour; Steel renders in greyscale.
 
 Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.
 

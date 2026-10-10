@@ -3,14 +3,14 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .nature, .outAndAbout: .light
-        case .steel, .disco, .concrete: .dark
+        case .outAndAbout: .light
+        case .eden, .steel, .disco, .concrete: .dark
         }
     }
 
     var accentColor: Color {
         switch self {
-        case .nature: Color(hex: 0x286B65)
+        case .eden: Color(hex: 0xC6E8AD)
         case .steel: Color(hex: 0xA7C9E0)
         case .disco: Color(hex: 0xFFB276)
         case .concrete: Color(hex: 0xC9C8BF)
@@ -20,7 +20,7 @@ extension AppTheme {
 
     var textColor: Color {
         switch self {
-        case .nature: Color(hex: 0x203D38)
+        case .eden: Color(hex: 0xF2F8ED)
         case .steel: Color(hex: 0xF0F4F7)
         case .disco: Color(hex: 0xFFF2FA)
         case .concrete: Color(hex: 0xF3F2ED)
@@ -30,8 +30,8 @@ extension AppTheme {
 
     var backgroundGradient: LinearGradient {
         switch self {
-        case .nature:
-            LinearGradient(colors: [Color(hex: 0xF0F3E9), Color(hex: 0xC9E4DD)],
+        case .eden:
+            LinearGradient(colors: [Color(hex: 0x4C8240), Color(hex: 0x123D27)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
         case .outAndAbout:
             LinearGradient(colors: [Color(hex: 0xA8D8F4), Color(hex: 0xE8F5FD)],
@@ -50,14 +50,14 @@ extension AppTheme {
 
     var fontDesign: Font.Design {
         switch self {
-        case .nature, .steel, .concrete, .outAndAbout: .default
+        case .eden, .steel, .concrete, .outAndAbout: .default
         case .disco: .rounded
         }
     }
 
     var affirmationWeight: Font.Weight {
         switch self {
-        case .nature, .concrete, .outAndAbout: .regular
+        case .eden, .concrete, .outAndAbout: .regular
         case .steel: .bold
         case .disco: .semibold
         }
@@ -65,7 +65,7 @@ extension AppTheme {
 
     var affirmationLineSpacing: CGFloat {
         switch self {
-        case .nature, .outAndAbout: 8
+        case .eden, .outAndAbout: 8
         case .steel: 4
         case .disco: 6
         case .concrete: 8
@@ -86,7 +86,7 @@ private extension Color {
 }
 
 private struct AppThemeKey: EnvironmentKey {
-    static let defaultValue: AppTheme = .nature
+    static let defaultValue: AppTheme = .eden
 }
 
 extension EnvironmentValues {

@@ -13,20 +13,20 @@ struct ThemePhoto: Identifiable {
 extension AppTheme {
     var photos: [ThemePhoto] {
         switch self {
-        case .nature:
+        case .eden:
             return [
-                ThemePhoto(id: "nature-canyon", name: "Canyon", focalPoint: UnitPoint(x: 0.55, y: 0.5),
-                           overlayOpacity: 0.42, accessibilityDescription: "Red sandstone canyon walls framing a ribbon of blue sky", textColor: .white),
-                ThemePhoto(id: "nature-meadow", name: "Meadow", focalPoint: .center,
-                           overlayOpacity: 0.38, accessibilityDescription: "Soft green meadow grasses against a shaded woodland background", textColor: .white),
-                ThemePhoto(id: "nature-forest", name: "Forest", focalPoint: UnitPoint(x: 0.56, y: 0.5),
-                           overlayOpacity: 0.48, accessibilityDescription: "Sunlight filtering through a green forest", textColor: .white),
-                ThemePhoto(id: "nature-beach", name: "Beach", focalPoint: UnitPoint(x: 0.5, y: 0.60),
-                           overlayOpacity: 0.50, accessibilityDescription: "Gentle waves washing over golden sand in warm evening light", textColor: .white),
-                ThemePhoto(id: "nature-river", name: "River", focalPoint: UnitPoint(x: 0.5, y: 0.65),
-                           overlayOpacity: 0.48, accessibilityDescription: "Clear blue river flowing around boulders beneath leafy trees", textColor: .white),
-                ThemePhoto(id: "nature-waterfall", name: "Waterfall", focalPoint: UnitPoint(x: 0.45, y: 0.5),
-                           overlayOpacity: 0.48, accessibilityDescription: "A cascading waterfall surrounded by lush green ferns and foliage", textColor: .white)
+                ThemePhoto(id: "eden-monstera", name: "Monstera", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A dew-covered monstera leaf glowing in tropical sunlight", textColor: .white),
+                ThemePhoto(id: "eden-peace-lily", name: "Peace Lily", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A white peace lily covered in dew amid lush rainforest foliage", textColor: .white),
+                ThemePhoto(id: "eden-stream", name: "Stream", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Sunlight sparkling on a jungle stream flowing over moss-covered rocks", textColor: .white),
+                ThemePhoto(id: "eden-ferns", name: "Ferns", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Rain-kissed ferns arching over mossy rocks beside a forest stream", textColor: .white),
+                ThemePhoto(id: "eden-ivy", name: "Ivy", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Dew-covered ivy trailing over a mossy tree in jungle sunlight", textColor: .white),
+                ThemePhoto(id: "eden-tropical-leaves", name: "Tropical Leaves", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Sunlight shining through rain-covered tropical leaves", textColor: .white)
             ]
         case .steel:
             return [

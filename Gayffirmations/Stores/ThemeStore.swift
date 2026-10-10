@@ -39,7 +39,7 @@ final class ThemeStore {
     let defaultTheme: AppTheme
 
     init(
-        selectedTheme: AppTheme = .nature,
+        selectedTheme: AppTheme = .eden,
         repository: (any ThemeRepository)? = nil,
         backgroundRepository: (any ThemeBackgroundRepository)? = nil
     ) {
@@ -59,7 +59,12 @@ final class ThemeStore {
         self.defaultTheme = defaultTheme
 
         do {
-            backgrounds = try backgroundRepository?.loadThemeBackgrounds() ?? [:]
+            var loadedBackgrounds = try backgroundRepository?.loadThemeBackgrounds() ?? [:]
+            // Keep the former Nature photo/gradient preference when migrating to Eden.
+            if loadedBackgrounds["eden"] == nil, let previous = loadedBackgrounds.removeValue(forKey: "nature") {
+                loadedBackgrounds["eden"] = previous
+            }
+            backgrounds = loadedBackgrounds
             if let savedTheme = try repository.loadTheme() {
                 selectedTheme = savedTheme
             } else {

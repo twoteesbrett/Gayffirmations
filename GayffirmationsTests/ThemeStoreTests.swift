@@ -6,15 +6,15 @@ import Testing
 struct ThemeStoreTests {
     @Test("Swipe previews leave the current photo unchanged and match the committed destination")
     func swipePhotoPreview() throws {
-        let store = ThemeStore(selectedTheme: .nature)
+        let store = ThemeStore(selectedTheme: .eden)
         let current = UUID()
         let next = UUID()
         store.updateDisplayedAffirmation(current)
         let original = store.selectedPhoto?.id
         let forward = store.photo(for: next, direction: 1)
         let backward = store.photo(for: next, direction: -1)
-        #expect(forward?.id == AppTheme.nature.photos[1].id)
-        #expect(backward?.id == AppTheme.nature.photos.last?.id)
+        #expect(forward?.id == AppTheme.eden.photos[1].id)
+        #expect(backward?.id == AppTheme.eden.photos.last?.id)
         #expect(store.selectedPhoto?.id == original)
 
         store.updateDisplayedAffirmation(next, direction: -1)
@@ -27,7 +27,7 @@ struct ThemeStoreTests {
     func loadsSavedTheme() {
         let repository = InMemoryThemeRepository(theme: .steel)
 
-        let store = ThemeStore(repository: repository, defaultTheme: .nature)
+        let store = ThemeStore(repository: repository, defaultTheme: .eden)
 
         #expect(store.selectedTheme == .steel)
     }
@@ -36,21 +36,21 @@ struct ThemeStoreTests {
     func savesDefaultTheme() {
         let repository = InMemoryThemeRepository()
 
-        let store = ThemeStore(repository: repository, defaultTheme: .nature)
+        let store = ThemeStore(repository: repository, defaultTheme: .eden)
 
-        #expect(store.selectedTheme == .nature)
-        #expect(repository.theme == .nature)
+        #expect(store.selectedTheme == .eden)
+        #expect(repository.theme == .eden)
     }
 
     @Test("A theme selection survives recreating the store", arguments: AppTheme.allCases)
     func selectionSurvivesRestart(theme: AppTheme) throws {
         let repository = InMemoryThemeRepository()
-        let firstStore = ThemeStore(repository: repository, defaultTheme: .nature)
+        let firstStore = ThemeStore(repository: repository, defaultTheme: .eden)
 
         try firstStore.select(theme)
         let restartedStore = ThemeStore(
             repository: repository,
-            defaultTheme: .nature
+            defaultTheme: .eden
         )
 
         #expect(restartedStore.selectedTheme == theme)
@@ -59,25 +59,25 @@ struct ThemeStoreTests {
     @Test("Reset restores and saves the default theme")
     func reset() throws {
         let repository = InMemoryThemeRepository()
-        let store = ThemeStore(repository: repository, defaultTheme: .nature)
+        let store = ThemeStore(repository: repository, defaultTheme: .eden)
 
         try store.select(.disco)
         try store.reset()
 
-        #expect(store.selectedTheme == .nature)
-        #expect(repository.theme == .nature)
+        #expect(store.selectedTheme == .eden)
+        #expect(repository.theme == .eden)
     }
 
     @Test("A load failure prevents the theme from being overwritten")
     func loadFailurePreventsOverwrite() {
         let repository = FailingThemeRepository()
-        let store = ThemeStore(repository: repository, defaultTheme: .nature)
+        let store = ThemeStore(repository: repository, defaultTheme: .eden)
 
         #expect(store.persistenceErrorMessage != nil)
         #expect(throws: PersistenceUnavailableError.self) {
-            try store.select(.nature)
+            try store.select(.eden)
         }
-        #expect(store.selectedTheme == .nature)
+        #expect(store.selectedTheme == .eden)
         #expect(repository.saveCallCount == 0)
     }
 }

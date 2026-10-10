@@ -141,7 +141,7 @@ private struct ThemePreviewRow: View {
     private var previewPhoto: ThemePhoto? {
         let photoID: String?
         switch theme {
-        case .nature: photoID = "nature-forest"
+        case .eden: photoID = "eden-monstera"
         case .steel: photoID = "steel-strength"
         case .disco: photoID = "disco-mirrorball"
         case .concrete: photoID = "concrete-oculus"

@@ -354,9 +354,9 @@ struct TodayView: View {
 }
 
 #if DEBUG
-#Preview("Nature") {
+#Preview("Eden") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
-        .themeAppearance(.nature)
+        .themeAppearance(.eden)
 }
 
 #Preview("Steel") {

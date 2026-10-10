@@ -14,14 +14,14 @@ struct StarterContentTests {
         #expect(entries.last?.text == "Be gentle with yourself. The world has enough critics already.")
     }
 
-    @Test("Retired themes load as Nature", arguments: [
-        "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
+    @Test("Retired themes load as Eden", arguments: [
+        "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
         "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
         "bubblegum", "daydream", "muscle", "spectrum"
     ])
     func migratesRetiredTheme(name: String) throws {
         let data = try JSONEncoder().encode(name)
-        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == .nature)
+        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == .eden)
     }
 
     @Test("Current themes preserve their identity", arguments: AppTheme.allCases)
