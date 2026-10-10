@@ -235,7 +235,7 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let saved = [Affirmation(text: "My custom affirmation", isFavorite: true, tags: ["Work"])]
         let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 6)
-        let backgrounds = [AppTheme.steel.rawValue: ThemeBackgroundChoice(usesPhoto: false)]
+        let backgrounds = [AppTheme.steel.rawValue: ThemeBackgroundChoice(usesImage: false)]
         try fixture.repository.saveAffirmations(saved)
         try fixture.repository.saveTheme(.steel)
         try fixture.repository.saveThemeBackgrounds(backgrounds)

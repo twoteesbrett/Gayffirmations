@@ -27,30 +27,30 @@ struct ThemePickerView: View {
                 }
             }
 
-            if !store.selectedTheme.photos.isEmpty {
+            if !store.selectedTheme.images.isEmpty {
                 Section {
-                    Toggle("Use photos", isOn: Binding(
-                        get: { store.backgroundChoice.usesPhoto },
-                        set: { enabled in updateBackground { try store.setUsesPhoto(enabled) } }
+                    Toggle("Use images", isOn: Binding(
+                        get: { store.backgroundChoice.usesImage },
+                        set: { enabled in updateBackground { try store.setUsesImage(enabled) } }
                     ))
 
-                    if store.backgroundChoice.usesPhoto {
+                    if store.backgroundChoice.usesImage {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 12)], spacing: 12) {
-                            ForEach(store.selectedTheme.photos) { photo in
-                                PhotoBackground(photo: photo)
+                            ForEach(store.selectedTheme.images) { image in
+                                ImageBackground(image: image)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 110)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                     .accessibilityHidden(false)
-                                    .accessibilityLabel(photo.accessibilityDescription)
+                                    .accessibilityLabel(image.accessibilityDescription)
                             }
                         }
                     }
                 } header: {
                     Text("Background")
                 } footer: {
-                    Text(store.backgroundChoice.usesPhoto
-                         ? "Photos rotate with each affirmation."
+                    Text(store.backgroundChoice.usesImage
+                         ? "Images rotate with each affirmation."
                          : "Uses \(store.selectedTheme.name)’s colour background.")
                 }
             }
@@ -112,12 +112,12 @@ private struct ThemePreviewRow: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 120, alignment: .leading)
-        .foregroundStyle(previewPhoto == nil ? theme.textColor : .white)
+        .foregroundStyle(previewImage == nil ? theme.textColor : .white)
         .background {
             theme.backgroundGradient
                 .overlay {
-                    if let photo = previewPhoto {
-                        PhotoBackground(photo: photo)
+                    if let image = previewImage {
+                        ImageBackground(image: image)
                             .environment(\.appTheme, theme)
                             .overlay {
                                 LinearGradient(
@@ -138,16 +138,16 @@ private struct ThemePreviewRow: View {
     }
 
     /// Stable covers make the collections recognizable while browsing the picker.
-    private var previewPhoto: ThemePhoto? {
-        let photoID: String?
+    private var previewImage: ThemeImage? {
+        let imageID: String?
         switch theme {
-        case .eden: photoID = "eden-monstera"
-        case .steel: photoID = "steel-strength"
-        case .disco: photoID = "disco-mirrorball"
-        case .concrete: photoID = "concrete-oculus"
-        case .outAndAbout: photoID = "out-and-about-lakeside"
+        case .eden: imageID = "eden-monstera"
+        case .steel: imageID = "steel-strength"
+        case .disco: imageID = "disco-mirrorball"
+        case .concrete: imageID = "concrete-oculus"
+        case .outAndAbout: imageID = "out-and-about-lakeside"
         }
-        return theme.photos.first { $0.id == photoID }
+        return theme.images.first { $0.id == imageID }
     }
 
     private var artwork: some View {
@@ -172,7 +172,7 @@ private struct ThemePreviewRow: View {
                 .font(.headline)
             Text(theme.description)
                 .font(.subheadline)
-                .foregroundStyle(previewPhoto == nil ? theme.textColor.opacity(0.85) : .white.opacity(0.9))
+                .foregroundStyle(previewImage == nil ? theme.textColor.opacity(0.85) : .white.opacity(0.9))
         }
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -182,7 +182,7 @@ private struct ThemePreviewRow: View {
         if isSelected {
             Image(systemName: "checkmark.circle.fill")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(previewPhoto == nil ? theme.textColor : .black.opacity(0.8), .white)
+                .foregroundStyle(previewImage == nil ? theme.textColor : .black.opacity(0.8), .white)
                 .accessibilityHidden(true)
         }
     }
@@ -209,9 +209,9 @@ private struct ThemePreviewRow: View {
 #endif
 
 #if DEBUG
-#Preview("Steel photos") {
+#Preview("Steel images") {
     let store = ThemeStore(selectedTheme: .steel)
-    let _ = try? store.setUsesPhoto(true)
+    let _ = try? store.setUsesImage(true)
     NavigationStack { ThemePickerView(store: store) }
         .themeAppearance(.steel)
 }

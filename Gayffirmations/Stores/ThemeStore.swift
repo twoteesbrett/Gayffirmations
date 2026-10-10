@@ -8,31 +8,31 @@ final class ThemeStore {
     private(set) var persistenceErrorMessage: String?
 
     private(set) var backgrounds: [String: ThemeBackgroundChoice] = [:]
-    private var photoRotation = AffirmationPhotoRotation()
+    private var imageRotation = AffirmationImageRotation()
     private let backgroundRepository: (any ThemeBackgroundRepository)?
 
     var backgroundChoice: ThemeBackgroundChoice {
         backgrounds[selectedTheme.rawValue]
-            ?? ThemeBackgroundChoice(usesPhoto: !selectedTheme.photos.isEmpty)
+            ?? ThemeBackgroundChoice(usesImage: !selectedTheme.images.isEmpty)
     }
 
-    var selectedPhoto: ThemePhoto? {
-        let photos = selectedTheme.photos
-        guard backgroundChoice.usesPhoto, !photos.isEmpty else { return nil }
-        return photos[photoRotation.photoIndex % photos.count]
+    var selectedImage: ThemeImage? {
+        let images = selectedTheme.images
+        guard backgroundChoice.usesImage, !images.isEmpty else { return nil }
+        return images[imageRotation.imageIndex % images.count]
     }
 
-    /// Preview a browsing destination without advancing the committed photo rotation.
-    func photo(for affirmationID: UUID, direction: Int) -> ThemePhoto? {
-        let photos = selectedTheme.photos
-        guard backgroundChoice.usesPhoto, !photos.isEmpty else { return nil }
-        var preview = photoRotation
-        preview.update(affirmationID: affirmationID, photoCount: photos.count, direction: direction)
-        return photos[preview.photoIndex % photos.count]
+    /// Preview a browsing destination without advancing the committed image rotation.
+    func image(for affirmationID: UUID, direction: Int) -> ThemeImage? {
+        let images = selectedTheme.images
+        guard backgroundChoice.usesImage, !images.isEmpty else { return nil }
+        var preview = imageRotation
+        preview.update(affirmationID: affirmationID, imageCount: images.count, direction: direction)
+        return images[preview.imageIndex % images.count]
     }
 
     func updateDisplayedAffirmation(_ id: UUID?, direction: Int = 1) {
-        photoRotation.update(affirmationID: id, photoCount: selectedTheme.photos.count, direction: direction)
+        imageRotation.update(affirmationID: id, imageCount: selectedTheme.images.count, direction: direction)
     }
 
     private let repository: (any ThemeRepository)?
@@ -58,7 +58,7 @@ final class ThemeStore {
 
         do {
             var loadedBackgrounds = try backgroundRepository?.loadThemeBackgrounds() ?? [:]
-            // Keep the former Nature photo/gradient preference when migrating to Eden.
+            // Keep the former Nature image/gradient preference when migrating to Eden.
             if loadedBackgrounds["eden"] == nil, let previous = loadedBackgrounds.removeValue(forKey: "nature") {
                 loadedBackgrounds["eden"] = previous
             }
@@ -75,9 +75,9 @@ final class ThemeStore {
         }
     }
 
-    func setUsesPhoto(_ enabled: Bool) throws {
-        guard !enabled || !selectedTheme.photos.isEmpty else { return }
-        try saveBackground(ThemeBackgroundChoice(usesPhoto: enabled))
+    func setUsesImage(_ enabled: Bool) throws {
+        guard !enabled || !selectedTheme.images.isEmpty else { return }
+        try saveBackground(ThemeBackgroundChoice(usesImage: enabled))
     }
 
     private func saveBackground(_ choice: ThemeBackgroundChoice) throws {
@@ -101,7 +101,7 @@ final class ThemeStore {
     func applyPersistedDefaults() {
         persistenceErrorMessage = nil
         backgrounds = [:]
-        photoRotation = AffirmationPhotoRotation()
+        imageRotation = AffirmationImageRotation()
         selectedTheme = defaultTheme
     }
 

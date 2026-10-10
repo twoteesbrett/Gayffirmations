@@ -17,7 +17,7 @@ struct AppDataResetCoordinatorTests {
         try repository.saveSchedules([AffirmationSchedule(isEnabled: true)])
         try repository.saveNotificationSound(.none)
         try repository.saveTheme(.steel)
-        try repository.saveThemeBackgrounds(["steel": ThemeBackgroundChoice(usesPhoto: false)])
+        try repository.saveThemeBackgrounds(["steel": ThemeBackgroundChoice(usesImage: false)])
         try repository.saveAffirmationSelection(.favourites)
         try repository.saveName("Saved name")
         let key = "gayffirmations.\(section)"

@@ -170,7 +170,7 @@ them idle for five seconds. Interaction restarts the timer; opening a sheet clea
 the controls. Dismissing a sheet reveals them with a fresh five-second timeout.
 VoiceOver keeps them visible. Swiping left anywhere in the affirmation area advances to the
 next affirmation; swiping right goes back. Message text slides in the swipe direction
-and optional photos transition with it. Reduce Motion uses crossfades.
+and optional images transition with it. Reduce Motion uses crossfades.
 These temporary choices expire at
 the next reminder, or at midnight without reminders. Changing a schedule or
 the fallback selection clears the temporary choice. Library filters leave it
@@ -207,33 +207,33 @@ saved identifiers and CAF filenames stable when renaming sounds so existing
 selections continue to work. Audio preparation and file sizes are in
 [SOURCES.md](SOURCES.md#notification-sounds).
 
-## Themes and photos
+## Themes and images
 
-The five themes are Eden, Disco, Steel, Concrete, and Out & About. Each has six photos.
+The five themes are Eden, Disco, Steel, Concrete, and Out & About. Each has six images, including photographic and illustrated backgrounds.
 Out & About rotates from morning through midday to evening: Lakeside, Market,
 Pool Club, Park, Harbour, and Carnival.
-Themes with photos use them by default and offer a Use photos switch saved
+Themes with images use them by default and offer a Use images switch saved
 separately for each theme. Turning it off uses the theme's colour background.
-The picker shows thumbnail previews. Steel renders photos in greyscale;
+The picker shows thumbnail previews. Steel renders images in greyscale;
 other themes retain colour. Source images retain their original colours.
 
-Photos appear on Today; Library and Settings use the theme gradient. Each
-photo has a crop focal point, dark overlay, and foreground colour chosen for
+Images appear on Today; Library and Settings use the theme gradient. Each
+image has a crop focal point, dark overlay, and foreground colour chosen for
 readability. Longer affirmations can scroll within the available space.
 
-Photos advance when the displayed affirmation changes, including swipes and
-scheduled changes. Swiping back reverses the photo sequence. The incoming
-photo follows the message's swipe direction; Reduce Motion uses a crossfade.
+Images advance when the displayed affirmation changes, including swipes and
+scheduled changes. Swiping back reverses the image sequence. The incoming
+image follows the message's swipe direction; Reduce Motion uses a crossfade.
 The collection cycles in order. Rotation is session state and restarts at the
-first photo on launch; only the Use photos preference is saved. Unrelated
-view updates, favouriting, and opening Settings do not advance photos.
-There is no separate timer or daily photo rotation.
+first image on launch; only the Use images preference is saved. Unrelated
+view updates, favouriting, and opening Settings do not advance images.
+There is no separate timer or daily image rotation.
 
-To add photos, bundle image assets and add entries to `AppTheme.photos` with
+To add images, bundle image assets and add entries to `AppTheme.images` with
 stable IDs, descriptive accessibility labels, focal points, and checked
 overlay and foreground settings. Record the originals in [SOURCES.md](SOURCES.md).
 Check portrait and landscape crops, long affirmations, accessibility text
-sizes, and toolbar contrast. Themes with photos automatically offer the switch.
+sizes, and toolbar contrast. Themes with images automatically offer the switch.
 
 ## Saved-data compatibility
 
@@ -244,7 +244,7 @@ no longer performed, including for installations with an old rebuild marker.
 
 Retired theme identifiers, including Nature and Refined, decode as Eden; current identifiers
 retain their identity. Unknown or malformed data reports an error rather than silently
-replacing saved content. Legacy fixed photo IDs are ignored when decoding
+replacing saved content. Legacy fixed image IDs are ignored when decoding
 background preferences. Reset All clears saved background choices. Schedules
 saved before sound selection was added load with Default sound.
 Legacy schedules with zero reminders load with reminders disabled and a count

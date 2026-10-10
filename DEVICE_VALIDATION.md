@@ -39,13 +39,16 @@ diagnostic source was removed after inspection.
   and confirm notification arrival with the preview's text and expected sound.
 - [x] Revoke permission in system Settings and return to the running app. Verify
   the blocked status and the ability to disable/delete individual routines.
-- [ ] Re-enable permission in system Settings and return without force-quitting.
+- [x] Re-enable permission in system Settings and return without force-quitting.
   Confirm remaining routines resume at their next preview time without a new prompt.
-- [ ] Confirm delivery while the app is terminated.
-- [ ] Check every custom sound, Default, and None on-device.
+- [x] Confirm delivery while the app is terminated.
+- [x] Check every custom sound, Default, and None on-device.
+- [x] Check custom affirmation, favorite, and theme persistence across termination.
 - [ ] Check clean installation, customized legacy-content upgrade, and persistence
   across termination using disposable validation data.
-- [ ] Check long text, accessibility sizes, VoiceOver, Reduce Motion, and small-phone
+- [x] Check largest accessibility text size on the iPhone across Home, library/editor,
+  Settings, and schedules.
+- [ ] Check long affirmation text, VoiceOver, Reduce Motion, and small-phone
   and iPad layouts.
 - [ ] Validate a signed distribution archive and App Store privacy answers.
 
@@ -55,5 +58,20 @@ is a development build; it does not establish distribution archive validation.
 On 11 October 2026, the user confirmed the Settings sheet displayed
 "Blocked - permission off" after notification permission was revoked, and confirmed
 schedule disabling/deletion worked. Re-enabling permission without closing the app
-restored the schedules display. Delivery of a future reminder after this permission
-transition remains to be confirmed before completing the recovery-delivery check.
+restored the schedules display. The user subsequently confirmed a future reminder
+arrived after this permission transition, completing the recovery-delivery check.
+
+On 11 October 2026, the user accidentally deleted the separate validation app,
+installed their latest build on the iPhone, and confirmed a scheduled notification
+still arrived after swiping that app away from the app switcher. This confirms
+delivery while terminated for the user-installed latest build; its bundle identity
+and build configuration were not independently inspected in this check.
+
+On 11 October 2026, the user confirmed the sound checks passed and that a temporary
+custom affirmation, a favorite, and a theme change persisted after swiping the app
+away and reopening it. Clean-install and customized legacy-content upgrade checks
+remain pending; this persistence check does not establish those migration paths.
+
+On 11 October 2026, the user reported all inspected screens looked fine at the
+largest accessibility text size on their iPhone. VoiceOver, Reduce Motion, long
+affirmation text, and other device layouts remain unverified.

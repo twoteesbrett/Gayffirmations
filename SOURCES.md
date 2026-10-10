@@ -1,89 +1,69 @@
 # Asset sources
 
-Sources and preparation details for bundled photos and notification sounds.
+Sources and preparation details for bundled images and notification sounds.
 App behaviour and development guidance are in [README.md](README.md).
 
-## Photos
+## Images
 
-Steel uses six user-supplied AI-generated images from `/Users/brett/Desktop/gayffirmations-assets`. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
+Steel uses six user-supplied AI-generated images. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
 
-| Photo | Source file | Source |
-| --- | --- | --- |
-| Strength | steel-strength.png | User-supplied AI-generated image |
-| Release | steel-release.png | User-supplied AI-generated image |
-| Curl | steel-curl.png | User-supplied AI-generated image |
-| Deadlift | steel-deadlift.png | User-supplied AI-generated image |
-| Squat | steel-squat.png | User-supplied AI-generated image |
-| Pull-up | steel-pull-up.png | User-supplied AI-generated image |
+| Image | Bundled asset identifier |
+| --- | --- |
+| Strength | `steel-strength` |
+| Release | `steel-release` |
+| Curl | `steel-curl` |
+| Deadlift | `steel-deadlift` |
+| Squat | `steel-squat` |
+| Pull-up | `steel-pull-up` |
 
-Eden uses six user-supplied images from `/Users/brett/Desktop/gayffirmations-assets`, preserving their original resolution and aspect ratio. It replaces the retired Nature collection.
+Eden uses six user-supplied images, preserving their original resolution and aspect ratio.
 
-| Photo | Original filename | Source file / bundled identifier |
-| --- | --- | --- |
-| Monstera | Dewy Monstera in Tropical Light.png | `eden-monstera.png` / `eden-monstera` |
-| Peace Lily | Dewy White Peace Lily in Rainforest Light.png | `eden-peace-lily.png` / `eden-peace-lily` |
-| Stream | Mossy Jungle Stream in Sunlight.png | `eden-stream.png` / `eden-stream` |
-| Ferns | Rain-Kissed Ferns in a Forest Stream.png | `eden-ferns.png` / `eden-ferns` |
-| Ivy | Sunlit Dew on Jungle Ivy.png | `eden-ivy.png` / `eden-ivy` |
-| Tropical Leaves | Sunlit Tropical Leaves After Rain.png | `eden-tropical-leaves.png` / `eden-tropical-leaves` |
+| Image | Bundled asset identifier |
+| --- | --- |
+| Monstera | `eden-monstera` |
+| Peace Lily | `eden-peace-lily` |
+| Stream | `eden-stream` |
+| Ferns | `eden-ferns` |
+| Ivy | `eden-ivy` |
+| Tropical Leaves | `eden-tropical-leaves` |
 
 Eden retains colour; Steel renders in greyscale.
 
-Each photo has an individually configured crop focal point and dark overlay. Photos are decorative backgrounds; the picker provides descriptive accessibility labels.
+Each image has an individually configured crop focal point and dark overlay. Images are decorative backgrounds; the picker provides descriptive accessibility labels.
 
-Disco uses six user-supplied AI-generated images from `/Users/brett/Desktop/gayffirmations-assets`, preserving their original resolution and aspect ratio.
+Disco uses six user-supplied AI-generated images, preserving their original resolution and aspect ratio.
 
-| Photo | Source file | Bundled asset identifier |
-| --- | --- | --- |
-| Mirrorball | disco-mirrorball.png | `disco-mirrorball` |
-| Aviators | disco-aviators.png | `disco-aviators` |
-| Dance | disco-dance.png | `disco-dance` |
-| Roller Skates | disco-roller-skates.jpg | `disco-roller-skates` |
-| Last Dance | disco-last-dance.png | `disco-last-dance` |
-| Vinyl | disco-vinyl.png | `disco-vinyl` |
-
-## AI-generated source filenames
-
-On 6 October 2026, the AI-generated files in `/Users/brett/Desktop/gayffirmations-assets` were renamed to lowercase, hyphenated names. Existing theme photos match the app's asset identifiers. File contents and extensions were preserved; files starting with `pexels` or `mixkit` were left unchanged.
-
-| Previous filename | Current filename |
+| Image | Bundled asset identifier |
 | --- | --- |
-| Monochrome Barbell Curl Portrait.png | steel-strength.png |
-| Monochrome Kettlebell Roar.png | steel-release.png |
-| Cinematic Monochrome Dumbbell Curl.png | steel-curl.png |
-| Low-Key Deadlift Power.png | steel-deadlift.png |
-| ChatGPT Image Oct 4, 2026 at 01_02_33 PM.png | steel-squat.png |
-| Monochrome Pull-Up in an Industrial Gym.png | steel-pull-up.png |
-| Neon Mirrorball Disco Glow.png | disco-mirrorball.png |
-| Neon Disco Aviators on Marble.png | disco-aviators.png |
-| Neon-lit portrait with vibrant bokeh.png | disco-portrait.png |
-| ChatGPT Image 6 Oct 2026, 17_46_54.png | disco-dancefloor-portrait.png |
-| ChatGPT Image 6 Oct 2026, 17_37_42.jpg | disco-roller-skates.jpg |
-| Gayffirmations app icon.png | gayffirmations-app-icon.png |
+| Mirrorball | `disco-mirrorball` |
+| Aviators | `disco-aviators` |
+| Dance | `disco-dance` |
+| Roller Skates | `disco-roller-skates` |
+| Last Dance | `disco-last-dance` |
+| Vinyl | `disco-vinyl` |
 
-The former `disco-portrait` and `disco-dancefloor-portrait` assets are no longer bundled in the app. `disco-dance.png` replaces the Dancefloor portrait in the Disco rotation. `gayffirmations-app-icon.png` is the AI-generated icon source; the app bundles its prepared icon as `AppIcon.appiconset/AppIcon.png`.
+## App icon
 
-The app reads bundled copies from `Gayffirmations/Assets.xcassets`, not the Desktop source folder. These source renames require no Swift, asset catalog, or saved-selection changes. When renaming a bundled image file, update its `Contents.json`; when changing an asset identifier, also update code references and account for persisted selections using the old identifier.
+The app uses a user-supplied AI-generated icon, bundled as
+`AppIcon.appiconset/AppIcon.png`.
+
+The app reads bundled images from `Gayffirmations/Assets.xcassets`.
 
 ## Notification sounds
 
-The user supplied five WAV files with Mixkit filenames from
-`/Users/brett/Desktop/gayffirmations-assets`. Original filenames are retained below for provenance.
-The originals remain outside the app; only optimized CAF files are bundled.
+The five notification sounds are from Mixkit. Only optimized CAF files are bundled.
 
-| Sound | Original filename | Duration | WAV bytes | CAF bytes |
-| --- | --- | --- | --- | --- |
-| Flute | mixkit-uplifting-flute-notification-2317.wav | 3.993 s | 704,360 | 93,733 |
-| Marimba | mixkit-magic-marimba-2820.wav | 3.341 s | 589,586 | 78,506 |
-| Choir | mixkit-choir-harp-bless-657.wav | 2.983 s | 526,314 | 70,108 |
-| Harp | mixkit-relaxing-harp-sweep-2628.wav | 6.330 s | 1,116,740 | 148,507 |
-| Ahem | mixkit-male-clearing-the-throat-2226.wav | 1.483 s | 262,196 | 34,877 |
+| Sound | Duration | WAV bytes | CAF bytes |
+| --- | --- | --- | --- |
+| Flute | 3.993 s | 704,360 | 93,733 |
+| Marimba | 3.341 s | 589,586 | 78,506 |
+| Choir | 2.983 s | 526,314 | 70,108 |
+| Harp | 6.330 s | 1,116,740 | 148,507 |
+| Ahem | 1.483 s | 262,196 | 34,877 |
 
-The optimized files live in `Gayffirmations/Resources/Sounds`. The original
-WAVs are available in the user's Desktop assets folder and are not copied into the app.
+The optimized files live in `Gayffirmations/Resources/Sounds`.
 Total asset size is 425,731 bytes, about 87% smaller than the originals
 (3,199,196 bytes).
-
 
 Audio was converted from stereo 16-bit PCM WAV to mono IMA4 CAF at the
 original 44,100 Hz sample rate. Full duration is preserved, with no trimming
@@ -111,30 +91,29 @@ and [system alert playback limitations](https://developer.apple.com/documentatio
 
 ## Concrete
 
-Concrete uses six user-supplied AI-generated images, preserving their original resolution and aspect ratio. Source images are in `/Users/brett/Desktop/gayffirmations-assets`.
+Concrete uses six user-supplied AI-generated images, preserving their original resolution and aspect ratio.
 
-| Photo | Source file | Bundled asset identifier |
-| --- | --- | --- |
-| Fjord | concrete-fjord.png | `concrete-fjord` |
-| Oculus | concrete-oculus.png | `concrete-oculus` |
-| Sunlight | concrete-sunlight.png | `concrete-sunlight` |
-| Pillar | concrete-pillar.png | `concrete-pillar` |
-| Ivy | concrete-ivy.png | `concrete-ivy` |
-| Stairway | concrete-stairway.png | `concrete-stairway` |
+| Image | Bundled asset identifier |
+| --- | --- |
+| Fjord | `concrete-fjord` |
+| Oculus | `concrete-oculus` |
+| Sunlight | `concrete-sunlight` |
+| Pillar | `concrete-pillar` |
+| Ivy | `concrete-ivy` |
+| Stairway | `concrete-stairway` |
 
 ## Out & About
 
-Out & About uses six user-supplied AI-generated images from
-`/Users/brett/Desktop/gayffirmations-assets`, preserving their original resolution
-and aspect ratio. Photos rotate from morning through midday to evening.
+Out & About uses six user-supplied AI-generated images, preserving their original resolution
+and aspect ratio. Images rotate from morning through midday to evening.
 
-| Photo | Original source filename | Renamed source / bundled asset identifier |
-| --- | --- | --- |
-| Lakeside | Sunlit Alpine Lakeside Campground.png | `out-and-about-lakeside` |
-| Market | Mediterranean Market Street by the Harbour.png | `out-and-about-market` |
-| Pool Club | Mediterranean Cliffside Pool Club.png | `out-and-about-pool-club` |
-| Park | Sunny Urban Park Celebration.png | `out-and-about-park` |
-| Harbour | Golden-Hour Mediterranean Harbour Life.png | `out-and-about-harbour` |
-| Carnival | Sunset Carnival by the Sea.png | `out-and-about-carnival` |
+| Image | Bundled asset identifier |
+| --- | --- |
+| Lakeside | `out-and-about-lakeside` |
+| Market | `out-and-about-market` |
+| Pool Club | `out-and-about-pool-club` |
+| Park | `out-and-about-park` |
+| Harbour | `out-and-about-harbour` |
+| Carnival | `out-and-about-carnival` |
 
-Renamed source files retain the `.png` extension; bundled copies use `photo.png`.
+Bundled copies use `image.png`.

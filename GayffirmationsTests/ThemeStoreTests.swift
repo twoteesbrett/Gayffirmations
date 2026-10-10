@@ -4,23 +4,23 @@ import Testing
 
 @MainActor
 struct ThemeStoreTests {
-    @Test("Swipe previews leave the current photo unchanged and match the committed destination")
-    func swipePhotoPreview() throws {
+    @Test("Swipe previews leave the current image unchanged and match the committed destination")
+    func swipeImagePreview() throws {
         let store = ThemeStore(selectedTheme: .eden)
         let current = UUID()
         let next = UUID()
         store.updateDisplayedAffirmation(current)
-        let original = store.selectedPhoto?.id
-        let forward = store.photo(for: next, direction: 1)
-        let backward = store.photo(for: next, direction: -1)
-        #expect(forward?.id == AppTheme.eden.photos[1].id)
-        #expect(backward?.id == AppTheme.eden.photos.last?.id)
-        #expect(store.selectedPhoto?.id == original)
+        let original = store.selectedImage?.id
+        let forward = store.image(for: next, direction: 1)
+        let backward = store.image(for: next, direction: -1)
+        #expect(forward?.id == AppTheme.eden.images[1].id)
+        #expect(backward?.id == AppTheme.eden.images.last?.id)
+        #expect(store.selectedImage?.id == original)
 
         store.updateDisplayedAffirmation(next, direction: -1)
-        #expect(store.selectedPhoto?.id == backward?.id)
-        try store.setUsesPhoto(false)
-        #expect(store.photo(for: current, direction: 1) == nil)
+        #expect(store.selectedImage?.id == backward?.id)
+        try store.setUsesImage(false)
+        #expect(store.image(for: current, direction: 1) == nil)
     }
 
     @Test("A saved theme is loaded when a store is created")

@@ -1,15 +1,15 @@
 import Foundation
 
 /// Advance only when the displayed affirmation changes, never on a view refresh.
-struct AffirmationPhotoRotation {
+struct AffirmationImageRotation {
     private(set) var affirmationID: UUID?
-    private(set) var photoIndex = 0
+    private(set) var imageIndex = 0
 
-    mutating func update(affirmationID: UUID?, photoCount: Int, direction: Int = 1) {
+    mutating func update(affirmationID: UUID?, imageCount: Int, direction: Int = 1) {
         guard let affirmationID else { return }
         guard self.affirmationID != affirmationID else { return }
-        if self.affirmationID != nil, photoCount > 0 {
-            photoIndex = ((photoIndex + direction) % photoCount + photoCount) % photoCount
+        if self.affirmationID != nil, imageCount > 0 {
+            imageIndex = ((imageIndex + direction) % imageCount + imageCount) % imageCount
         }
         self.affirmationID = affirmationID
     }

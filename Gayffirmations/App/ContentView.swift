@@ -67,7 +67,7 @@ struct ContentView: View {
                 sheetDismissalID: sheetDismissalID,
                 onOpenDestination: { destination = $0 }
             )
-            .environment(\.themePhoto, themeStore.selectedPhoto)
+            .environment(\.themeImage, themeStore.selectedImage)
             .sheet(item: $destination) { destination in
                 destinationView(destination)
                     .themeAppearance(themeStore.selectedTheme)

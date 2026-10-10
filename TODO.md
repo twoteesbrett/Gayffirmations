@@ -174,8 +174,8 @@ Notification sounds are selectable in Settings and saved with the schedule.
 - [ ] Refine each theme's light and dark appearance.
 
   Theme styling centralizes adaptive accent/background colours and typography.
-  Today uses scalable, centred text over rotating theme photos and horizontal
-  swipes to browse. The theme picker previews the same photos; app screens
+  Today uses scalable, centred text over rotating theme images and horizontal
+  swipes to browse. The theme picker previews the same images; app screens
   inherit the selected type design and follow system appearance. Eight Today
   previews cover every theme in light and dark.
   Simulator build passes; visual approval and final artwork remain pending.
@@ -242,7 +242,7 @@ inside the tag picker and editor.
       tags once per normalization operation.
 - [x] Make pure affirmation and theme models explicitly nonisolated so their
       Codable and Equatable conformances do not inherit main-actor isolation.
-- [x] Update README behavior to describe optional rotating theme photos.
+- [x] Update README behavior to describe optional rotating theme images.
 
 ## Code review — 7 October 2026
 
@@ -251,7 +251,7 @@ inside the tag picker and editor.
 - [x] Cover loading, launch reconciliation, schedule updates, restarting, and
       explicit re-enabling for migrated schedules.
 - [x] Align documentation with the current 15 starter messages, five predefined
-      tags, individual tag controls, rotating photos, and bundled app icon.
+      tags, individual tag controls, rotating images, and bundled app icon.
 
 The current reminder range is one to twenty-four; the zero-to-twelve range
 recorded in the 3 October review describes the earlier implementation.

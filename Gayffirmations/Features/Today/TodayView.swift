@@ -25,11 +25,11 @@ struct TodayView: View {
         let browsingState: TodayBrowsingState
         let direction: Int
         let width: CGFloat
-        let currentPhoto: ThemePhoto?
-        let nextPhoto: ThemePhoto?
+        let currentImage: ThemeImage?
+        let nextImage: ThemeImage?
     }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.themePhoto) private var themePhoto
+    @Environment(\.themeImage) private var themeImage
     @Environment(\.appTheme) private var appTheme
     @Environment(\.scenePhase) private var scenePhase
     @State private var refreshDate = Date.now
@@ -89,7 +89,7 @@ struct TodayView: View {
                                 swipe.next,
                                 size: geometry.size, centeringInset: centeringInset
                             )
-                            .foregroundStyle(swipe.nextPhoto?.textColor ?? appTheme.textColor)
+                            .foregroundStyle(swipe.nextImage?.textColor ?? appTheme.textColor)
                         }
                         .scrollClipDisabled()
                         .offset(x: reduceMotion ? 0 : swipeTranslation + CGFloat(swipe.direction) * swipe.width)
@@ -137,13 +137,13 @@ struct TodayView: View {
                 if let swipe {
                     GeometryReader { geometry in
                         ZStack {
-                            if let photo = swipe.currentPhoto {
-                                PhotoBackground(photo: photo)
+                            if let image = swipe.currentImage {
+                                ImageBackground(image: image)
                                     .offset(x: reduceMotion ? 0 : swipeTranslation / swipe.width * geometry.size.width)
                                     .opacity(reduceMotion ? 1 - swipeProgress : 1)
                             }
-                            if let photo = swipe.nextPhoto {
-                                PhotoBackground(photo: photo)
+                            if let image = swipe.nextImage {
+                                ImageBackground(image: image)
                                     .offset(x: reduceMotion ? 0 : (swipeTranslation / swipe.width + CGFloat(swipe.direction)) * geometry.size.width)
                                     .opacity(reduceMotion ? swipeProgress : 1)
                             }
@@ -152,7 +152,7 @@ struct TodayView: View {
                     }
                     .accessibilityHidden(true)
                 } else {
-                    TransitioningPhotoBackground(photo: themePhoto, browsingForward: browsingForward)
+                    TransitioningImageBackground(image: themeImage, browsingForward: browsingForward)
                 }
             }
             .ignoresSafeArea()
@@ -199,7 +199,7 @@ struct TodayView: View {
         }
     }
 
-    private var foregroundColor: Color { themePhoto?.textColor ?? appTheme.textColor }
+    private var foregroundColor: Color { themeImage?.textColor ?? appTheme.textColor }
 
     private var emptyState: some View {
         let libraryIsEmpty = store.affirmations.isEmpty
@@ -288,8 +288,8 @@ struct TodayView: View {
                   let next = previewState.cycle(by: direction, at: now, context: context) else { return }
             swipe = SwipePreview(
                 current: current, next: next, browsingState: previewState,
-                direction: direction, width: width, currentPhoto: themePhoto,
-                nextPhoto: themeStore?.photo(for: next.id, direction: direction) ?? themePhoto
+                direction: direction, width: width, currentImage: themeImage,
+                nextImage: themeStore?.image(for: next.id, direction: direction) ?? themeImage
             )
         }
         swipeTranslation = max(-width, min(width, translation))
@@ -391,11 +391,11 @@ struct TodayView: View {
 #Preview("Steel · Strength") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
         .themeAppearance(.steel)
-        .environment(\.themePhoto, AppTheme.steel.photos[0])
+        .environment(\.themeImage, AppTheme.steel.images[0])
 }
 #Preview("Steel · Release") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
         .themeAppearance(.steel)
-        .environment(\.themePhoto, AppTheme.steel.photos[1])
+        .environment(\.themeImage, AppTheme.steel.images[1])
 }
 #endif
