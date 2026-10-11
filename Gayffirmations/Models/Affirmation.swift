@@ -44,7 +44,7 @@ nonisolated struct Affirmation: Codable, Identifiable, Equatable {
         } else {
             // Preserve previously customised starter messages as editable user content.
             let savedID = id
-            let candidates = (Self.legacyStarterAffirmations + Self.starterAffirmations)
+            let candidates = Self.starterAffirmations
                 .filter { $0.id == savedID }
             let isOriginalNameMessage = id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
                 && text == "Stop comparing. You're the only Brett in the room."

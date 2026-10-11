@@ -40,7 +40,7 @@ struct PersonalizationTests {
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         let repository = UserDefaultsRepository(userDefaults: defaults)
-        var original = try #require(Affirmation.legacyStarterAffirmations.last)
+        var original = try #require(Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") })
         original.text = "Stop comparing. You're the only Brett in the room."
         original.isFavorite = true
         let custom = Affirmation(text: "Brett is great")

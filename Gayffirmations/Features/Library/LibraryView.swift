@@ -10,7 +10,7 @@ struct LibraryView: View {
     @State private var editorDestination: EditorDestination?
     @State private var persistenceErrorMessage: String?
     @State private var isTagPickerPresented = false
-    @State private var sourceFilter: Affirmation.Source?
+    @State private var sourceFilter = LibrarySourceFilter()
 
     @State private var filter: AffirmationSelection
 
@@ -50,7 +50,7 @@ struct LibraryView: View {
                         ContentUnavailableView {
                             Label("No Matching Affirmations", systemImage: "text.quote")
                         } description: {
-                            Text(sourceFilter == .user ? "Add your own affirmation or clear filters to see more entries." : sourceFilter == .bundled ? "Clear filters or restore default affirmations in Settings to see bundled messages." : filter.emptyMessage)
+                            Text(sourceFilter.includesMine && !sourceFilter.includesBundled ? "Add your own affirmation or clear filters to see more entries." : sourceFilter.includesBundled && !sourceFilter.includesMine ? "Clear filters or restore default affirmations in Settings to see bundled messages." : filter.emptyMessage)
                         } actions: {
                             Button("Show All Affirmations") {
                                 clearFilters()
@@ -104,7 +104,7 @@ struct LibraryView: View {
                 filterControls
             }
 
-            if filter != .all || sourceFilter != nil {
+            if filter != .all || !sourceFilter.isEmpty {
                 HStack(alignment: .firstTextBaseline) {
                     Text(activeFilterName)
                         .fixedSize(horizontal: false, vertical: true)
@@ -126,14 +126,14 @@ struct LibraryView: View {
 
     private var filterControls: some View {
         Group {
-            filterButton("All", systemImage: "square.stack", isSelected: filter == .all && sourceFilter == nil) {
+            filterButton("All", systemImage: "square.stack", isSelected: filter == .all && sourceFilter.isEmpty) {
                 clearFilters()
             }
-            filterButton("Bundled", systemImage: "shippingbox", isSelected: sourceFilter == .bundled) {
-                sourceFilter = sourceFilter == .bundled ? nil : .bundled
+            filterButton("Bundled", systemImage: "shippingbox", isSelected: sourceFilter.includesBundled) {
+                sourceFilter.toggle(.bundled)
             }
-            filterButton("Mine", systemImage: "person", isSelected: sourceFilter == .user) {
-                sourceFilter = sourceFilter == .user ? nil : .user
+            filterButton("Mine", systemImage: "person", isSelected: sourceFilter.includesMine) {
+                sourceFilter.toggle(.user)
             }
             filterButton("Favourites", systemImage: "heart", isSelected: filter.includesFavourites) {
                 setFilter(filter.selectingFavourites(!filter.includesFavourites))
@@ -157,7 +157,7 @@ struct LibraryView: View {
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Show entries matching any selected tag or Favourites. Mine shows your own affirmations; Bundled shows messages included with the app. These filters only change the Library list.")
+                    Text("Show entries matching any selected tag or Favourites. Mine shows your own affirmations; Bundled shows messages included with the app. Select both to include both sources, then narrow the results with tags or Favourites. These filters only change the Library list.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,
@@ -213,13 +213,12 @@ struct LibraryView: View {
 
     private func clearFilters() {
         filter = .all
-        sourceFilter = nil
+        sourceFilter = LibrarySourceFilter()
     }
 
     private var activeFilterName: String {
-        guard let sourceFilter else { return filter.name }
-        let sourceName = sourceFilter == .user ? "Mine" : "Bundled"
-        return filter == .all ? sourceName : "\(sourceName) · \(filter.name)"
+        guard !sourceFilter.isEmpty else { return filter.name }
+        return filter == .all ? sourceFilter.name : "\(sourceFilter.name) · \(filter.name)"
     }
 
     private var hasSelectedTags: Bool {
@@ -228,7 +227,7 @@ struct LibraryView: View {
 
     private var filteredAffirmations: [Affirmation] {
         let matches = filter.matchingAffirmations(in: store.affirmations)
-        return sourceFilter.map { source in matches.filter { $0.source == source } } ?? matches
+        return sourceFilter.matchingAffirmations(in: matches)
     }
 
     private var affirmationList: some View {

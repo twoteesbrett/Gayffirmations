@@ -12,7 +12,7 @@ struct AffirmationValidationTests {
         let suite = "AffirmationValidationTests.\(UUID())"
         let preferences = try #require(UserDefaults(suiteName: suite))
         defer { preferences.removePersistentDomain(forName: suite) }
-        let starter = try #require(Affirmation.legacyStarterAffirmations.last)
+        let starter = try #require(Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") })
         var nameMessage = try #require(JSONSerialization.jsonObject(
             with: JSONEncoder().encode(starter)
         ) as? [String: Any])

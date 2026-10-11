@@ -175,11 +175,11 @@ nonisolated extension Affirmation {
         // MARK: - Self-Kindness
 
         starter("B7E77000-0000-4000-8000-000000000043",
-                "Give yourself a break, {name}. You're doing your best.",
+                "Give yourself a break, honey. You're doing your best.",
                 [.selfKindness]),
 
         starter("B7E77000-0000-4000-8000-000000000044",
-                "You wouldn't talk to a friend like that. So why talk to yourself that way?",
+                "Good god girl, get a grip!",
                 [.selfKindness]),
 
         starter("B7E77000-0000-4000-8000-000000000045",
@@ -212,56 +212,57 @@ nonisolated extension Affirmation {
 
         starter("B7E77000-0000-4000-8000-000000000052",
                 "Be gentle with yourself. The world has enough critics already.",
-                [.selfKindness])
-    ]
+                [.selfKindness]),
 
-    // Keep the original catalogue to recognise unedited saves made before source tracking.
-    static let legacyStarterAffirmations: [Affirmation] = [
-        starter("B7E77000-0000-4000-8000-000000000001",
-                "Hey handsome, the pantry isn't going anywhere.",
-                [.food, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000002",
-                "A craving called. You don't have to answer.",
-                [.food, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000003",
-                "Your body deserves kindness, not another guilt trip.",
-                [.body, .food, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000004",
-                "One treat is a treat. It doesn't need a sequel.",
-                [.food, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000005",
-                "You've got this. Yes, even with biscuits in the house.",
-                [.food, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000006",
-                "Gay looks good on you.",
-                [.gay, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000007",
-                "You don't have to follow the straight instruction manual.",
-                [.gay, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000008",
-                "There's no dress code for being a gay man.",
-                [.gay, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000009",
-                "You like men. Excellent taste.",
-                [.gay, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000010",
-                "Be as gay as you damn well please.",
-                [.gay, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000011",
-                "Hey handsome. Yes, I'm talking to you.",
-                [.body, .confidence]),
-        starter("B7E77000-0000-4000-8000-000000000012",
-                "Your body isn't auditioning for anyone.",
-                [.body, .confidence, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000013",
-                "You don't need a six-pack to be a whole snack.",
-                [.body, .confidence, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000014",
-                "Grey hairs? You've earned the highlights.",
-                [.body, .confidence, .selfKindness]),
-        starter("B7E77000-0000-4000-8000-000000000015",
-                "Stop comparing. You're the only {name} in the room.",
-                [.confidence, .selfKindness]),
+        // MARK: - Inner Critic
+
+        starter("B7E77000-0000-4000-8000-000000000053",
+                "My brain is talking shit again. I don’t have to buy it.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000054",
+                "I deserve better than being heckled inside my own head.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000055",
+                "I’m allowed to fuck up without deciding I’m a fuck-up.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000056",
+                "My inner critic has a loud mouth and questionable credentials.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000057",
+                "I’ve barely opened my eyes. The character assassination can wait.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000058",
+                "I don’t have to earn kindness by being useful. I’m a person, not an appliance.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000059",
+                "I can sort my shit out without treating myself like shit.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000060",
+                "My inner critic can submit its complaints directly to the bin.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000061",
+                "I’m backing myself today. The bitchy commentary can ride in the boot.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000062",
+                "I can regret what I did without putting my entire existence on trial.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000063",
+                "I deserve some tenderness. Yes, me. Settle down, you little critic.",
+                [.innerCritic]),
+
+        starter("B7E77000-0000-4000-8000-000000000064",
+                "My brain has confused being a bully with being a life coach. I’m cancelling the subscription.",
+                [.innerCritic])
     ]
 
     private static func starter(

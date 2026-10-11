@@ -70,3 +70,30 @@ enum AffirmationSelection: Codable, Hashable {
         }
     }
 }
+
+/// Library source choices are independent of favourites and tags.
+struct LibrarySourceFilter {
+    private(set) var includesBundled = false
+    private(set) var includesMine = false
+
+    var isEmpty: Bool { !includesBundled && !includesMine }
+
+    var name: String {
+        [includesBundled ? "Bundled" : nil, includesMine ? "Mine" : nil]
+            .compactMap { $0 }.joined(separator: ", ")
+    }
+
+    mutating func toggle(_ source: Affirmation.Source) {
+        switch source {
+        case .bundled: includesBundled.toggle()
+        case .user: includesMine.toggle()
+        }
+    }
+
+    func matchingAffirmations(in affirmations: [Affirmation]) -> [Affirmation] {
+        guard !isEmpty else { return affirmations }
+        return affirmations.filter {
+            ($0.isBundled && includesBundled) || (!$0.isBundled && includesMine)
+        }
+    }
+}

@@ -33,7 +33,7 @@ struct BundledAffirmationTests {
     }
 
     @Test func bundledEditsAndDeletionSurviveReloadAndCanBeRestored() throws {
-        let entry = try #require(Affirmation.legacyStarterAffirmations.last)
+        let entry = try #require(Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") })
         let repository = BundledMessageRepository()
         let store = AffirmationStore(repository: repository, defaultAffirmations: [entry])
         try store.update(id: entry.id, text: "Changed", tags: ["Mine"])
@@ -63,7 +63,7 @@ struct BundledAffirmationTests {
     }
 
     @Test func legacySourcesPreserveCustomisations() throws {
-        let starter = try #require(Affirmation.legacyStarterAffirmations.first)
+        let starter = try #require(Affirmation.starterAffirmations.first)
         func legacy(_ entry: Affirmation) throws -> Affirmation {
             var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(entry)) as? [String: Any])
             object.removeValue(forKey: "source")
@@ -87,7 +87,7 @@ struct BundledAffirmationTests {
           arguments: [false, true], [["Mine"], []] as [[String]])
     func legacyTagCustomisations(useOriginalNameMessage: Bool, tags: [String]) throws {
         let starter = try #require(useOriginalNameMessage
-            ? Affirmation.legacyStarterAffirmations.last : Affirmation.legacyStarterAffirmations.first)
+            ? Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") } : Affirmation.starterAffirmations.first)
         var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(starter)) as? [String: Any])
         object.removeValue(forKey: "source")
         if useOriginalNameMessage {
@@ -111,7 +111,7 @@ struct BundledAffirmationTests {
     }
 
     @Test func originalLegacyNameMessageRemainsBundled() throws {
-        let starter = try #require(Affirmation.legacyStarterAffirmations.last)
+        let starter = try #require(Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") })
         var object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(starter)) as? [String: Any])
         object.removeValue(forKey: "source")
         object["text"] = "Stop comparing. You're the only Brett in the room."

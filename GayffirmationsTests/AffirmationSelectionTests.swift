@@ -4,6 +4,34 @@ import Testing
 
 @MainActor
 struct AffirmationSelectionTests {
+    @Test("Bundled and Mine combine independently with favourites and tags")
+    func combinesLibrarySourceFilters() {
+        let bundledFavourite = Affirmation(text: "Bundled favourite", isFavorite: true, source: .bundled)
+        let bundledTagged = Affirmation(text: "Bundled tagged", tags: ["Work"], source: .bundled)
+        let bundledOther = Affirmation(text: "Bundled other", source: .bundled)
+        let mineFavourite = Affirmation(text: "My favourite", isFavorite: true)
+        let mineTagged = Affirmation(text: "My tagged", tags: ["work"])
+        let mineOther = Affirmation(text: "My other")
+        let entries = [bundledFavourite, bundledTagged, bundledOther, mineFavourite, mineTagged, mineOther]
+        let selection = AffirmationSelection.sources(favourites: true, tags: ["Work"])
+        let matches = selection.matchingAffirmations(in: entries)
+        var sources = LibrarySourceFilter()
+        #expect(sources.matchingAffirmations(in: matches) == matches)
+        sources.toggle(.bundled)
+        #expect(sources.matchingAffirmations(in: matches) == [bundledFavourite, bundledTagged])
+        sources.toggle(.user)
+        #expect(sources.includesBundled && sources.includesMine)
+        #expect(sources.name == "Bundled, Mine")
+        #expect(sources.matchingAffirmations(in: matches) == [bundledFavourite, bundledTagged, mineFavourite, mineTagged])
+        #expect(sources.matchingAffirmations(in: entries) == entries)
+        sources.toggle(.bundled)
+        #expect(!sources.includesBundled && sources.includesMine)
+        #expect(sources.matchingAffirmations(in: matches) == [mineFavourite, mineTagged])
+        sources.toggle(.user)
+        #expect(sources.isEmpty)
+        #expect(sources.matchingAffirmations(in: entries) == entries)
+    }
+
     @Test("Clearing the final Library filter returns to All while active filters remain selected")
     func emptyLibraryFiltersDefaultToAll() {
         #expect(AffirmationSelection.sources(favourites: false, tags: []).usingAllWhenEmpty == .all)

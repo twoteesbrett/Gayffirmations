@@ -6,12 +6,12 @@ struct StarterContentTests {
     @Test("Initial affirmations match the supplied text and tag combinations")
     func initialContent() {
         let entries = Affirmation.starterAffirmations
-        #expect(entries.count == 50)
-        #expect(Set(entries.map(\.id)).count == 50)
+        #expect(entries.count == 62)
+        #expect(Set(entries.map(\.id)).count == 62)
         #expect(entries.allSatisfy { $0.isBundled && !$0.isFavorite && !$0.text.isEmpty && !$0.tags.isEmpty })
         #expect(Set(entries.flatMap(\.tags)) == Set(AffirmationTag.allCases.map(\.rawValue)))
         #expect(entries.first?.text == "You've got this. Yes, you, gorgeous.")
-        #expect(entries.last?.text == "Be gentle with yourself. The world has enough critics already.")
+        #expect(entries.last?.text == "My brain has confused being a bully with being a life coach. I’m cancelling the subscription.")
     }
 
     @Test("Retired themes load as Eden", arguments: [

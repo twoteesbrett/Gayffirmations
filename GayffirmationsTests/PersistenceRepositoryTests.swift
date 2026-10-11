@@ -10,12 +10,10 @@ struct PersistenceRepositoryTests {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
         let current = Affirmation.starterAffirmations
-        let starter = try #require(Affirmation.legacyStarterAffirmations.first {
+        let starter = try #require(Affirmation.starterAffirmations.first {
             entry in current.contains { $0.id == entry.id }
         })
-        let retired = try #require(Affirmation.legacyStarterAffirmations.first {
-            entry in !current.contains { $0.id == entry.id }
-        })
+        let retired = Affirmation(text: "Retired bundled message", tags: ["Original"], source: .bundled)
         var objects = try #require(JSONSerialization.jsonObject(
             with: JSONEncoder().encode([starter, retired])
         ) as? [[String: Any]])
@@ -110,7 +108,7 @@ struct PersistenceRepositoryTests {
     func nameMigrationRespectsOwnership(bundled: Bool, legacy: Bool) throws {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
-        let starter = try #require(Affirmation.legacyStarterAffirmations.last)
+        let starter = try #require(Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") })
         let original = Affirmation(
             id: starter.id, text: "Stop comparing. You're the only Brett in the room.",
             isFavorite: true, tags: bundled ? starter.tags : ["Mine"],
