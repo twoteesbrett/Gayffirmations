@@ -5,6 +5,7 @@ enum AffirmationTag: String, CaseIterable {
     case gay
     case innerCritic = "inner-critic"
     case selfKindness = "self-kindness"
+    case treatYourself = "treat-yourself"
 
     var name: String {
         switch self {
@@ -14,6 +15,7 @@ enum AffirmationTag: String, CaseIterable {
         case .gay: "Gay"
         case .innerCritic: "Inner Critic"
         case .selfKindness: "Self-kindness"
+        case .treatYourself: "Treat Yourself"
         }
     }
 }
