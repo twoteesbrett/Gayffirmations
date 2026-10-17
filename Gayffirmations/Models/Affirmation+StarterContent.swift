@@ -203,7 +203,7 @@ nonisolated extension Affirmation {
                 [.selfKindness]),
 
         starter("B7E77000-0000-4000-8000-000000000050",
-                "You're allowed to rest before your body files a formal complaint.",
+                "<small>Let it go means to</small><br>Let it be",
                 [.selfKindness]),
 
         starter("B7E77000-0000-4000-8000-000000000051",

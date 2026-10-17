@@ -10,7 +10,7 @@ struct ScheduledAffirmation: Identifiable, Equatable {
 
     var id: String { "gayffirmations.schedule.\(scheduleID.uuidString).\(slot)" }
     var reminder: NotificationReminder {
-        NotificationReminder(time: time, affirmationText: affirmation.text, sound: sound, identifier: id)
+        NotificationReminder(time: time, affirmationText: MessageMarkup(affirmation.text).plainText, sound: sound, identifier: id)
     }
 }
 

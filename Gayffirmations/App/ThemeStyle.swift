@@ -79,12 +79,13 @@ extension AppTheme {
 }
 
 enum AffirmationTextRole {
-    case message, preview
+    case message, preview, context
 
     var textStyle: Font.TextStyle {
         switch self {
         case .message: .largeTitle
         case .preview: .title2
+        case .context: .body
         }
     }
 
@@ -92,6 +93,7 @@ enum AffirmationTextRole {
         switch self {
         case .message: 34
         case .preview: 22
+        case .context: 17
         }
     }
 }

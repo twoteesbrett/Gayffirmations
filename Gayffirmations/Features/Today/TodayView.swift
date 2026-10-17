@@ -237,12 +237,12 @@ struct TodayView: View {
     }
 
     private func affirmationMessage(_ affirmation: Affirmation) -> some View {
-        Text(affirmation.text)
+        MessageText(source: affirmation.text, theme: appTheme)
             .affirmationTypography(appTheme)
             .lineSpacing(appTheme.affirmationLineSpacing)
             .frame(maxWidth: 560)
             .multilineTextAlignment(.center)
-            .accessibilityLabel("Affirmation: \(affirmation.text)")
+            .accessibilityLabel("Affirmation: \(MessageMarkup(affirmation.text).plainText)")
             .accessibilityAction(named: "Next affirmation") { cycleAffirmation(by: 1) }
             .accessibilityAction(named: "Previous affirmation") { cycleAffirmation(by: -1) }
     }

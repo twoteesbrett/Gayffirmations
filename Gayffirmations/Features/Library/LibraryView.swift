@@ -279,7 +279,7 @@ struct LibraryView: View {
 
     private func affirmationLabel(_ affirmation: Affirmation) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(affirmation.resolved(name: notificationCoordinator.personalizationStore.name)?.text ?? affirmation.text)
+            MessageText(source: affirmation.resolved(name: notificationCoordinator.personalizationStore.name)?.text ?? affirmation.text)
                 .font(.body)
                 .lineSpacing(3)
             if affirmation.resolved(name: notificationCoordinator.personalizationStore.name) == nil {
