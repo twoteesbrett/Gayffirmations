@@ -80,6 +80,7 @@ struct ContentView: View {
             }
         }
         .themeAppearance(themeStore.selectedTheme)
+        .environment(\.imageDimming, themeStore.backgroundChoice.imageDimming ?? 0)
         .task {
             await notificationCoordinator.reconcileOnLaunch()
         }

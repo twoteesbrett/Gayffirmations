@@ -16,3 +16,26 @@ struct MessageText: View {
         .accessibilityLabel(markup.plainText)
     }
 }
+
+/// Offset silhouettes keep the outline aligned with all fonts and inline markup.
+struct TextOutline: ViewModifier {
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        content.background {
+            if enabled {
+                ZStack {
+                    ForEach(0..<8) { index in
+                        let angle = Double(index) * .pi / 4
+                        content
+                            .foregroundStyle(.black)
+                            .colorMultiply(.black)
+                            .offset(x: cos(angle) * 0.8, y: sin(angle) * 0.8)
+                    }
+                }
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
+            }
+        }
+    }
+}

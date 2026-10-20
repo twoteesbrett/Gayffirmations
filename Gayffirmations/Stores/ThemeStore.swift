@@ -77,7 +77,22 @@ final class ThemeStore {
 
     func setUsesImage(_ enabled: Bool) throws {
         guard !enabled || !selectedTheme.images.isEmpty else { return }
-        try saveBackground(ThemeBackgroundChoice(usesImage: enabled))
+        var choice = backgroundChoice
+        choice.usesImage = enabled
+        try saveBackground(choice)
+    }
+
+    func setImageDimming(_ value: Double) throws {
+        var choice = backgroundChoice
+        let adjustment = ThemeBackgroundChoice.snappedDimming(value)
+        choice.imageDimming = adjustment == 0 ? nil : adjustment
+        try saveBackground(choice)
+    }
+
+    func setOutlinesText(_ enabled: Bool) throws {
+        var choice = backgroundChoice
+        choice.outlinesText = enabled ? true : nil
+        try saveBackground(choice)
     }
 
     private func saveBackground(_ choice: ThemeBackgroundChoice) throws {

@@ -242,6 +242,7 @@ struct TodayView: View {
             .lineSpacing(appTheme.affirmationLineSpacing)
             .frame(maxWidth: 560)
             .multilineTextAlignment(.center)
+            .modifier(TextOutline(enabled: themeImage != nil && (themeStore?.backgroundChoice.outlinesText ?? false)))
             .accessibilityLabel("Affirmation: \(MessageMarkup(affirmation.text).plainText)")
             .accessibilityAction(named: "Next affirmation") { cycleAffirmation(by: 1) }
             .accessibilityAction(named: "Previous affirmation") { cycleAffirmation(by: -1) }

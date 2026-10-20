@@ -16,6 +16,7 @@ struct ThemePickerView: View {
                             theme: theme,
                             isSelected: store.selectedTheme == theme
                         )
+                        .environment(\.imageDimming, store.backgrounds[theme.rawValue]?.imageDimming ?? 0)
                     }
                     .buttonStyle(.plain)
                     .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
@@ -35,9 +36,43 @@ struct ThemePickerView: View {
                     ))
 
                     if store.backgroundChoice.usesImage {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Image dimming")
+                                Spacer()
+                                Button("Default") {
+                                    updateBackground { try store.setImageDimming(0) }
+                                }
+                                .disabled((store.backgroundChoice.imageDimming ?? 0) == 0)
+                            }
+                            Slider(value: Binding(
+                                get: { store.backgroundChoice.imageDimming ?? 0 },
+                                set: { value in updateBackground { try store.setImageDimming(value) } }
+                            ), in: -1...1)
+                            .accessibilityLabel("Image dimming")
+                            .accessibilityValue((store.backgroundChoice.imageDimming ?? 0) == 0
+                                                ? "Default" : "\(Int(((store.backgroundChoice.imageDimming ?? 0) + 1) * 50)) percent")
+                            HStack {
+                                Text("Clear")
+                                Spacer()
+                                Text("Default")
+                                Spacer()
+                                Text("Darker")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                        }
+                        Toggle("Outline text", isOn: Binding(
+                            get: { store.backgroundChoice.outlinesText ?? false },
+                            set: { enabled in updateBackground { try store.setOutlinesText(enabled) } }
+                        ))
+                        .accessibilityHint("Adds a thin black outline to affirmation text over images")
+
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 12)], spacing: 12) {
                             ForEach(store.selectedTheme.images) { image in
                                 ImageBackground(image: image)
+                                    .environment(\.imageDimming, store.backgroundChoice.imageDimming ?? 0)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 110)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))

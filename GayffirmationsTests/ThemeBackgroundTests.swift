@@ -5,6 +5,63 @@ import UIKit
 
 @MainActor
 struct ThemeBackgroundTests {
+    @Test("Text outline defaults off and persists per theme without changing dimming")
+    func textOutlinePreference() throws {
+        let oldChoice = try JSONDecoder().decode(
+            ThemeBackgroundChoice.self, from: Data(#"{"usesPhoto":true}"#.utf8)
+        )
+        #expect(!(oldChoice.outlinesText ?? false))
+        let suite = "gayffirmations.outline.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let store = ThemeStore(repository: repository, backgroundRepository: repository)
+        try store.setImageDimming(-0.5)
+        try store.setOutlinesText(true)
+        try store.setUsesImage(false)
+        try store.setUsesImage(true)
+        #expect(store.backgroundChoice.outlinesText == true)
+        #expect(store.backgroundChoice.imageDimming == -0.5)
+        try store.select(.steel)
+        #expect(!(store.backgroundChoice.outlinesText ?? false))
+        try store.select(.eden)
+        let restarted = ThemeStore(repository: repository, backgroundRepository: repository)
+        #expect(restarted.backgroundChoice.outlinesText == true)
+        try restarted.setOutlinesText(false)
+        #expect(!(restarted.backgroundChoice.outlinesText ?? false))
+        #expect(restarted.backgroundChoice.imageDimming == -0.5)
+    }
+
+    @Test("Dimming preserves image defaults and snaps near the default")
+    func dimmingRange() {
+        #expect(ThemeBackgroundChoice.overlayOpacity(default: 0.48, adjustment: 0) == 0.48)
+        #expect(ThemeBackgroundChoice.overlayOpacity(default: 0.48, adjustment: -1) == 0)
+        #expect(ThemeBackgroundChoice.overlayOpacity(default: 0.48, adjustment: 1) == 0.85)
+        #expect(ThemeBackgroundChoice.snappedDimming(0.04) == 0)
+        #expect(ThemeBackgroundChoice.snappedDimming(-0.04) == 0)
+        #expect(ThemeBackgroundChoice.snappedDimming(-0.5) == -0.5)
+    }
+
+    @Test("Dimming persists per theme and survives toggling images")
+    func persistsDimming() throws {
+        let suite = "gayffirmations.dimming.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let store = ThemeStore(repository: repository, backgroundRepository: repository)
+        try store.setImageDimming(-0.5)
+        try store.setUsesImage(false)
+        try store.setUsesImage(true)
+        #expect(store.backgroundChoice.imageDimming == -0.5)
+        try store.select(.steel)
+        #expect(store.backgroundChoice.imageDimming == nil)
+        try store.select(.eden)
+        let restarted = ThemeStore(repository: repository, backgroundRepository: repository)
+        #expect(restarted.backgroundChoice.imageDimming == -0.5)
+        try restarted.setImageDimming(0)
+        #expect(restarted.backgroundChoice.imageDimming == nil)
+    }
+
     @Test("Nature's gradient preference migrates to Eden across restarts")
     func migratesNatureBackground() throws {
         let suite = "gayffirmations.eden.migration.\(UUID())"
