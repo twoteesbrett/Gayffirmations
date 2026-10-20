@@ -26,6 +26,17 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .accessibilityHint("Edit the name used in personalised affirmations")
                 }
+                Section {
+                    NavigationLink {
+                        FallbackAffirmationsView(coordinator: notificationCoordinator)
+                    } label: {
+                        LabeledContent("Affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
+                    }
+                } header: {
+                    Text("Today")
+                } footer: {
+                    Text("Shown when no scheduled reminders are ready. Changes daily and doesn’t send notifications.")
+                }
                 Section("Notifications") {
                     Button {
                         isShowingSchedule = true

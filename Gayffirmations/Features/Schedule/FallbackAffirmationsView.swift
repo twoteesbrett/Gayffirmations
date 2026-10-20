@@ -49,7 +49,7 @@ struct FallbackAffirmationsView: View {
             }
         }
         .themedBackground()
-        .navigationTitle("Today’s fallback")
+        .navigationTitle("Today’s Affirmations")
         .navigationBarTitleDisplayMode(.inline)
         .disabled(coordinator.isUpdating)
         .alert("Unable to Save Today’s Content", isPresented: Binding(

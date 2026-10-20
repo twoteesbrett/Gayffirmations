@@ -212,7 +212,7 @@ struct TodayView: View {
                  ? "Tap the screen, then open Library in the top-left corner to add your first affirmation."
                  : (needsName
                     ? "Add a name in Settings to use these personalised affirmations."
-                    : "Choose different fallback content in Schedules or add matching affirmations in Library."))
+                    : "Choose different affirmations under Today in Settings or add matching affirmations in Library."))
                 .foregroundStyle(foregroundColor.opacity(0.85))
         }
     }
