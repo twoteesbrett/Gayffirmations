@@ -16,8 +16,8 @@ enum AffirmationSelection: Codable, Hashable {
 
     var selectedTags: [String] {
         switch self {
-        case .tag(let tag): [tag]
-        case .sources(_, let tags): tags
+        case .tag(let tag): [AffirmationTag.canonicalTag(tag)]
+        case .sources(_, let tags): AffirmationTag.canonicalTags(tags)
         default: []
         }
     }
@@ -29,7 +29,7 @@ enum AffirmationSelection: Codable, Hashable {
 
     var name: String {
         if self == .all { return "All affirmations" }
-        let names = (includesFavourites ? ["Favourites"] : []) + selectedTags.map { $0.lowercased() }
+        let names = (includesFavourites ? ["Favourites"] : []) + selectedTags.map { AffirmationTag(rawValue: $0)?.name ?? $0.lowercased() }
         return names.isEmpty ? "None selected" : names.joined(separator: ", ")
     }
 
@@ -47,7 +47,7 @@ enum AffirmationSelection: Codable, Hashable {
     }
 
     func containsTag(_ tag: String) -> Bool {
-        selectedTags.contains { $0.compare(tag, options: .caseInsensitive) == .orderedSame }
+        selectedTags.contains { $0.compare(AffirmationTag.canonicalTag(tag), options: .caseInsensitive) == .orderedSame }
     }
 
     func selectingFavourites(_ included: Bool) -> AffirmationSelection {
@@ -55,7 +55,7 @@ enum AffirmationSelection: Codable, Hashable {
     }
 
     func selectingTag(_ tag: String, included: Bool) -> AffirmationSelection {
-        var tags = selectedTags.filter { $0.compare(tag, options: .caseInsensitive) != .orderedSame }
+        var tags = selectedTags.filter { $0.compare(AffirmationTag.canonicalTag(tag), options: .caseInsensitive) != .orderedSame }
         if included { tags.append(tag) }
         tags.sort { $0.localizedStandardCompare($1) == .orderedAscending }
         return .sources(favourites: includesFavourites, tags: tags)

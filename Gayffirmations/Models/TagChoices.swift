@@ -4,7 +4,7 @@ enum TagChoices {
     /// Preserve the first spelling of each tag while sorting choices for display.
     static func sortedUnique(_ tags: [String]) -> [String] {
         var uniqueTags: [String] = []
-        for tag in tags {
+        for tag in tags.map(AffirmationTag.canonicalTag) {
             let alreadyIncluded = uniqueTags.contains {
                 $0.compare(tag, options: .caseInsensitive) == .orderedSame
             }

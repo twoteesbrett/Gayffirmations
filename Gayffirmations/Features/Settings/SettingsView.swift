@@ -210,11 +210,11 @@ private enum ResetAction {
     var message: String {
         switch self {
         case .affirmations:
-            "This restores bundled affirmations, including deleted ones. Personal additions and favorites are kept."
+            "This loads the current bundled affirmations, including any you deleted, and removes retired bundled messages. Your personal affirmations are kept. Favourite choices are kept for bundled affirmations still in the collection."
         case .schedule:
             "This replaces all schedules with one disabled default schedule and removes pending notifications."
         case .all:
-            "This restores the affirmation library, notification schedules and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favorites will be removed, pending notifications will be cancelled, and previous recovery backups will be removed unless unreadable data needs to be preserved."
+            "This restores the affirmation library, notification schedules and sound, affirmation selection, name, and theme to their defaults. Custom affirmations and favourites will be removed, pending notifications will be cancelled, and previous recovery backups will be removed unless unreadable data needs to be preserved."
         }
     }
 }

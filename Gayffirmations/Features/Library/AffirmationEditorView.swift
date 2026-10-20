@@ -51,7 +51,7 @@ struct AffirmationEditorView: View {
                 tagSection
                 if let onRestore {
                     Section {
-                        Button("Restore Original") {
+                        Button("Restore Bundled Version") {
                             do {
                                 try onRestore()
                                 dismiss()
@@ -61,7 +61,7 @@ struct AffirmationEditorView: View {
                             }
                         }
                     } footer: {
-                        Text("Restore this affirmation’s original text and tags. Your favourite choice is kept.")
+                        Text("Restore this affirmation’s current bundled text and tags. Your favourite choice is kept.")
                     }
                 }
             }

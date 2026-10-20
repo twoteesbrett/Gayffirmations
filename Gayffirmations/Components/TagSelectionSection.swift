@@ -18,8 +18,15 @@ struct TagSelectionSection: View {
                     get: { selection.containsTag(tag) },
                     set: { onChange(selection.selectingTag(tag, included: $0)) }
                 )) {
-                    Text(AffirmationTag(rawValue: tag)?.name ?? tag.lowercased())
-                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(AffirmationTag(rawValue: tag)?.name ?? tag.lowercased())
+                        if let category = AffirmationTag(rawValue: tag) {
+                            Text(category.displayName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
 

@@ -96,11 +96,9 @@ receives a new saved ID. Its text, tags, and favourite choice stay with the pers
 copy; the bundled original is restored separately. Restore Original is available
 only for bundled messages.
 
-The bundled catalogue contains 72 affirmations across Confidence, Food, Gay, Body,
-Self-kindness, Inner Critic, and Treat Yourself. Food challenges impulse snacking;
-Treat Yourself offers permission to enjoy a deliberate indulgence. Existing saved
+The bundled catalogue contains 50 affirmations, ten each across Food, Critic, Gay, Human and Role Model. Food challenges impulse snacking. Existing saved
 libraries keep their content; use Restore Bundled Affirmations to load the revised
-copy and new category.
+catalogue.
 
 ## Personalised messages
 

@@ -48,7 +48,7 @@ struct ScheduleView: View {
                     LabeledContent("Affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
                 }
             } header: {
-                Text("When no schedule is active")
+                Text("When no scheduled reminders are ready")
             } footer: {
                 Text("Today uses this selection when no schedule has reminders ready to deliver, including paused schedules. It changes once per day and never sends reminders.")
             }

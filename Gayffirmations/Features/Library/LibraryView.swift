@@ -50,7 +50,7 @@ struct LibraryView: View {
                         ContentUnavailableView {
                             Label("No Matching Affirmations", systemImage: "text.quote")
                         } description: {
-                            Text(sourceFilter.includesMine && !sourceFilter.includesBundled ? "Add your own affirmation or clear filters to see more entries." : sourceFilter.includesBundled && !sourceFilter.includesMine ? "Clear filters or restore default affirmations in Settings to see bundled messages." : filter.emptyMessage)
+                            Text(sourceFilter.includesMine && !sourceFilter.includesBundled ? "Add your own affirmation or clear filters to see more entries." : sourceFilter.includesBundled && !sourceFilter.includesMine ? "Clear filters or use Restore Bundled Affirmations in Settings to see bundled messages." : filter.emptyMessage)
                         } actions: {
                             Button("Show All Affirmations") {
                                 clearFilters()
@@ -157,7 +157,7 @@ struct LibraryView: View {
                             .foregroundStyle(.secondary)
                     }
                 } footer: {
-                    Text("Show entries matching any selected tag or Favourites. Mine shows your own affirmations; Bundled shows messages included with the app. Select both to include both sources, then narrow the results with tags or Favourites. These filters only change the Library list.")
+                    Text("Choose tags to filter your Library. Select multiple tags to include affirmations matching any of them. This only changes the Library list, not your schedules.")
                 }
                 TagSelectionSection(
                     tags: tagChoices,
@@ -254,7 +254,7 @@ struct LibraryView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(
-                    affirmation.isFavorite ? "Remove from favorites" : "Add to favorites"
+                    affirmation.isFavorite ? "Remove from favourites" : "Add to favourites"
                 )
             }
             .padding(.vertical, 8)
@@ -291,7 +291,7 @@ struct LibraryView: View {
                 Image(systemName: affirmation.isBundled ? "shippingbox" : "person")
                     .accessibilityLabel(affirmation.isBundled ? "Bundled affirmation" : "Your affirmation")
                 if !affirmation.tags.isEmpty {
-                    Text(affirmation.tags.map { $0.lowercased() }.joined(separator: " · "))
+                    Text(affirmation.tags.map { AffirmationTag(rawValue: $0)?.name ?? $0.lowercased() }.joined(separator: " · "))
                 }
             }
             .font(.caption)

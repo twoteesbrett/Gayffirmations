@@ -25,7 +25,7 @@ nonisolated struct Affirmation: Codable, Identifiable, Equatable {
         self.id = id
         self.text = text
         self.isFavorite = isFavorite
-        self.tags = tags
+        self.tags = AffirmationTag.canonicalTags(tags)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -46,15 +46,16 @@ nonisolated struct Affirmation: Codable, Identifiable, Equatable {
             let savedID = id
             let candidates = Self.starterAffirmations
                 .filter { $0.id == savedID }
-            let isOriginalNameMessage = id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015")
-                && text == "Stop comparing. You're the only Brett in the room."
             let savedText = text
-            let savedTags = tags
+            let savedTags = AffirmationTag.canonicalTags(tags)
             let matchesBundle = candidates.contains {
-                ($0.text == savedText || isOriginalNameMessage) && $0.tags == savedTags
-            }
+                $0.text == savedText && $0.tags == savedTags
+            } || LegacyAffirmationCatalog.contains(id: id, text: text, tags: tags)
             source = matchesBundle ? .bundled : .user
         }
+        // Validate the original saved tags before migration can merge categories.
+        try AffirmationValidation.validate([self])
+        tags = AffirmationTag.canonicalTags(tags)
     }
 }
 
