@@ -193,8 +193,17 @@ final class AffirmationStore {
     ) throws -> String {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !trimmedText.isEmpty else {
+        guard MessageMarkup(trimmedText).hasVisibleText else {
             throw AffirmationStoreError.blankText
+        }
+
+        // Restoration can legitimately retain personal and bundled copies with
+        // matching text. Metadata edits must not force either copy to be rewritten.
+        if let excludedID,
+           let existing = affirmations.first(where: { $0.id == excludedID }),
+           existing.text.trimmingCharacters(in: .whitespacesAndNewlines)
+               .compare(trimmedText, options: .caseInsensitive) == .orderedSame {
+            return trimmedText
         }
 
         let isDuplicate = affirmations.contains { affirmation in

@@ -4,6 +4,45 @@ import Testing
 
 @MainActor
 struct AffirmationStoreTests {
+    @Test("Restored duplicate text remains editable after reloading")
+    func editsRestoredDuplicates() throws {
+        let original = Affirmation(text: "Keep this message", tags: ["Work"], source: .bundled)
+        let personal = Affirmation(id: original.id, text: original.text, isFavorite: true, tags: ["Mine"])
+        let repository = InMemoryAffirmationRepository(affirmations: [personal])
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [original])
+        try store.restoreDefaults()
+        let reloaded = AffirmationStore(repository: repository, defaultAffirmations: [original])
+        #expect(reloaded.affirmations.count == 2)
+        for entry in reloaded.affirmations {
+            try reloaded.update(id: entry.id, text: entry.text)
+            try reloaded.update(id: entry.id, text: entry.text, tags: ["Calm"])
+        }
+        let saved = AffirmationStore(repository: repository, defaultAffirmations: [original])
+        #expect(saved.affirmations.allSatisfy { $0.tags == ["Calm"] && $0.text == original.text })
+        #expect(saved.affirmations.first { !$0.isBundled }?.isFavorite == true)
+        #expect(throws: AffirmationStoreError.duplicateText) {
+            try reloaded.add(text: original.text)
+        }
+        let other = try reloaded.add(text: "Different text")
+        #expect(throws: AffirmationStoreError.duplicateText) {
+            try reloaded.update(id: other.id, text: original.text)
+        }
+    }
+
+    @Test("Markup-only additions and edits are rejected without changing saved content",
+          arguments: ["<small></small>", "<br>", "<small>  </small>", " <br />\n<br/> "])
+    func rejectsInvisibleText(text: String) throws {
+        let entry = Affirmation(text: "Keep me")
+        let repository = InMemoryAffirmationRepository(affirmations: [entry])
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [])
+        #expect(throws: AffirmationStoreError.blankText) { try store.add(text: text) }
+        #expect(throws: AffirmationStoreError.blankText) { try store.update(id: entry.id, text: text) }
+        #expect(store.affirmations == [entry])
+        #expect(repository.affirmations == [entry])
+        let literal = try store.add(text: "<small>unfinished")
+        #expect(literal.text == "<small>unfinished")
+    }
+
     @Test("Tags share spelling across entries and filtering ignores case")
     func sharedTagsAndFiltering() throws {
         let store = AffirmationStore()
@@ -27,9 +66,9 @@ struct AffirmationStoreTests {
     func normalizesTags() throws {
         let store = AffirmationStore()
         let affirmation = try store.add(
-            text: "Tagged", tags: [" Work ", "", "work", "\nConfidence\n"]
+            text: "Tagged", tags: [" Work ", "", "work", "\nCalm\n"]
         )
-        #expect(affirmation.tags == ["Work", "Confidence"])
+        #expect(affirmation.tags == ["Work", "Calm"])
     }
 
     @Test("Tag edits persist without changing favourites and notify change observers")

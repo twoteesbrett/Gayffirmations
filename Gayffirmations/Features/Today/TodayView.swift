@@ -16,25 +16,10 @@ struct TodayView: View {
     @State private var errorMessage: String?
     @State private var browsingState = TodayBrowsingState()
     @State private var browsingForward = true
-    @State private var swipe: SwipePreview?
-    @State private var swipeTranslation: CGFloat = 0
-    @State private var isSettlingSwipe = false
-    @State private var imageZoom: CGFloat = 1
-    @State private var pinchStartZoom: CGFloat = 1
-    @State private var imageOffset: CGSize = .zero
-    @State private var isPinchingImage = false
-    @State private var isPanningImage = false
+    @State private var swipeState = TodaySwipeState()
+    @State private var imageInteraction = TodayImageInteractionState()
     @State private var imageViewportSize: CGSize = .zero
 
-    private struct SwipePreview {
-        let current: Affirmation
-        let next: Affirmation
-        let browsingState: TodayBrowsingState
-        let direction: Int
-        let width: CGFloat
-        let currentImage: ThemeImage?
-        let nextImage: ThemeImage?
-    }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.themeImage) private var themeImage
     @Environment(\.appTheme) private var appTheme
@@ -71,33 +56,26 @@ struct TodayView: View {
                 // the current page or change the current page's vertical scroll position.
                 ScrollView {
                     affirmationPage(
-                        swipe?.current ?? affirmation,
+                        swipeState.preview?.current ?? affirmation,
                         size: geometry.size, centeringInset: centeringInset
                     )
-                    .offset(x: reduceMotion ? 0 : swipeTranslation)
-                    .opacity(reduceMotion ? 1 - swipeProgress : 1)
-                    .accessibilityHidden(swipe != nil)
+                    .offset(x: reduceMotion ? 0 : swipeState.translation)
+                    .opacity(reduceMotion ? 1 - swipeState.progress : 1)
+                    .accessibilityHidden(swipeState.preview != nil)
                     .overlay {
                         TodayGestureTarget(
                             onTap: { controls.toggle() },
                             onDragChanged: { updateSwipe(translation: $0, width: geometry.size.width) },
                             onDragEnded: { finishSwipe(translation: $0, velocity: $1, cancelled: $2) },
-                            allowsImageZoom: themeImage != nil && swipe == nil,
+                            allowsImageZoom: themeImage != nil && swipeState.preview == nil,
                             onPinch: { scale, ended in
                                 controls.registerInteraction()
-                                isPinchingImage = !ended
-                                imageZoom = min(4, max(1, pinchStartZoom * scale))
-                                imageOffset = constrainedImageOffset(imageOffset)
-                                if ended { pinchStartZoom = imageZoom }
+                                imageInteraction.pinch(scale: scale, ended: ended)
                             },
-                            pansImage: themeImage != nil && imageZoom > 1,
+                            pansImage: themeImage != nil && imageInteraction.zoom > 1,
                             onImagePan: { translation, ended in
                                 controls.registerInteraction()
-                                isPanningImage = !ended
-                                imageOffset = constrainedImageOffset(CGSize(
-                                    width: imageOffset.width + translation.width / max(1, imageViewportSize.width),
-                                    height: imageOffset.height + translation.height / max(1, imageViewportSize.height)
-                                ))
+                                imageInteraction.pan(translation: translation, ended: ended)
                             }
                         )
                         .accessibilityHidden(true)
@@ -105,11 +83,11 @@ struct TodayView: View {
                 }
                 .scrollClipDisabled()
                 .scrollBounceBehavior(.basedOnSize)
-                .scrollDisabled(themeImage != nil && (imageZoom > 1 || isPinchingImage || isPanningImage))
+                .scrollDisabled(themeImage != nil && imageInteraction.preventsTextScrolling)
                 // A committed destination starts at the top, matching its swipe preview.
-                .id((swipe?.current ?? affirmation)?.id)
+                .id((swipeState.preview?.current ?? affirmation)?.id)
                 .overlay {
-                    if let swipe {
+                    if let swipe = swipeState.preview {
                         ScrollView {
                             affirmationPage(
                                 swipe.next,
@@ -119,8 +97,8 @@ struct TodayView: View {
                         }
                         .scrollClipDisabled()
                         .scrollBounceBehavior(.basedOnSize)
-                        .offset(x: reduceMotion ? 0 : swipeTranslation + CGFloat(swipe.direction) * swipe.width)
-                        .opacity(reduceMotion ? swipeProgress : 1)
+                        .offset(x: reduceMotion ? 0 : swipeState.translation + CGFloat(swipe.direction) * swipe.width)
+                        .opacity(reduceMotion ? swipeState.progress : 1)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                     }
@@ -161,18 +139,18 @@ struct TodayView: View {
         .background {
             ZStack {
                 appTheme.backgroundGradient
-                if let swipe {
+                if let swipe = swipeState.preview {
                     GeometryReader { geometry in
                         ZStack {
                             if let image = swipe.currentImage {
-                                ImageBackground(image: image, zoom: imageZoom, panOffset: imageOffset)
-                                    .offset(x: reduceMotion ? 0 : swipeTranslation / swipe.width * geometry.size.width)
-                                    .opacity(reduceMotion ? 1 - swipeProgress : 1)
+                                ImageBackground(image: image, zoom: imageInteraction.zoom, panOffset: imageInteraction.offset)
+                                    .offset(x: reduceMotion ? 0 : swipeState.translation / swipe.width * geometry.size.width)
+                                    .opacity(reduceMotion ? 1 - swipeState.progress : 1)
                             }
                             if let image = swipe.nextImage {
                                 ImageBackground(image: image)
-                                    .offset(x: reduceMotion ? 0 : (swipeTranslation / swipe.width + CGFloat(swipe.direction)) * geometry.size.width)
-                                    .opacity(reduceMotion ? swipeProgress : 1)
+                                    .offset(x: reduceMotion ? 0 : (swipeState.translation / swipe.width + CGFloat(swipe.direction)) * geometry.size.width)
+                                    .opacity(reduceMotion ? swipeState.progress : 1)
                             }
                         }
                         .clipped()
@@ -180,21 +158,18 @@ struct TodayView: View {
                     .accessibilityHidden(true)
                 } else {
                     TransitioningImageBackground(image: themeImage, browsingForward: browsingForward,
-                                                 imageZoom: imageZoom, imageOffset: imageOffset)
+                                                 imageZoom: imageInteraction.zoom, imageOffset: imageInteraction.offset)
                 }
             }
             .ignoresSafeArea()
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                 imageViewportSize = size
-                imageOffset = constrainedImageOffset(imageOffset)
+                updateImageGeometry()
             }
         }
-        .onChange(of: themeImage?.id) { _, _ in
-            imageZoom = 1
-            pinchStartZoom = 1
-            imageOffset = .zero
-            isPinchingImage = false
-            isPanningImage = false
+        .onChange(of: themeImage?.id, initial: true) { _, _ in
+            imageInteraction.reset()
+            updateImageGeometry()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }
@@ -240,15 +215,17 @@ struct TodayView: View {
 
     private var foregroundColor: Color { themeImage?.textColor ?? appTheme.textColor }
 
-    private func constrainedImageOffset(_ offset: CGSize) -> CGSize {
-        guard let image = themeImage, let uiImage = UIImage(named: image.id) else { return .zero }
-        return ImageViewport.constrainedOffset(offset, zoom: imageZoom, imageSize: uiImage.size,
-                                               viewport: imageViewportSize, focalPoint: image.focalPoint)
+    private func updateImageGeometry() {
+        let imageSize = themeImage.flatMap { UIImage(named: $0.id)?.size } ?? .zero
+        imageInteraction.updateGeometry(viewport: imageViewportSize, imageSize: imageSize,
+                                        focalPoint: themeImage?.focalPoint ?? .center)
     }
 
     private var emptyState: some View {
         let libraryIsEmpty = store.affirmations.isEmpty
-        let needsName = !fallbackSelectionStore.selection.matchingAffirmations(in: store.affirmations).isEmpty
+        let needsName = personalizationStore.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && fallbackSelectionStore.selection.matchingAffirmations(in: store.affirmations)
+                .contains { $0.usesName && MessageMarkup($0.text).hasVisibleText }
         return ContentUnavailableView {
             Label(libraryIsEmpty ? "No Affirmations" : (needsName ? "Add a Name" : "No Matching Affirmations"), systemImage: "text.quote")
                 .foregroundStyle(foregroundColor)
@@ -317,40 +294,33 @@ struct TodayView: View {
         )
     }
 
-    private var swipeProgress: Double {
-        guard let swipe else { return 0 }
-        return Double(min(1, abs(swipeTranslation) / swipe.width))
-    }
-
     private func updateSwipe(translation: CGFloat, width: CGFloat) {
-        guard !isSettlingSwipe, width > 0 else { return }
+        guard !swipeState.isSettling, width > 0 else { return }
         controls.registerInteraction()
         let direction = translation <= 0 ? 1 : -1
-        if swipe?.direction != direction {
+        if swipeState.preview?.direction != direction {
             let now = Date.now
             let context = context(at: now)
             var previewState = browsingState
             guard let current = browsingState.affirmation(at: now, context: context),
                   let next = previewState.cycle(by: direction, at: now, context: context) else { return }
-            swipe = SwipePreview(
+            swipeState.preview = TodaySwipeState.Preview(
                 current: current, next: next, browsingState: previewState,
                 direction: direction, width: width, currentImage: themeImage,
                 nextImage: themeStore?.image(for: next.id, direction: direction) ?? themeImage
             )
         }
-        swipeTranslation = max(-width, min(width, translation))
+        swipeState.translation = max(-width, min(width, translation))
     }
 
     private func finishSwipe(translation: CGFloat, velocity: CGFloat, cancelled: Bool) {
-        guard let preview = swipe, !isSettlingSwipe else { return }
+        guard let preview = swipeState.preview, !swipeState.isSettling else { return }
         controls.registerInteraction()
-        isSettlingSwipe = true
-        // Project a short distance ahead so a quick flick can complete a small drag.
-        let projectedDistance = -(translation + velocity * 0.18) * CGFloat(preview.direction)
-        let commits = !cancelled && projectedDistance > preview.width * 0.3
+        swipeState.isSettling = true
+        let commits = swipeState.shouldCommit(translation: translation, velocity: velocity, cancelled: cancelled)
         let destination = commits ? -CGFloat(preview.direction) * preview.width : 0
         withAnimation(.easeOut(duration: reduceMotion ? 0.15 : 0.25), completionCriteria: .removed) {
-            swipeTranslation = destination
+            swipeState.translation = destination
         } completion: {
             var transaction = Transaction(animation: nil)
             transaction.disablesAnimations = true
@@ -361,15 +331,13 @@ struct TodayView: View {
                     themeStore?.updateDisplayedAffirmation(preview.next.id, direction: preview.direction)
                     browsingState = preview.browsingState
                 }
-                swipe = nil
-                swipeTranslation = 0
-                isSettlingSwipe = false
+                swipeState.reset()
             }
         }
     }
 
     private func cycleAffirmation(by offset: Int) {
-        guard swipe == nil else { return }
+        guard swipeState.preview == nil else { return }
         controls.registerInteraction()
         var updatedBrowsingState = browsingState
         let now = Date.now

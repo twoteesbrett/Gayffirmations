@@ -10,6 +10,9 @@ nonisolated struct MessageMarkup {
 
     let runs: [Run]
     var plainText: String { runs.map(\.text).joined() }
+    var hasVisibleText: Bool {
+        !plainText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     init(_ source: String) {
         var result: [Run] = []

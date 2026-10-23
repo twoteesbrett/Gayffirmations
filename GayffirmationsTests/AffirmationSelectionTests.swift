@@ -61,12 +61,12 @@ struct AffirmationSelectionTests {
 
     @Test("Changing individual choices preserves the other choices")
     func changesIndividualChoices() {
-        let selection = AffirmationSelection.favourites.selectingTag("Confidence", included: true)
+        let selection = AffirmationSelection.favourites.selectingTag("Calm", included: true)
         #expect(selection.includesFavourites)
-        #expect(selection.containsTag("confidence"))
+        #expect(selection.containsTag("calm"))
         let tagsOnly = selection.selectingFavourites(false)
-        #expect(tagsOnly.selectedTags == ["Confidence"])
-        let empty = tagsOnly.selectingTag("CONFIDENCE", included: false)
+        #expect(tagsOnly.selectedTags == ["Calm"])
+        let empty = tagsOnly.selectingTag("CALM", included: false)
         #expect(empty.matchingAffirmations(in: [Affirmation(text: "Example", isFavorite: true, tags: ["Example tag"])]).isEmpty)
         #expect(empty.name == "None selected")
         let fromAll = AffirmationSelection.all.selectingTag("Work", included: true)

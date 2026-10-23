@@ -1,7 +1,47 @@
+import Foundation
 import Testing
 @testable import Gayffirmations
 
 struct MessageMarkupTests {
+    @Test @MainActor func historicalInvisibleContentIsPreservedButNotDisplayedOrDelivered() throws {
+        let suite = "MessageMarkupTests.\(UUID())"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = UserDefaultsRepository(userDefaults: defaults)
+        let blank = Affirmation(text: "<small></small>")
+        let visible = Affirmation(text: "<small>Hello</small><br>World")
+        try repository.saveAffirmations([blank, visible])
+        let bytes = defaults.data(forKey: "gayffirmations.affirmations")
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [])
+        #expect(store.persistenceErrorMessage == nil)
+        #expect(store.affirmations == [blank, visible])
+        #expect(defaults.data(forKey: "gayffirmations.affirmations") == bytes)
+
+        for enabled in [false, true] {
+            let schedules = [AffirmationSchedule(isEnabled: enabled)]
+            let context = TodayAffirmationResolver().context(
+                at: .now, schedules: schedules, affirmations: store.affirmations,
+                fallbackSelection: .all, name: ""
+            )
+            #expect(context.affirmation == visible)
+            #expect(context.browsingAffirmations == [visible])
+            let emptyContext = TodayAffirmationResolver().context(
+                at: .now, schedules: schedules, affirmations: [blank],
+                fallbackSelection: .all, name: ""
+            )
+            #expect(emptyContext.affirmation == nil)
+            #expect(emptyContext.browsingAffirmations.isEmpty)
+        }
+        let schedule = AffirmationSchedule(isEnabled: true)
+        let plan = try NotificationPlanner().plan(for: [schedule], affirmations: store.affirmations, name: "")
+        #expect(plan.count == schedule.notificationsPerDay)
+        #expect(plan.allSatisfy { $0.reminder.affirmationText == "Hello\nWorld" })
+        #expect(try NotificationPlanner().plan(for: [schedule], affirmations: [blank], name: "").isEmpty)
+        #expect(Affirmation(text: "{name}").resolved(name: "<br>") == nil)
+        try store.update(id: blank.id, text: "Repaired")
+        #expect(try repository.loadAffirmations()?.first?.text == "Repaired")
+    }
+
     @Test func parsesSmallRunsAndPreservesLineBreaks() {
         let markup = MessageMarkup("<small>Let it go means to</small>\nLet it be")
         #expect(markup.runs.count == 2)

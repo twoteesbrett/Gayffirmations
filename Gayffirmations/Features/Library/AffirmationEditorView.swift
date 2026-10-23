@@ -4,7 +4,6 @@ struct AffirmationEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     let affirmation: Affirmation?
-    let name: String
     let availableTags: [String]
     let onRestore: (() throws -> Void)?
     let onSave: (String, [String]) throws -> Void
@@ -19,11 +18,9 @@ struct AffirmationEditorView: View {
     init(
         affirmation: Affirmation? = nil,
         availableTags: [String] = [],
-        name: String = "",
         onRestore: (() throws -> Void)? = nil,
         onSave: @escaping (String, [String]) throws -> Void
     ) {
-        self.name = name
         self.affirmation = affirmation
         self.availableTags = availableTags
         self.onRestore = onRestore

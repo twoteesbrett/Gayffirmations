@@ -11,7 +11,7 @@ struct StarterContentTests {
         #expect(entries.allSatisfy { $0.isBundled && !$0.isFavorite && !$0.text.isEmpty && !$0.tags.isEmpty })
         #expect(Set(entries.flatMap(\.tags)) == Set(AffirmationTag.allCases.map(\.rawValue)))
         #expect(AffirmationTag.allCases.allSatisfy { tag in entries.filter { $0.tags.contains(tag.rawValue) }.count == 10 })
-        #expect(entries.first?.text == "You've got this, hun.")
+        #expect(entries.first?.text == "You've got this, bitch.")
         #expect(entries.last?.text == "Let your kindness do the talking.")
     }
 

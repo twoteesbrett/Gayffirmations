@@ -63,11 +63,14 @@ nonisolated extension Affirmation {
     var usesName: Bool { text.contains("{name}") }
 
     func resolved(name: String) -> Affirmation? {
-        guard usesName else { return self }
-        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty else { return nil }
         var result = self
-        result.text = text.replacingOccurrences(of: "{name}", with: name)
-        return result
+        if usesName {
+            let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { return nil }
+            result.text = text.replacingOccurrences(of: "{name}", with: name)
+        }
+        // Preserve historical source in the library, but only display or deliver
+        // entries with meaningful text after personalisation and markup parsing.
+        return MessageMarkup(result.text).hasVisibleText ? result : nil
     }
 }

@@ -114,7 +114,7 @@ struct LibraryView: View {
                 .font(.subheadline)
             }
 
-            Text("Filter the list to find and edit affirmations. Choose Today’s content in Schedules.")
+            Text("Filter the list to find and edit affirmations. Choose fallback content in Settings → Today → Affirmations, and reminder content in each schedule.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -279,10 +279,16 @@ struct LibraryView: View {
 
     private func affirmationLabel(_ affirmation: Affirmation) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            MessageText(source: affirmation.resolved(name: notificationCoordinator.personalizationStore.name)?.text ?? affirmation.text)
+            MessageText(source: MessageMarkup(affirmation.text).hasVisibleText
+                        ? (affirmation.resolved(name: notificationCoordinator.personalizationStore.name)?.text ?? affirmation.text)
+                        : "Empty affirmation")
                 .font(.body)
                 .lineSpacing(3)
-            if affirmation.resolved(name: notificationCoordinator.personalizationStore.name) == nil {
+            if !MessageMarkup(affirmation.text).hasVisibleText {
+                Text("Edit this affirmation to add visible text")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else if affirmation.usesName && notificationCoordinator.personalizationStore.name.isEmpty {
                 Text("Add a name in Settings to use this affirmation")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -328,7 +334,7 @@ struct LibraryView: View {
                 try store.add(text: text, tags: tags)
             }
         case .edit(let affirmation):
-            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, name: notificationCoordinator.personalizationStore.name, onRestore: store.canRestoreOriginal(id: affirmation.id) ? {
+            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, onRestore: store.canRestoreOriginal(id: affirmation.id) ? {
                 try store.restoreOriginal(id: affirmation.id)
             } : nil) { text, tags in
                 try store.update(id: affirmation.id, text: text, tags: tags)
