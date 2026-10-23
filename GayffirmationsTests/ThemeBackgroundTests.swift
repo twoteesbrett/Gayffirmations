@@ -1,10 +1,91 @@
 import Foundation
+import SwiftUI
 import Testing
 import UIKit
 @testable import Gayffirmations
 
 @MainActor
 struct ThemeBackgroundTests {
+    @Test("Panning reveals the full source image with asymmetric focal point bounds")
+    func fullSourcePanBounds() {
+        let imageSize = CGSize(width: 2000, height: 1000)
+        let viewport = CGSize(width: 100, height: 200)
+        let focalPoint = UnitPoint(x: 0.85, y: 0.5)
+        let right = ImageViewport.constrainedOffset(CGSize(width: 100, height: 100), zoom: 2,
+            imageSize: imageSize, viewport: viewport, focalPoint: focalPoint)
+        let left = ImageViewport.constrainedOffset(CGSize(width: -100, height: -100), zoom: 2,
+            imageSize: imageSize, viewport: viewport, focalPoint: focalPoint)
+        #expect(abs(right.width - 5.6) < 0.0001)
+        #expect(abs(left.width + 1.4) < 0.0001)
+        #expect(right.height == 0.5)
+        #expect(left.height == -0.5)
+        let unzoomedRight = ImageViewport.constrainedOffset(right, zoom: 1, imageSize: imageSize,
+            viewport: viewport, focalPoint: focalPoint)
+        let unzoomedLeft = ImageViewport.constrainedOffset(left, zoom: 1, imageSize: imageSize,
+            viewport: viewport, focalPoint: focalPoint)
+        #expect(abs(unzoomedRight.width - 2.55) < 0.0001)
+        #expect(abs(unzoomedLeft.width + 0.45) < 0.0001)
+        #expect(unzoomedRight.height == 0)
+        #expect(unzoomedLeft.height == 0)
+        let portrait = ImageViewport.constrainedOffset(CGSize(width: 100, height: 100), zoom: 1,
+            imageSize: CGSize(width: 100, height: 400), viewport: CGSize(width: 100, height: 200))
+        #expect(portrait.width == 0)
+        #expect(portrait.height == 0.5)
+    }
+
+    @Test("Image pinch and two-finger pan recognize together without enabling simultaneous browsing")
+    func simultaneousImageGestures() {
+        let target = TodayGestureTarget(onTap: {}, onDragChanged: { _ in },
+                                        onDragEnded: { _, _, _ in }, allowsImageZoom: true)
+        let coordinator = target.makeCoordinator()
+        let pinch = UIPinchGestureRecognizer()
+        let imagePan = UIPanGestureRecognizer()
+        imagePan.minimumNumberOfTouches = 2
+        let browsingPan = UIPanGestureRecognizer()
+        pinch.delegate = coordinator
+        imagePan.delegate = coordinator
+        browsingPan.delegate = coordinator
+        #expect(coordinator.gestureRecognizer(pinch, shouldRecognizeSimultaneouslyWith: imagePan))
+        #expect(coordinator.gestureRecognizer(imagePan, shouldRecognizeSimultaneouslyWith: pinch))
+        #expect(!coordinator.gestureRecognizer(pinch, shouldRecognizeSimultaneouslyWith: browsingPan))
+        #expect(!coordinator.gestureRecognizer(imagePan, shouldRecognizeSimultaneouslyWith: browsingPan))
+        #expect(!coordinator.gestureRecognizer(pinch, shouldRecognizeSimultaneouslyWith: UIScrollView().panGestureRecognizer))
+        coordinator.target.allowsImageZoom = false
+        #expect(!coordinator.gestureRecognizer(pinch, shouldRecognizeSimultaneouslyWith: imagePan))
+    }
+
+    @Test("Image gestures attach to the whole scroll viewport and detach cleanly")
+    func viewportGestureAttachment() {
+        let scroll = UIScrollView(frame: CGRect(x: 0, y: 0, width: 320, height: 640))
+        let content = UIView(frame: scroll.bounds)
+        let marker = TodayGestureTarget.GestureHostView(frame: CGRect(x: 100, y: 200, width: 120, height: 80))
+        let pinch = UIPinchGestureRecognizer()
+        let pan = UIPanGestureRecognizer()
+        marker.viewportRecognizers = [pinch, pan]
+        scroll.addSubview(content)
+        content.addSubview(marker)
+        marker.installRecognizers()
+        #expect(pinch.view === scroll)
+        #expect(pan.view === scroll)
+        #expect(!marker.point(inside: CGPoint(x: 10, y: 10), with: nil))
+        marker.installRecognizers()
+        #expect(scroll.gestureRecognizers?.filter { $0 === pinch }.count == 1)
+        marker.removeRecognizers()
+        #expect(pinch.view == nil)
+        #expect(pan.view == nil)
+    }
+
+    @Test("Image panning stays within the zoomed viewport and recentres at normal size")
+    func imagePanBounds() {
+        let offset = CGSize(width: 2, height: -2)
+        #expect(ImageViewport.constrainedOffset(offset, zoom: 1) == .zero)
+        #expect(ImageViewport.constrainedOffset(offset, zoom: 2) == CGSize(width: 0.5, height: -0.5))
+        #expect(ImageViewport.constrainedOffset(offset, zoom: 4) == CGSize(width: 1.5, height: -1.5))
+        let smallOffset = CGSize(width: 0.1, height: -0.2)
+        #expect(ImageViewport.constrainedOffset(smallOffset, zoom: 2) == smallOffset)
+        #expect(ImageViewport.constrainedOffset(smallOffset, zoom: 1.2).height > smallOffset.height)
+    }
+
     @Test("Text outline defaults off and persists per theme without changing dimming")
     func textOutlinePreference() throws {
         let oldChoice = try JSONDecoder().decode(

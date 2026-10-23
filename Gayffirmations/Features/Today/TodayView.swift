@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct TodayView: View {
     let store: AffirmationStore
@@ -18,6 +19,12 @@ struct TodayView: View {
     @State private var swipe: SwipePreview?
     @State private var swipeTranslation: CGFloat = 0
     @State private var isSettlingSwipe = false
+    @State private var imageZoom: CGFloat = 1
+    @State private var pinchStartZoom: CGFloat = 1
+    @State private var imageOffset: CGSize = .zero
+    @State private var isPinchingImage = false
+    @State private var isPanningImage = false
+    @State private var imageViewportSize: CGSize = .zero
 
     private struct SwipePreview {
         let current: Affirmation
@@ -74,12 +81,31 @@ struct TodayView: View {
                         TodayGestureTarget(
                             onTap: { controls.toggle() },
                             onDragChanged: { updateSwipe(translation: $0, width: geometry.size.width) },
-                            onDragEnded: { finishSwipe(translation: $0, velocity: $1, cancelled: $2) }
+                            onDragEnded: { finishSwipe(translation: $0, velocity: $1, cancelled: $2) },
+                            allowsImageZoom: themeImage != nil && swipe == nil,
+                            onPinch: { scale, ended in
+                                controls.registerInteraction()
+                                isPinchingImage = !ended
+                                imageZoom = min(4, max(1, pinchStartZoom * scale))
+                                imageOffset = constrainedImageOffset(imageOffset)
+                                if ended { pinchStartZoom = imageZoom }
+                            },
+                            pansImage: themeImage != nil && imageZoom > 1,
+                            onImagePan: { translation, ended in
+                                controls.registerInteraction()
+                                isPanningImage = !ended
+                                imageOffset = constrainedImageOffset(CGSize(
+                                    width: imageOffset.width + translation.width / max(1, imageViewportSize.width),
+                                    height: imageOffset.height + translation.height / max(1, imageViewportSize.height)
+                                ))
+                            }
                         )
                         .accessibilityHidden(true)
                     }
                 }
                 .scrollClipDisabled()
+                .scrollBounceBehavior(.basedOnSize)
+                .scrollDisabled(themeImage != nil && (imageZoom > 1 || isPinchingImage || isPanningImage))
                 // A committed destination starts at the top, matching its swipe preview.
                 .id((swipe?.current ?? affirmation)?.id)
                 .overlay {
@@ -92,6 +118,7 @@ struct TodayView: View {
                             .foregroundStyle(swipe.nextImage?.textColor ?? appTheme.textColor)
                         }
                         .scrollClipDisabled()
+                        .scrollBounceBehavior(.basedOnSize)
                         .offset(x: reduceMotion ? 0 : swipeTranslation + CGFloat(swipe.direction) * swipe.width)
                         .opacity(reduceMotion ? swipeProgress : 1)
                         .allowsHitTesting(false)
@@ -138,7 +165,7 @@ struct TodayView: View {
                     GeometryReader { geometry in
                         ZStack {
                             if let image = swipe.currentImage {
-                                ImageBackground(image: image)
+                                ImageBackground(image: image, zoom: imageZoom, panOffset: imageOffset)
                                     .offset(x: reduceMotion ? 0 : swipeTranslation / swipe.width * geometry.size.width)
                                     .opacity(reduceMotion ? 1 - swipeProgress : 1)
                             }
@@ -152,10 +179,22 @@ struct TodayView: View {
                     }
                     .accessibilityHidden(true)
                 } else {
-                    TransitioningImageBackground(image: themeImage, browsingForward: browsingForward)
+                    TransitioningImageBackground(image: themeImage, browsingForward: browsingForward,
+                                                 imageZoom: imageZoom, imageOffset: imageOffset)
                 }
             }
             .ignoresSafeArea()
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
+                imageViewportSize = size
+                imageOffset = constrainedImageOffset(imageOffset)
+            }
+        }
+        .onChange(of: themeImage?.id) { _, _ in
+            imageZoom = 1
+            pinchStartZoom = 1
+            imageOffset = .zero
+            isPinchingImage = false
+            isPanningImage = false
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshDate = .now }
@@ -200,6 +239,12 @@ struct TodayView: View {
     }
 
     private var foregroundColor: Color { themeImage?.textColor ?? appTheme.textColor }
+
+    private func constrainedImageOffset(_ offset: CGSize) -> CGSize {
+        guard let image = themeImage, let uiImage = UIImage(named: image.id) else { return .zero }
+        return ImageViewport.constrainedOffset(offset, zoom: imageZoom, imageSize: uiImage.size,
+                                               viewport: imageViewportSize, focalPoint: image.focalPoint)
+    }
 
     private var emptyState: some View {
         let libraryIsEmpty = store.affirmations.isEmpty
