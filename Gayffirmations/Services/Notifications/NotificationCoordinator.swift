@@ -24,7 +24,7 @@ enum NotificationDeliveryState: Equatable {
 
 @MainActor
 @Observable
-final class NotificationCoordinator {
+final class NotificationCoordinator: AffirmationChangeObserver {
     private(set) var isUpdating = false
     var errorMessage: String?
     private var refreshTask: Task<Void, Never>?
@@ -50,11 +50,16 @@ final class NotificationCoordinator {
         self.scheduler = scheduler
         self.fallbackSelectionStore = fallbackSelectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
-        affirmationStore.willChangeAffirmations = { [weak self] _ in try self?.checkIdle() }
-        affirmationStore.didChangeAffirmations = { [weak self] previous in
-            guard let self, self.deliveryChanges(from: previous) else { return }
-            self.refreshAfterLibraryChange()
-        }
+        affirmationStore.attachChangeObserver(self)
+    }
+
+    func willChangeAffirmations() throws {
+        try checkIdle()
+    }
+
+    func didChangeAffirmations(from previous: [Affirmation]) {
+        guard deliveryChanges(from: previous) else { return }
+        refreshAfterLibraryChange()
     }
 
     var availableTags: [String] { affirmationStore.availableTags }

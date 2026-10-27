@@ -296,7 +296,7 @@ content is added once without replacing existing entries; later launches preserv
 edits and deletions. Views send reminder-affecting schedule and source changes through
 `NotificationCoordinator`, which serializes updates and restores prior reminders
 when a save or replacement fails. Library edits notify that same coordinator through
-store callbacks. `AppDataResetCoordinator` handles resets across all stores.
+a weak, single-owner change observer; attaching a second live observer is rejected. `AppDataResetCoordinator` handles resets across all stores.
 
 `AffirmationSelection` owns matching rules; `ScheduleCalculator` owns reminder times;
 `ScheduleValidation` enforces valid schedules and the combined daily budget.
@@ -304,7 +304,11 @@ store callbacks. `AppDataResetCoordinator` handles resets across all stores.
 affirmations, and sounds; `TodayAffirmationResolver` consumes that same plan. An empty matching collection
 produces no reminders. Clearing the final Library filter returns to All.
 `WrappingLayout` handles button placement without knowing about selections or storage. `TodayBrowsingState` owns temporary browsing,
-wrapping, and expiry; `TodayView` owns gestures, animation, and presentation.
+wrapping, and expiry; `TodayView` resolves content once per data/time update and shares the context supplied by
+`ContentView`. `TodayInteractionView` owns gestures and transient state; separate views
+render swipe viewports, affirmation pages, and backgrounds. Gesture frame updates do
+not rebuild the daily plan. Dimming-slider previews use local state and save when
+dragging finishes (or immediately for accessibility adjustments).
 `AppDependencies` creates and connects shared services at launch, keeping the app
 entry point focused on presenting its root view.
 

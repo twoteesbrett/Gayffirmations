@@ -4,6 +4,37 @@ import Testing
 
 @MainActor
 struct AffirmationStoreTests {
+    @Test("A delivery observer can veto an edit before persistence")
+    func observerVetoPreservesData() throws {
+        let original = Affirmation(text: "Original")
+        let repository = InMemoryAffirmationRepository(affirmations: [original])
+        let store = AffirmationStore(repository: repository, defaultAffirmations: [])
+        let observer = AffirmationChangeObserverSpy()
+        observer.blocksChanges = true
+        store.attachChangeObserver(observer)
+        #expect(throws: NotificationCoordinatorError.updateInProgress) {
+            try store.update(id: original.id, text: "Changed")
+        }
+        #expect(store.affirmations == [original])
+        #expect(repository.saveCallCount == 0)
+        #expect(observer.changeCount == 1)
+    }
+
+    @Test("The store does not retain its delivery observer")
+    func observerLifetime() throws {
+        let store = AffirmationStore()
+        var observer: AffirmationChangeObserverSpy? = AffirmationChangeObserverSpy()
+        weak let releasedObserver = observer
+        store.attachChangeObserver(observer!)
+        observer = nil
+        #expect(releasedObserver == nil)
+        let replacement = AffirmationChangeObserverSpy()
+        store.attachChangeObserver(replacement)
+        store.attachChangeObserver(replacement)
+        try store.add(text: "Still editable")
+        #expect(replacement.changeCount == 2)
+    }
+
     @Test("Restored duplicate text remains editable after reloading")
     func editsRestoredDuplicates() throws {
         let original = Affirmation(text: "Keep this message", tags: ["Work"], source: .bundled)
@@ -76,15 +107,14 @@ struct AffirmationStoreTests {
         let original = Affirmation(text: "Keep me", isFavorite: true, tags: ["Work"])
         let repository = InMemoryAffirmationRepository(affirmations: [original])
         let store = AffirmationStore(repository: repository, defaultAffirmations: [])
-        var reminderChanges = 0
-        store.willChangeAffirmations = { _ in reminderChanges += 1 }
-        store.didChangeAffirmations = { _ in reminderChanges += 1 }
+        let observer = AffirmationChangeObserverSpy()
+        store.attachChangeObserver(observer)
 
         try store.update(id: original.id, text: original.text, tags: [" Calm ", "calm"])
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: [])
         #expect(restarted.affirmations.first?.tags == ["Calm"])
         #expect(restarted.affirmations.first?.isFavorite == true)
-        #expect(reminderChanges == 2)
+        #expect(observer.changeCount == 2)
 
         try store.update(id: original.id, text: "New text")
         #expect(store.affirmations.first?.tags == ["Calm"])
@@ -129,14 +159,13 @@ struct AffirmationStoreTests {
         let original = [bundled, custom]
         let repository = InMemoryAffirmationRepository(affirmations: original)
         let store = AffirmationStore(repository: repository, defaultAffirmations: [])
-        var notified = false
-        store.willChangeAffirmations = { _ in notified = true }
-        store.didChangeAffirmations = { _ in notified = true }
+        let observer = AffirmationChangeObserverSpy()
+        store.attachChangeObserver(observer)
 
         try store.delete(id: bundled.id)
         #expect(store.affirmations == [custom])
         #expect(repository.affirmations == [custom])
-        #expect(notified)
+        #expect(observer.changeCount == 2)
     }
 
     @Test("An affirmation can be favorited and unfavorited")
@@ -368,4 +397,15 @@ private final class InMemoryAffirmationRepository: AffirmationRepository {
         saveCallCount += 1
         self.affirmations = affirmations
     }
+}
+
+@MainActor
+private final class AffirmationChangeObserverSpy: AffirmationChangeObserver {
+    var changeCount = 0
+    var blocksChanges = false
+    func willChangeAffirmations() throws {
+        changeCount += 1
+        if blocksChanges { throw NotificationCoordinatorError.updateInProgress }
+    }
+    func didChangeAffirmations(from previous: [Affirmation]) { changeCount += 1 }
 }

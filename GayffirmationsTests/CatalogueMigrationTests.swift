@@ -41,6 +41,18 @@ struct CatalogueMigrationTests {
         #expect(merged.tags == ["human"])
     }
 
+    @Test(arguments: [["body", "Human"], ["Human", "confidence"], ["inner-critic", "Critic"]])
+    func migratedTagsMergeCaseInsensitively(tags: [String]) throws {
+        let entry = try JSONDecoder().decode(Affirmation.self,
+            from: legacy(text: "Personal", tags: tags))
+        #expect(entry.tags.count == 1)
+        #expect(entry.isFavorite)
+        #expect(entry.source == .user)
+        try AffirmationValidation.validate([entry])
+        let reloaded = try JSONDecoder().decode(Affirmation.self, from: JSONEncoder().encode(entry))
+        #expect(reloaded == entry)
+    }
+
     @Test func roleModelCategoryHasTenUniqueBundledMessages() throws {
         let entries = Affirmation.starterAffirmations.filter { $0.tags.contains("role-model") }
         #expect(entries.count == 10)

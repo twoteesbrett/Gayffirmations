@@ -1,6 +1,13 @@
 import Foundation
 import Observation
 
+/// One delivery observer guards edits and reacts only after persistence succeeds.
+@MainActor
+protocol AffirmationChangeObserver: AnyObject {
+    func willChangeAffirmations() throws
+    func didChangeAffirmations(from previous: [Affirmation])
+}
+
 enum AffirmationStoreError: LocalizedError, Equatable {
     case blankText
     case duplicateText
@@ -21,9 +28,15 @@ final class AffirmationStore {
     private(set) var affirmations: [Affirmation]
     private(set) var persistenceErrorMessage: String?
 
-    // Hooks allow the coordinator to block overlapping updates and refresh delivery after saving.
-    var willChangeAffirmations: (([Affirmation]) throws -> Void)?
-    var didChangeAffirmations: (([Affirmation]) -> Void)?
+    @ObservationIgnored private weak var changeObserver: (any AffirmationChangeObserver)?
+
+    /// The app retains one coordinator for this store. Replacing a live observer
+    /// would silently disconnect reminder delivery, so reject that wiring mistake.
+    func attachChangeObserver(_ observer: any AffirmationChangeObserver) {
+        precondition(changeObserver == nil || changeObserver === observer,
+                     "An affirmation store can have only one delivery observer")
+        changeObserver = observer
+    }
 
     private let repository: (any AffirmationRepository)?
     let defaultAffirmations: [Affirmation]
@@ -161,11 +174,11 @@ final class AffirmationStore {
 
         try AffirmationValidation.validate(updatedAffirmations)
         guard updatedAffirmations != affirmations else { return }
-        try willChangeAffirmations?(updatedAffirmations)
+        try changeObserver?.willChangeAffirmations()
         try repository?.saveAffirmations(updatedAffirmations)
         let previousAffirmations = affirmations
         affirmations = updatedAffirmations
-        didChangeAffirmations?(previousAffirmations)
+        changeObserver?.didChangeAffirmations(from: previousAffirmations)
     }
 
     private func normalizedTags(_ tags: [String]) -> [String] {

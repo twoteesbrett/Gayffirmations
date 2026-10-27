@@ -1,3 +1,5 @@
+import Foundation
+
 nonisolated enum AffirmationTag: String, CaseIterable {
     case food
     case critic
@@ -37,7 +39,9 @@ nonisolated enum AffirmationTag: String, CaseIterable {
     static func canonicalTags(_ tags: [String]) -> [String] {
         tags.reduce(into: []) { result, tag in
             let value = canonicalTag(tag)
-            if !result.contains(value) { result.append(value) }
+            if !result.contains(where: { $0.compare(value, options: .caseInsensitive) == .orderedSame }) {
+                result.append(value)
+            }
         }
     }
 }

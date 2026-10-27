@@ -69,6 +69,7 @@ struct ContentView: View {
                 TodayView(
                     store: affirmationStore,
                     date: timeline.date,
+                    context: context,
                     fallbackSelectionStore: notificationCoordinator.fallbackSelectionStore,
                     personalizationStore: notificationCoordinator.personalizationStore,
                     scheduleStore: scheduleStore,

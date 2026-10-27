@@ -93,8 +93,11 @@ struct PersistenceRepositoryTests {
 
         scheduler.authorizationStatusValue = .authorized
         let restartedStore = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        // A restart creates a fresh library and coordinator, not a second owner
+        // for the still-live store from the previous session.
+        let restartedLibrary = AffirmationStore(affirmations: library.affirmations)
         let restarted = NotificationCoordinator(
-            affirmationStore: library, scheduleStore: restartedStore, scheduler: scheduler
+            affirmationStore: restartedLibrary, scheduleStore: restartedStore, scheduler: scheduler
         )
         await restarted.reconcileOnLaunch()
         #expect(restartedStore.schedules == schedules)

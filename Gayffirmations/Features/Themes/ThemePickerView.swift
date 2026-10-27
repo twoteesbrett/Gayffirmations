@@ -4,6 +4,12 @@ struct ThemePickerView: View {
     let store: ThemeStore
 
     @State private var errorMessage: String?
+    @State private var dimmingDraft: Double?
+    @State private var isEditingDimming = false
+
+    private var displayedDimming: Double {
+        dimmingDraft ?? store.backgroundChoice.imageDimming ?? 0
+    }
 
     var body: some View {
         List {
@@ -16,7 +22,7 @@ struct ThemePickerView: View {
                             theme: theme,
                             isSelected: store.selectedTheme == theme
                         )
-                        .environment(\.imageDimming, store.backgrounds[theme.rawValue]?.imageDimming ?? 0)
+                        .environment(\.imageDimming, theme == store.selectedTheme ? displayedDimming : (store.backgrounds[theme.rawValue]?.imageDimming ?? 0))
                     }
                     .buttonStyle(.plain)
                     .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
@@ -41,17 +47,25 @@ struct ThemePickerView: View {
                                 Text("Image dimming")
                                 Spacer()
                                 Button("Default") {
-                                    updateBackground { try store.setImageDimming(0) }
+                                    dimmingDraft = 0
+                                    saveDimming()
                                 }
-                                .disabled((store.backgroundChoice.imageDimming ?? 0) == 0)
+                                .disabled(displayedDimming == 0)
                             }
                             Slider(value: Binding(
-                                get: { store.backgroundChoice.imageDimming ?? 0 },
-                                set: { value in updateBackground { try store.setImageDimming(value) } }
-                            ), in: -1...1)
+                                get: { displayedDimming },
+                                set: { value in
+                                    dimmingDraft = ThemeBackgroundChoice.snappedDimming(value)
+                                    // Accessibility adjustments need not start a drag session.
+                                    if !isEditingDimming { saveDimming() }
+                                }
+                            ), in: -1...1, onEditingChanged: { editing in
+                                isEditingDimming = editing
+                                if !editing { saveDimming() }
+                            })
                             .accessibilityLabel("Image dimming")
-                            .accessibilityValue((store.backgroundChoice.imageDimming ?? 0) == 0
-                                                ? "Default" : "\(Int(((store.backgroundChoice.imageDimming ?? 0) + 1) * 50)) percent")
+                            .accessibilityValue(displayedDimming == 0
+                                                ? "Default" : "\(Int((displayedDimming + 1) * 50)) percent")
                             HStack {
                                 Text("Clear")
                                 Spacer()
@@ -72,7 +86,7 @@ struct ThemePickerView: View {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 12)], spacing: 12) {
                             ForEach(store.selectedTheme.images) { image in
                                 ImageBackground(image: image)
-                                    .environment(\.imageDimming, store.backgroundChoice.imageDimming ?? 0)
+                                    .environment(\.imageDimming, displayedDimming)
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 110)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -92,6 +106,11 @@ struct ThemePickerView: View {
         }
         .themedBackground()
         .navigationTitle("Default Theme")
+        .onDisappear { saveDimming() }
+        .onChange(of: store.selectedTheme) { _, _ in
+            dimmingDraft = nil
+            isEditingDimming = false
+        }
         .alert("Unable to Change Theme", isPresented: errorIsPresented) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -106,12 +125,20 @@ struct ThemePickerView: View {
         )
     }
 
+    private func saveDimming() {
+        guard let value = dimmingDraft else { return }
+        defer { dimmingDraft = nil }
+        guard value != (store.backgroundChoice.imageDimming ?? 0) else { return }
+        updateBackground { try store.setImageDimming(value) }
+    }
+
     private func updateBackground(_ change: () throws -> Void) {
         do { try change() }
         catch { errorMessage = error.localizedDescription }
     }
 
     private func select(_ theme: AppTheme) {
+        saveDimming()
         do {
             try store.select(theme)
         } catch {
