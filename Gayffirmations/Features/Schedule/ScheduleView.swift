@@ -38,7 +38,7 @@ struct ScheduleView: View {
                     editingSchedule = AffirmationSchedule()
                 }
             } footer: {
-                Text("Each schedule has its own tags, times, and daily rhythm. Swipe right to duplicate a schedule, or left to delete it.")
+                Text("Each schedule has its own tags, theme, times, and daily rhythm. Swipe right to duplicate a schedule, or left to delete it.")
             }
 
             Section("Daily preview") {
@@ -118,6 +118,7 @@ struct ScheduleView: View {
                         Text(schedule.selection.name)
                         Text("\(schedule.notificationsPerDay) per day")
                         Text(schedule.rhythm.title)
+                        Text("Theme: \(schedule.theme?.name ?? "Use default")")
                         if notificationCoordinator.isPaused(schedule) {
                             Label("Paused · No matching affirmations ready", systemImage: "pause.circle")
                         }

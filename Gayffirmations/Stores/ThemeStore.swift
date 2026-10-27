@@ -4,6 +4,7 @@ import Observation
 @MainActor
 @Observable
 final class ThemeStore {
+    /// Saved default; a schedule can supply a display theme without changing it.
     private(set) var selectedTheme: AppTheme
     private(set) var persistenceErrorMessage: String?
 
@@ -12,27 +13,36 @@ final class ThemeStore {
     private let backgroundRepository: (any ThemeBackgroundRepository)?
 
     var backgroundChoice: ThemeBackgroundChoice {
-        backgrounds[selectedTheme.rawValue]
-            ?? ThemeBackgroundChoice(usesImage: !selectedTheme.images.isEmpty)
+        backgroundChoice(for: selectedTheme)
+    }
+
+    func backgroundChoice(for theme: AppTheme) -> ThemeBackgroundChoice {
+        backgrounds[theme.rawValue]
+            ?? ThemeBackgroundChoice(usesImage: !theme.images.isEmpty)
     }
 
     var selectedImage: ThemeImage? {
-        let images = selectedTheme.images
-        guard backgroundChoice.usesImage, !images.isEmpty else { return nil }
+        selectedImage(for: selectedTheme)
+    }
+
+    func selectedImage(for theme: AppTheme) -> ThemeImage? {
+        let images = theme.images
+        guard backgroundChoice(for: theme).usesImage, !images.isEmpty else { return nil }
         return images[imageRotation.imageIndex % images.count]
     }
 
     /// Preview a browsing destination without advancing the committed image rotation.
-    func image(for affirmationID: UUID, direction: Int) -> ThemeImage? {
-        let images = selectedTheme.images
-        guard backgroundChoice.usesImage, !images.isEmpty else { return nil }
+    func image(for affirmationID: UUID, direction: Int, theme: AppTheme? = nil) -> ThemeImage? {
+        let theme = theme ?? selectedTheme
+        let images = theme.images
+        guard backgroundChoice(for: theme).usesImage, !images.isEmpty else { return nil }
         var preview = imageRotation
         preview.update(affirmationID: affirmationID, imageCount: images.count, direction: direction)
         return images[preview.imageIndex % images.count]
     }
 
-    func updateDisplayedAffirmation(_ id: UUID?, direction: Int = 1) {
-        imageRotation.update(affirmationID: id, imageCount: selectedTheme.images.count, direction: direction)
+    func updateDisplayedAffirmation(_ id: UUID?, direction: Int = 1, theme: AppTheme? = nil) {
+        imageRotation.update(affirmationID: id, imageCount: (theme ?? selectedTheme).images.count, direction: direction)
     }
 
     private let repository: (any ThemeRepository)?

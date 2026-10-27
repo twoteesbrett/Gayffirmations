@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var startupPersistenceErrorMessage: String?
     @State private var destination: TodayDestination?
     @State private var sheetDismissalID: UUID?
+    @State private var refreshDate = Date.now
 
     init(
         affirmationStore: AffirmationStore,
@@ -57,17 +58,29 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            TodayView(
-                store: affirmationStore,
-                fallbackSelectionStore: notificationCoordinator.fallbackSelectionStore,
-                personalizationStore: notificationCoordinator.personalizationStore,
-                scheduleStore: scheduleStore,
-                isUpdating: notificationCoordinator.isUpdating,
-                themeStore: themeStore,
-                sheetDismissalID: sheetDismissalID,
-                onOpenDestination: { destination = $0 }
-            )
-            .environment(\.themeImage, themeStore.selectedImage)
+            TimelineView(.periodic(from: refreshMinute, by: 60)) { timeline in
+                let context = TodayAffirmationResolver().context(
+                    at: timeline.date, schedules: scheduleStore.schedules,
+                    affirmations: affirmationStore.affirmations,
+                    fallbackSelection: notificationCoordinator.fallbackSelectionStore.selection,
+                    name: notificationCoordinator.personalizationStore.name
+                )
+                let theme = context.theme ?? themeStore.selectedTheme
+                TodayView(
+                    store: affirmationStore,
+                    date: timeline.date,
+                    fallbackSelectionStore: notificationCoordinator.fallbackSelectionStore,
+                    personalizationStore: notificationCoordinator.personalizationStore,
+                    scheduleStore: scheduleStore,
+                    isUpdating: notificationCoordinator.isUpdating,
+                    themeStore: themeStore,
+                    sheetDismissalID: sheetDismissalID,
+                    onOpenDestination: { destination = $0 }
+                )
+                .themeAppearance(theme)
+                .environment(\.themeImage, themeStore.selectedImage(for: theme))
+                .environment(\.imageDimming, themeStore.backgroundChoice(for: theme).imageDimming ?? 0)
+            }
             .sheet(item: $destination) { destination in
                 destinationView(destination)
                     .themeAppearance(themeStore.selectedTheme)
@@ -79,13 +92,12 @@ struct ContentView: View {
                 }
             }
         }
-        .themeAppearance(themeStore.selectedTheme)
-        .environment(\.imageDimming, themeStore.backgroundChoice.imageDimming ?? 0)
         .task {
             await notificationCoordinator.reconcileOnLaunch()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                refreshDate = .now
                 Task { await notificationCoordinator.reconcileOnForeground() }
             }
         }
@@ -112,17 +124,20 @@ struct ContentView: View {
         }
     }
 
+    private var refreshMinute: Date {
+        Calendar.current.dateInterval(of: .minute, for: refreshDate)?.start ?? refreshDate
+    }
+
     @ViewBuilder
     private func destinationView(_ destination: TodayDestination) -> some View {
         switch destination {
         case .library:
             LibraryView(store: affirmationStore, notificationCoordinator: notificationCoordinator)
-        case .themes:
-            ThemesView(store: themeStore)
         case .settings:
             SettingsView(
                 affirmationStore: affirmationStore,
                 scheduleStore: scheduleStore,
+                themeStore: themeStore,
                 notificationCoordinator: notificationCoordinator,
                 resetCoordinator: resetCoordinator
             )

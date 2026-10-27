@@ -62,4 +62,43 @@ struct TodayAffirmationResolverTests {
         #expect(expiry.timeIntervalSince(start) == 23 * 60 * 60)
     }
 
+    @Test func themeFollowsTheLatestReminderDuringItsSchedulePeriod() {
+        let morning = AffirmationSchedule(
+            isEnabled: true, startTime: TimeOfDay(hour: 8, minute: 0),
+            endTime: TimeOfDay(hour: 10, minute: 0), notificationsPerDay: 1
+        )
+        var evening = AffirmationSchedule(
+            isEnabled: true, startTime: TimeOfDay(hour: 18, minute: 0),
+            endTime: TimeOfDay(hour: 20, minute: 0), notificationsPerDay: 1
+        )
+        evening.theme = .steel
+        func context(hour: Int) -> TodayAffirmationContext {
+            resolver.context(at: date(hour: hour), schedules: [morning, evening],
+                             affirmations: affirmations, fallbackSelection: .all, name: "", calendar: calendar)
+        }
+        #expect(context(hour: 12).theme == nil)
+        #expect(context(hour: 19).theme == .steel)
+        #expect(context(hour: 21).theme == nil)
+        #expect(context(hour: 6).theme == nil)
+        evening.isEnabled = false
+        #expect(context(hour: 21).theme == nil)
+    }
+
+    @Test func schedulesWithoutReadyAffirmationsUseTheDefaultTheme() {
+        let schedule = AffirmationSchedule(selection: .tag("Missing"), theme: .steel, isEnabled: true)
+        let context = resolver.context(at: date(hour: 12), schedules: [schedule],
+                                       affirmations: affirmations, fallbackSelection: .all, name: "", calendar: calendar)
+        #expect(context.theme == nil)
+    }
+
+    @Test func scheduleThemePersistsAndOlderSchedulesInheritTheDefault() throws {
+        let schedule = AffirmationSchedule(theme: .steel)
+        let encoded = try JSONEncoder().encode(schedule)
+        #expect(try JSONDecoder().decode(AffirmationSchedule.self, from: encoded).theme == .steel)
+        var legacy = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        legacy.removeValue(forKey: "theme")
+        let legacyData = try JSONSerialization.data(withJSONObject: legacy)
+        #expect(try JSONDecoder().decode(AffirmationSchedule.self, from: legacyData).theme == nil)
+    }
+
 }

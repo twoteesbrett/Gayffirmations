@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct TodayView: View {
+    let date: Date
     let store: AffirmationStore
     let fallbackSelectionStore: AffirmationSelectionStore
     let personalizationStore: PersonalizationStore
@@ -24,10 +25,10 @@ struct TodayView: View {
     @Environment(\.themeImage) private var themeImage
     @Environment(\.appTheme) private var appTheme
     @Environment(\.scenePhase) private var scenePhase
-    @State private var refreshDate = Date.now
 
     init(
         store: AffirmationStore,
+        date: Date = .now,
         fallbackSelectionStore: AffirmationSelectionStore? = nil,
         personalizationStore: PersonalizationStore? = nil,
         scheduleStore: ScheduleStore? = nil,
@@ -36,6 +37,7 @@ struct TodayView: View {
         sheetDismissalID: UUID? = nil,
         onOpenDestination: @escaping (TodayDestination) -> Void = { _ in }
     ) {
+        self.date = date
         self.store = store
         self.fallbackSelectionStore = fallbackSelectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
@@ -47,91 +49,89 @@ struct TodayView: View {
     }
 
     var body: some View {
-        TimelineView(.periodic(from: refreshMinute, by: 60)) { context in
-            let affirmation = currentAffirmation(at: context.date)
-            GeometryReader { geometry in
-                // Balance the safe areas to keep the message at the screen's centre.
-                let centeringInset = geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
-                // The destination has its own viewport, so its text height cannot resize
-                // the current page or change the current page's vertical scroll position.
-                ScrollView {
-                    affirmationPage(
-                        swipeState.preview?.current ?? affirmation,
-                        size: geometry.size, centeringInset: centeringInset
-                    )
-                    .offset(x: reduceMotion ? 0 : swipeState.translation)
-                    .opacity(reduceMotion ? 1 - swipeState.progress : 1)
-                    .accessibilityHidden(swipeState.preview != nil)
-                    .overlay {
-                        TodayGestureTarget(
-                            onTap: { controls.toggle() },
-                            onDragChanged: { updateSwipe(translation: $0, width: geometry.size.width) },
-                            onDragEnded: { finishSwipe(translation: $0, velocity: $1, cancelled: $2) },
-                            allowsImageZoom: themeImage != nil && swipeState.preview == nil,
-                            onPinch: { scale, ended in
-                                controls.registerInteraction()
-                                imageInteraction.pinch(scale: scale, ended: ended)
-                            },
-                            pansImage: themeImage != nil && imageInteraction.zoom > 1,
-                            onImagePan: { translation, ended in
-                                controls.registerInteraction()
-                                imageInteraction.pan(translation: translation, ended: ended)
-                            }
-                        )
-                        .accessibilityHidden(true)
-                    }
-                }
-                .scrollClipDisabled()
-                .scrollBounceBehavior(.basedOnSize)
-                .scrollDisabled(themeImage != nil && imageInteraction.preventsTextScrolling)
-                // A committed destination starts at the top, matching its swipe preview.
-                .id((swipeState.preview?.current ?? affirmation)?.id)
+        let affirmation = currentAffirmation(at: date)
+        GeometryReader { geometry in
+            // Balance the safe areas to keep the message at the screen's centre.
+            let centeringInset = geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
+            // The destination has its own viewport, so its text height cannot resize
+            // the current page or change the current page's vertical scroll position.
+            ScrollView {
+                affirmationPage(
+                    swipeState.preview?.current ?? affirmation,
+                    size: geometry.size, centeringInset: centeringInset
+                )
+                .offset(x: reduceMotion ? 0 : swipeState.translation)
+                .opacity(reduceMotion ? 1 - swipeState.progress : 1)
+                .accessibilityHidden(swipeState.preview != nil)
                 .overlay {
-                    if let swipe = swipeState.preview {
-                        ScrollView {
-                            affirmationPage(
-                                swipe.next,
-                                size: geometry.size, centeringInset: centeringInset
-                            )
-                            .foregroundStyle(swipe.nextImage?.textColor ?? appTheme.textColor)
+                    TodayGestureTarget(
+                        onTap: { controls.toggle() },
+                        onDragChanged: { updateSwipe(translation: $0, width: geometry.size.width) },
+                        onDragEnded: { finishSwipe(translation: $0, velocity: $1, cancelled: $2) },
+                        allowsImageZoom: themeImage != nil && swipeState.preview == nil,
+                        onPinch: { scale, ended in
+                            controls.registerInteraction()
+                            imageInteraction.pinch(scale: scale, ended: ended)
+                        },
+                        pansImage: themeImage != nil && imageInteraction.zoom > 1,
+                        onImagePan: { translation, ended in
+                            controls.registerInteraction()
+                            imageInteraction.pan(translation: translation, ended: ended)
                         }
-                        .scrollClipDisabled()
-                        .scrollBounceBehavior(.basedOnSize)
-                        .offset(x: reduceMotion ? 0 : swipeState.translation + CGFloat(swipe.direction) * swipe.width)
-                        .opacity(reduceMotion ? swipeState.progress : 1)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                    }
+                    )
+                    .accessibilityHidden(true)
                 }
-                // Keep the resting layout inside the safe area, but let swiping text
-                // reach the physical screen edges. Both scroll views use this clip.
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .padding(.leading, geometry.safeAreaInsets.leading)
-                .padding(.trailing, geometry.safeAreaInsets.trailing)
-                .clipped()
-                .padding(.leading, -geometry.safeAreaInsets.leading)
-                .padding(.trailing, -geometry.safeAreaInsets.trailing)
-                .simultaneousGesture(
-                    DragGesture().onChanged { _ in controls.registerInteraction() }
-                )
             }
+            .scrollClipDisabled()
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollDisabled(themeImage != nil && imageInteraction.preventsTextScrolling)
+            // A committed destination starts at the top, matching its swipe preview.
+            .id((swipeState.preview?.current ?? affirmation)?.id)
             .overlay {
-                TodayCornerControls(
-                    affirmation: affirmation,
-                    isUpdating: isUpdating,
-                    onOpenDestination: openDestination,
-                    onToggleFavorite: {
-                        if let affirmation { toggleFavorite(affirmation) }
+                if let swipe = swipeState.preview {
+                    ScrollView {
+                        affirmationPage(
+                            swipe.next,
+                            size: geometry.size, centeringInset: centeringInset
+                        )
+                        .foregroundStyle(swipe.nextImage?.textColor ?? appTheme.textColor)
                     }
-                )
-                .opacity(controls.isVisible ? 1 : 0)
-                .allowsHitTesting(controls.isVisible)
-                .accessibilityHidden(!controls.isVisible)
-                .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: controls.isVisible)
+                    .scrollClipDisabled()
+                    .scrollBounceBehavior(.basedOnSize)
+                    .offset(x: reduceMotion ? 0 : swipeState.translation + CGFloat(swipe.direction) * swipe.width)
+                    .opacity(reduceMotion ? swipeState.progress : 1)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
             }
-            .onChange(of: affirmation?.id, initial: true) { _, id in
-                themeStore?.updateDisplayedAffirmation(id)
-            }
+            // Keep the resting layout inside the safe area, but let swiping text
+            // reach the physical screen edges. Both scroll views use this clip.
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .padding(.leading, geometry.safeAreaInsets.leading)
+            .padding(.trailing, geometry.safeAreaInsets.trailing)
+            .clipped()
+            .padding(.leading, -geometry.safeAreaInsets.leading)
+            .padding(.trailing, -geometry.safeAreaInsets.trailing)
+            .simultaneousGesture(
+                DragGesture().onChanged { _ in controls.registerInteraction() }
+            )
+        }
+        .overlay {
+            TodayCornerControls(
+                affirmation: affirmation,
+                isUpdating: isUpdating,
+                onOpenDestination: openDestination,
+                onToggleFavorite: {
+                    if let affirmation { toggleFavorite(affirmation) }
+                }
+            )
+            .opacity(controls.isVisible ? 1 : 0)
+            .allowsHitTesting(controls.isVisible)
+            .accessibilityHidden(!controls.isVisible)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: controls.isVisible)
+        }
+        .onChange(of: affirmation?.id, initial: true) { _, id in
+            themeStore?.updateDisplayedAffirmation(id, theme: appTheme)
         }
         .foregroundStyle(foregroundColor)
         .tint(foregroundColor)
@@ -172,8 +172,7 @@ struct TodayView: View {
             updateImageGeometry()
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { refreshDate = .now }
-            else { controls.reset() }
+            if phase != .active { controls.reset() }
         }
         .onChange(of: voiceOverEnabled, initial: true) { _, enabled in
             controls.setAlwaysVisible(enabled)
@@ -264,7 +263,7 @@ struct TodayView: View {
             .lineSpacing(appTheme.affirmationLineSpacing)
             .frame(maxWidth: 560)
             .multilineTextAlignment(.center)
-            .modifier(TextOutline(enabled: themeImage != nil && (themeStore?.backgroundChoice.outlinesText ?? false)))
+            .modifier(TextOutline(enabled: themeImage != nil && (themeStore?.backgroundChoice(for: appTheme).outlinesText ?? false)))
             .accessibilityLabel("Affirmation: \(MessageMarkup(affirmation.text).plainText)")
             .accessibilityAction(named: "Next affirmation") { cycleAffirmation(by: 1) }
             .accessibilityAction(named: "Previous affirmation") { cycleAffirmation(by: -1) }
@@ -277,10 +276,6 @@ struct TodayView: View {
             insertion: .offset(x: distance),
             removal: .offset(x: -distance)
         )
-    }
-
-    private var refreshMinute: Date {
-        Calendar.current.dateInterval(of: .minute, for: refreshDate)?.start ?? refreshDate
     }
 
     private func currentAffirmation(at date: Date) -> Affirmation? {
@@ -307,7 +302,7 @@ struct TodayView: View {
             swipeState.preview = TodaySwipeState.Preview(
                 current: current, next: next, browsingState: previewState,
                 direction: direction, width: width, currentImage: themeImage,
-                nextImage: themeStore?.image(for: next.id, direction: direction) ?? themeImage
+                nextImage: themeStore?.image(for: next.id, direction: direction, theme: appTheme) ?? themeImage
             )
         }
         swipeState.translation = max(-width, min(width, translation))
@@ -328,7 +323,7 @@ struct TodayView: View {
                 // A reminder may have changed the selection while the finger was held.
                 if commits, currentAffirmation(at: .now)?.id == preview.current.id {
                     browsingForward = preview.direction > 0
-                    themeStore?.updateDisplayedAffirmation(preview.next.id, direction: preview.direction)
+                    themeStore?.updateDisplayedAffirmation(preview.next.id, direction: preview.direction, theme: appTheme)
                     browsingState = preview.browsingState
                 }
                 swipeState.reset()
@@ -347,7 +342,7 @@ struct TodayView: View {
 
         browsingForward = offset > 0
         withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.30)) {
-            themeStore?.updateDisplayedAffirmation(next.id, direction: offset)
+            themeStore?.updateDisplayedAffirmation(next.id, direction: offset, theme: appTheme)
             browsingState = updatedBrowsingState
         }
     }

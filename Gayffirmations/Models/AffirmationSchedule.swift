@@ -50,6 +50,8 @@ struct AffirmationSchedule: Codable, Equatable, Identifiable {
     var id: UUID
     // Retained for compatibility with previously saved schedules.
     var name: String
+    // Nil inherits the default theme chosen under Today in Settings.
+    var theme: AppTheme?
     var selection: AffirmationSelection
     var isEnabled: Bool
     var startTime: TimeOfDay
@@ -64,6 +66,7 @@ struct AffirmationSchedule: Codable, Equatable, Identifiable {
         id: UUID = UUID(),
         name: String = "",
         selection: AffirmationSelection = .all,
+        theme: AppTheme? = nil,
         isEnabled: Bool = false,
         startTime: TimeOfDay = TimeOfDay(hour: 9, minute: 0),
         endTime: TimeOfDay = TimeOfDay(hour: 17, minute: 0),
@@ -74,6 +77,7 @@ struct AffirmationSchedule: Codable, Equatable, Identifiable {
     ) {
         self.id = id
         self.name = name
+        self.theme = theme
         self.selection = selection
         self.isEnabled = isEnabled
         self.startTime = startTime
@@ -85,7 +89,7 @@ struct AffirmationSchedule: Codable, Equatable, Identifiable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, selection, isEnabled, startTime, endTime, notificationsPerDay, sound, rhythm, emphasis
+        case id, name, theme, selection, isEnabled, startTime, endTime, notificationsPerDay, sound, rhythm, emphasis
     }
 
     var timeRangeDescription: String {
@@ -100,6 +104,7 @@ struct AffirmationSchedule: Codable, Equatable, Identifiable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? "Daily affirmations"
+        theme = try container.decodeIfPresent(AppTheme.self, forKey: .theme)
         selection = try container.decodeIfPresent(AffirmationSelection.self, forKey: .selection) ?? .all
         isEnabled = try container.decode(Bool.self, forKey: .isEnabled)
         startTime = try container.decode(TimeOfDay.self, forKey: .startTime)

@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     let affirmationStore: AffirmationStore
     let scheduleStore: ScheduleStore
+    let themeStore: ThemeStore
     let notificationCoordinator: NotificationCoordinator
     let resetCoordinator: AppDataResetCoordinator
 
@@ -31,6 +32,11 @@ struct SettingsView: View {
                         FallbackAffirmationsView(coordinator: notificationCoordinator)
                     } label: {
                         LabeledContent("Affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
+                    }
+                    NavigationLink {
+                        ThemePickerView(store: themeStore)
+                    } label: {
+                        LabeledContent("Default theme", value: themeStore.selectedTheme.name)
                     }
                 } header: {
                     Text("Today")
@@ -253,6 +259,7 @@ private enum ResetAction {
     SettingsView(
         affirmationStore: affirmationStore,
         scheduleStore: scheduleStore,
+        themeStore: themeStore,
         notificationCoordinator: notificationCoordinator,
         resetCoordinator: resetCoordinator
     )

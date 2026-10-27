@@ -21,7 +21,6 @@ struct TodayCornerControls: View {
             }
             Spacer()
             HStack {
-                icon("paintpalette", label: "Themes") { onOpenDestination(.themes) }
                 Spacer()
                 icon("gearshape", label: "Settings") { onOpenDestination(.settings) }
             }

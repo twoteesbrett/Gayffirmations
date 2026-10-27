@@ -169,7 +169,7 @@ Today shows the last of those reminders. Swiping browses the current schedule’
 content. With no deliverable reminders, Today rotates through the fallback selection
 once per local calendar day.
 Tap the screen to reveal corner icons for Library (top left), Favourite (top right),
-Themes (bottom left), and Settings (bottom right). Tap again to hide them, or leave
+and Settings (bottom right). Tap again to hide them, or leave
 them idle for five seconds. Interaction restarts the timer; opening a sheet clears
 the controls. Dismissing a sheet reveals them with a fresh five-second timeout.
 VoiceOver keeps them visible. Swiping left anywhere in the affirmation area advances to the
@@ -212,6 +212,12 @@ selections continue to work. Audio preparation and file sizes are in
 [SOURCES.md](SOURCES.md#notification-sounds).
 
 ## Themes and images
+
+Choose the default theme in Settings → Today → Default theme. Each schedule can
+inherit it with Use default or choose its own theme. Today uses the latest
+reminder’s schedule theme during that schedule’s daily period and returns to the
+default outside it. Disabled schedules and schedules without ready affirmations
+do not supply a theme. Existing saved schedules inherit the default.
 
 The five themes are Eden, Disco, Steel, Concrete, and Out & About. Each has six images, including photographic and illustrated backgrounds.
 Out & About rotates from morning through midday to evening: Lakeside, Market,

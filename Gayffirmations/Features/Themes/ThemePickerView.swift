@@ -91,7 +91,7 @@ struct ThemePickerView: View {
             }
         }
         .themedBackground()
-        .navigationTitle("Themes")
+        .navigationTitle("Default Theme")
         .alert("Unable to Change Theme", isPresented: errorIsPresented) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -120,7 +120,7 @@ struct ThemePickerView: View {
     }
 }
 
-private struct ThemePreviewRow: View {
+struct ThemePreviewRow: View {
     let theme: AppTheme
     let isSelected: Bool
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize

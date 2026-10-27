@@ -4,6 +4,23 @@ import Testing
 
 @MainActor
 struct ThemeStoreTests {
+    @Test("A schedule theme uses its own artwork without replacing the saved default")
+    func scheduleThemeDoesNotChangeDefault() {
+        let repository = InMemoryThemeRepository(theme: .eden)
+        let store = ThemeStore(repository: repository)
+        let current = UUID()
+        let next = UUID()
+        store.updateDisplayedAffirmation(current, theme: .steel)
+        let preview = store.image(for: next, direction: 1, theme: .steel)
+        store.updateDisplayedAffirmation(next, theme: .steel)
+
+        #expect(store.selectedImage(for: .steel)?.id == preview?.id)
+        #expect(AppTheme.steel.images.contains { $0.id == preview?.id })
+        #expect(store.selectedTheme == .eden)
+        #expect(repository.theme == .eden)
+        #expect(repository.saveCallCount == 0)
+    }
+
     @Test("Swipe previews leave the current image unchanged and match the committed destination")
     func swipeImagePreview() throws {
         let store = ThemeStore(selectedTheme: .eden)

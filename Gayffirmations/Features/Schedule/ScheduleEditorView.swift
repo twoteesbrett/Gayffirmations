@@ -45,6 +45,13 @@ struct ScheduleEditorView: View {
                 } footer: {
                     Text("\(coordinator.matchingAffirmations(for: draft).count) matching affirmations ready. Choose multiple tags to include affirmations matching any of them.")
                 }
+                Section {
+                    NavigationLink {
+                        ScheduleThemePicker(selection: $draft.theme)
+                    } label: {
+                        LabeledContent("Theme", value: draft.theme?.name ?? "Use default")
+                    }
+                }
                 Section("Daily period") {
                     DatePicker("Start", selection: timeBinding(\.startTime), displayedComponents: .hourAndMinute)
                     DatePicker("End", selection: timeBinding(\.endTime), displayedComponents: .hourAndMinute)
@@ -216,6 +223,49 @@ private struct ScheduleContentPicker: View {
         }
         .themedBackground()
         .navigationTitle("Affirmations")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct ScheduleThemePicker: View {
+    @Binding var selection: AppTheme?
+
+    var body: some View {
+        List {
+            Section {
+                Button {
+                    selection = nil
+                } label: {
+                    HStack {
+                        Text("Use default")
+                        Spacer()
+                        if selection == nil {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selection == nil ? .isSelected : [])
+            } footer: {
+                Text("Uses the default theme chosen under Today in Settings.")
+            }
+            Section {
+                ForEach(AppTheme.allCases) { theme in
+                    Button {
+                        selection = theme
+                    } label: {
+                        ThemePreviewRow(theme: theme, isSelected: selection == theme)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .accessibilityAddTraits(selection == theme ? .isSelected : [])
+                }
+            }
+        }
+        .themedBackground()
+        .navigationTitle("Theme")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

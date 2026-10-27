@@ -3,6 +3,7 @@ import Foundation
 struct TodayAffirmationContext {
     let affirmation: Affirmation?
     let browsingAffirmations: [Affirmation]
+    var theme: AppTheme? = nil
     let nextChange: Date
 }
 
@@ -27,6 +28,7 @@ struct TodayAffirmationResolver {
             return TodayAffirmationContext(
                 affirmation: slot.affirmation,
                 browsingAffirmations: resolved(schedule.selection, in: affirmations, name: name),
+                theme: currentTime >= schedule.startTime && currentTime < schedule.endTime ? schedule.theme : nil,
                 nextChange: nextChange
             )
         }

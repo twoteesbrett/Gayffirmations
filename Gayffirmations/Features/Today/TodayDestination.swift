@@ -1,5 +1,5 @@
 enum TodayDestination: Identifiable {
-    case library, themes, settings
+    case library, settings
 
     var id: Self { self }
 }
