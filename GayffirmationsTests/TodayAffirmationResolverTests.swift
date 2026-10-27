@@ -91,6 +91,7 @@ struct TodayAffirmationResolverTests {
         #expect(context.theme == nil)
     }
 
+    @MainActor
     @Test func scheduleThemePersistsAndOlderSchedulesInheritTheDefault() throws {
         let schedule = AffirmationSchedule(theme: .steel)
         let encoded = try JSONEncoder().encode(schedule)
