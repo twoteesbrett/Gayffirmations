@@ -203,10 +203,7 @@ struct ThemePreviewRow: View {
     private var previewImage: ThemeImage? {
         let imageID: String?
         switch theme {
-        case .eden: imageID = "eden-monstera"
         case .steel: imageID = "steel-strength"
-        case .disco: imageID = "disco-mirrorball"
-        case .concrete: imageID = "concrete-oculus"
         case .outAndAbout: imageID = "out-and-about-lakeside"
         }
         return theme.images.first { $0.id == imageID }
@@ -259,8 +256,8 @@ struct ThemePreviewRow: View {
     .themeAppearance(store.selectedTheme)
 }
 
-#Preview("Disco with largest text size") {
-    let store = ThemeStore(selectedTheme: .disco)
+#Preview("Steel with largest text size") {
+    let store = ThemeStore(selectedTheme: .steel)
     NavigationStack {
         ThemePickerView(store: store)
     }

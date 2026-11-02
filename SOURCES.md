@@ -16,31 +16,7 @@ Steel uses six user-supplied AI-generated images. Bundled JPEGs and PNGs preserv
 | Squat | `steel-squat` |
 | Pull-up | `steel-pull-up` |
 
-Eden uses six user-supplied images, preserving their original resolution and aspect ratio.
-
-| Image | Bundled asset identifier |
-| --- | --- |
-| Monstera | `eden-monstera` |
-| Peace Lily | `eden-peace-lily` |
-| Stream | `eden-stream` |
-| Ferns | `eden-ferns` |
-| Ivy | `eden-ivy` |
-| Tropical Leaves | `eden-tropical-leaves` |
-
-Eden retains colour; Steel renders in greyscale.
-
-Each image has an individually configured crop focal point and dark overlay. Images are decorative backgrounds; the picker provides descriptive accessibility labels.
-
-Disco uses six user-supplied AI-generated images, preserving their original resolution and aspect ratio.
-
-| Image | Bundled asset identifier |
-| --- | --- |
-| Mirrorball | `disco-mirrorball` |
-| Aviators | `disco-aviators` |
-| Dance | `disco-dance` |
-| Roller Skates | `disco-roller-skates` |
-| Last Dance | `disco-last-dance` |
-| Vinyl | `disco-vinyl` |
+Out & About retains colour; Steel renders in greyscale. Each image has a crop focal point and dark overlay.
 
 ## App icon
 
@@ -89,31 +65,20 @@ playback checks on an iPhone remain in [TODO.md](TODO.md).
 Apple references: [custom notification sounds](https://developer.apple.com/documentation/usernotifications/unnotificationsound)
 and [system alert playback limitations](https://developer.apple.com/documentation/audiotoolbox/audioservicesplayalertsound(_:)).
 
-## Concrete
-
-Concrete uses six user-supplied AI-generated images, preserving their original resolution and aspect ratio.
-
-| Image | Bundled asset identifier |
-| --- | --- |
-| Fjord | `concrete-fjord` |
-| Oculus | `concrete-oculus` |
-| Sunlight | `concrete-sunlight` |
-| Pillar | `concrete-pillar` |
-| Ivy | `concrete-ivy` |
-| Stairway | `concrete-stairway` |
-
 ## Out & About
 
-Out & About uses six user-supplied AI-generated images, preserving their original resolution
-and aspect ratio. Images rotate from morning through midday to evening.
+Out & About uses nine user-supplied AI-generated images imported from Desktop/out-and-about.
+Renamed source copies in Assets and bundled PNGs preserve the originals' resolution and aspect ratio.
+The rotation progresses from morning through twilight to moonlight.
 
 | Image | Bundled asset identifier |
 | --- | --- |
 | Lakeside | `out-and-about-lakeside` |
+| Alpine Café | `out-and-about-alpine-cafe` |
 | Market | `out-and-about-market` |
 | Pool Club | `out-and-about-pool-club` |
 | Park | `out-and-about-park` |
+| Waterfall | `out-and-about-waterfall` |
 | Harbour | `out-and-about-harbour` |
 | Carnival | `out-and-about-carnival` |
-
-Bundled copies use `image.png`.
+| Moonlit Lakeside | `out-and-about-moonlit-lakeside` |

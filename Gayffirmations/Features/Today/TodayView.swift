@@ -55,19 +55,14 @@ struct TodayView: View {
 
 
 #if DEBUG
-#Preview("Eden") {
+#Preview("Out & About") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
-        .themeAppearance(.eden)
+        .themeAppearance(.outAndAbout)
 }
 
 #Preview("Steel") {
     TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
         .themeAppearance(.steel)
-}
-
-#Preview("Disco") {
-    TodayView(store: AffirmationStore(affirmations: PreviewContent.affirmations))
-        .themeAppearance(.disco)
 }
 
 #Preview("Empty") {

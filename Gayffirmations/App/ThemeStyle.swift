@@ -3,75 +3,53 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .eden, .steel, .disco, .concrete, .outAndAbout: .dark
+        case .steel, .outAndAbout: .dark
         }
     }
 
     var accentColor: Color {
         switch self {
-        case .eden: Color(hex: 0xC6E8AD)
         case .steel: Color(hex: 0xA7C9E0)
-        case .disco: Color(hex: 0xFFB276)
-        case .concrete: Color(hex: 0xC9C8BF)
         case .outAndAbout: Color(hex: 0xB9E2F5)
         }
     }
 
     var textColor: Color {
         switch self {
-        case .eden: Color(hex: 0xF2F8ED)
         case .steel: Color(hex: 0xF0F4F7)
-        case .disco: Color(hex: 0xFFF2FA)
-        case .concrete: Color(hex: 0xF3F2ED)
         case .outAndAbout: Color(hex: 0xF0F7FC)
         }
     }
 
     var backgroundGradient: LinearGradient {
         switch self {
-        case .eden:
-            LinearGradient(colors: [Color(hex: 0x4C8240), Color(hex: 0x123D27)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
         case .outAndAbout:
             LinearGradient(colors: [Color(hex: 0x327FA8), Color(hex: 0x123E5A)],
                            startPoint: .top, endPoint: .bottom)
         case .steel:
             LinearGradient(colors: [Color(hex: 0x202830), Color(hex: 0x354350)],
                            startPoint: .top, endPoint: .bottom)
-        case .concrete:
-            LinearGradient(colors: [Color(hex: 0x292B2A), Color(hex: 0x555650)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-        case .disco:
-            LinearGradient(colors: [Color(hex: 0x17285D), Color(hex: 0x532478), Color(hex: 0x872C68)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
         }
     }
 
     var interfaceFontDesign: Font.Design? {
         switch self {
-        case .disco: .rounded
-        case .eden, .steel, .concrete, .outAndAbout: nil
+        case .steel, .outAndAbout: nil
         }
     }
 
     var affirmationLineSpacing: CGFloat {
         switch self {
-        case .eden, .outAndAbout: 8
+        case .outAndAbout: 8
         case .steel: 4
-        case .disco: 6
-        case .concrete: 8
         }
     }
 
     func affirmationFont(for role: AffirmationTextRole) -> Font {
         switch self {
-        case .eden:
-            .custom("Baskerville", size: role.baseSize, relativeTo: role.textStyle)
         case .steel:
             .system(role.textStyle, design: .default, weight: .bold)
-        case .disco:
-            .system(role.textStyle, design: .rounded, weight: .semibold)
-        case .concrete, .outAndAbout:
+        case .outAndAbout:
             .system(role.textStyle, design: .default, weight: .regular)
         }
     }
@@ -107,7 +85,7 @@ private extension Color {
 }
 
 private struct AppThemeKey: EnvironmentKey {
-    static let defaultValue: AppTheme = .eden
+    static let defaultValue: AppTheme = .outAndAbout
 }
 
 extension EnvironmentValues {

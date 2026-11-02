@@ -15,14 +15,28 @@ struct StarterContentTests {
         #expect(entries.last?.text == "Let your kindness do the talking.")
     }
 
-    @Test("Retired themes load as Eden", arguments: [
-        "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
+    @Test("Retired themes load as Out & About", arguments: [
+        "eden", "disco", "concrete", "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
         "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
         "bubblegum", "daydream", "muscle", "spectrum"
     ])
     func migratesRetiredTheme(name: String) throws {
         let data = try JSONEncoder().encode(name)
-        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == .eden)
+        #expect(try JSONDecoder().decode(AppTheme.self, from: data) == .outAndAbout)
+    }
+
+    @Test("Schedules with newly retired themes retain their settings", arguments: ["eden", "disco", "concrete"])
+    @MainActor
+    func migratesScheduledTheme(name: String) throws {
+        let original = AffirmationSchedule(theme: .steel, isEnabled: true, notificationsPerDay: 7)
+        let data = try JSONEncoder().encode(original)
+        var object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        object["theme"] = name
+        let migrated = try JSONDecoder().decode(AffirmationSchedule.self,
+                                                from: JSONSerialization.data(withJSONObject: object))
+        var expected = original
+        expected.theme = .outAndAbout
+        #expect(migrated == expected)
     }
 
     @Test("Current themes preserve their identity", arguments: AppTheme.allCases)

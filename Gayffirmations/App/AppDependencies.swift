@@ -21,7 +21,7 @@ final class AppDependencies {
         )
         let themeStore = ThemeStore(
             repository: repository,
-            defaultTheme: .eden,
+            defaultTheme: .outAndAbout,
             backgroundRepository: repository
         )
 

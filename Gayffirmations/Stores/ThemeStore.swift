@@ -49,7 +49,7 @@ final class ThemeStore {
     let defaultTheme: AppTheme
 
     /// Creates an in-memory store for previews and isolated UI tests.
-    init(selectedTheme: AppTheme = .eden) {
+    init(selectedTheme: AppTheme = .outAndAbout) {
         self.selectedTheme = selectedTheme
         self.defaultTheme = selectedTheme
         self.repository = nil
@@ -59,7 +59,7 @@ final class ThemeStore {
     /// A repository always loads saved theme and background preferences.
     init(
         repository: any ThemeRepository,
-        defaultTheme: AppTheme = .eden,
+        defaultTheme: AppTheme = .outAndAbout,
         backgroundRepository: (any ThemeBackgroundRepository)? = nil
     ) {
         self.repository = repository
@@ -67,12 +67,8 @@ final class ThemeStore {
         self.defaultTheme = defaultTheme
 
         do {
-            var loadedBackgrounds = try backgroundRepository?.loadThemeBackgrounds() ?? [:]
-            // Keep the former Nature image/gradient preference when migrating to Eden.
-            if loadedBackgrounds["eden"] == nil, let previous = loadedBackgrounds.removeValue(forKey: "nature") {
-                loadedBackgrounds["eden"] = previous
-            }
-            backgrounds = loadedBackgrounds
+            backgrounds = (try backgroundRepository?.loadThemeBackgrounds() ?? [:])
+                .filter { AppTheme(rawValue: $0.key) != nil }
             if let savedTheme = try repository.loadTheme() {
                 selectedTheme = savedTheme
             } else {

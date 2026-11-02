@@ -54,7 +54,7 @@ struct PersonalizationTests {
         let profile = PersonalizationStore(repository: repository)
         try profile.setName("  Alex  ")
         #expect(PersonalizationStore(repository: repository).name == "Alex")
-        try repository.saveAppData(affirmations: [], schedules: [AffirmationSchedule()], theme: .eden, selection: .all)
+        try repository.saveAppData(affirmations: [], schedules: [AffirmationSchedule()], theme: .outAndAbout, selection: .all)
         #expect(try repository.loadName() == nil)
     }
 

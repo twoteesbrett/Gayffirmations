@@ -143,7 +143,7 @@ struct AffirmationValidationTests {
         }
         #expect(throws: AffirmationValidationError.blankText) {
             try repository.saveAppData(affirmations: [Affirmation(text: "")],
-                                       schedules: [AffirmationSchedule()], theme: .eden,
+                                       schedules: [AffirmationSchedule()], theme: .outAndAbout,
                                        selection: .all, preservingExistingData: true)
         }
         let after = try #require(preferences.persistentDomain(forName: suite))

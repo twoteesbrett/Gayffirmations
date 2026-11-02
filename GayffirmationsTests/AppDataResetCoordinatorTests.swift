@@ -30,7 +30,7 @@ struct AppDataResetCoordinatorTests {
         let beforeLoad = try #require(preferences.persistentDomain(forName: suite))
         let library = AffirmationStore(repository: repository, defaultAffirmations: bundled)
         let schedules = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let theme = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
+        let theme = ThemeStore(repository: repository, defaultTheme: .outAndAbout, backgroundRepository: repository)
         let selection = AffirmationSelectionStore(repository: repository)
         let name = PersonalizationStore(repository: repository)
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
@@ -48,7 +48,7 @@ struct AppDataResetCoordinatorTests {
         case "schedules", "schedule", "notificationSound":
             #expect(throws: PersistenceUnavailableError.self) { try schedules.reset() }
         case "theme", "themeBackgrounds":
-            #expect(throws: PersistenceUnavailableError.self) { try theme.select(.disco) }
+            #expect(throws: PersistenceUnavailableError.self) { try theme.select(.steel) }
         case "affirmationSelection":
             #expect(throws: PersistenceUnavailableError.self) { try selection.select(.all) }
         default:
@@ -75,7 +75,7 @@ struct AppDataResetCoordinatorTests {
         #expect(library.affirmations == bundled)
         #expect(schedules.schedules == [schedules.defaultSchedule])
         #expect(schedules.notificationSound == .systemDefault)
-        #expect(theme.selectedTheme == .eden)
+        #expect(theme.selectedTheme == .outAndAbout)
         #expect(theme.backgrounds.isEmpty)
         #expect(selection.selection == .all)
         #expect(name.name.isEmpty)
@@ -87,12 +87,12 @@ struct AppDataResetCoordinatorTests {
         // New store instances exercise the persistent loading paths after repair.
         let reloadedLibrary = AffirmationStore(repository: repository, defaultAffirmations: bundled)
         let reloadedSchedules = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let reloadedTheme = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
+        let reloadedTheme = ThemeStore(repository: repository, defaultTheme: .outAndAbout, backgroundRepository: repository)
         #expect(reloadedLibrary.affirmations == bundled)
         #expect(reloadedLibrary.persistenceErrorMessage == nil)
         #expect(reloadedSchedules.schedules == [schedules.defaultSchedule])
         #expect(reloadedSchedules.persistenceErrorMessage == nil)
-        #expect(reloadedTheme.selectedTheme == .eden)
+        #expect(reloadedTheme.selectedTheme == .outAndAbout)
         #expect(reloadedTheme.persistenceErrorMessage == nil)
         #expect(AffirmationSelectionStore(repository: repository).persistenceErrorMessage == nil)
         #expect(PersonalizationStore(repository: repository).persistenceErrorMessage == nil)
@@ -101,7 +101,7 @@ struct AppDataResetCoordinatorTests {
         // Load-error guards must also clear for edits in this same session.
         try library.add(text: "After recovery")
         try schedules.setNotificationSound(.magicMarimba)
-        try theme.select(.disco)
+        try theme.select(.steel)
         try selection.select(.favourites)
         try name.setName("After recovery")
     }
@@ -145,7 +145,7 @@ struct AppDataResetCoordinatorTests {
         try resetCoordinator.resetAll()
         #expect(library.affirmations == defaults)
         #expect(schedule.schedule == schedule.defaultSchedule)
-        #expect(theme.selectedTheme == .eden)
+        #expect(theme.selectedTheme == .outAndAbout)
         #expect(coordinator.fallbackSelectionStore.selection == .all)
         #expect(scheduler.scheduledReminders.isEmpty)
         #expect(repository.didSave)
@@ -160,7 +160,7 @@ struct AppDataResetCoordinatorTests {
         let defaults = [Affirmation(text: "Default")]
         let library = AffirmationStore(repository: repository, defaultAffirmations: defaults)
         let schedule = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let theme = ThemeStore(repository: repository, defaultTheme: .eden)
+        let theme = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule,
             scheduler: NotificationSchedulerSpy(authorizationStatus: .authorized),
@@ -181,7 +181,7 @@ struct AppDataResetCoordinatorTests {
         #expect(try repository.loadAffirmationSelection() == .all)
         #expect(try repository.loadAffirmations() == defaults)
         #expect(try repository.loadSchedule() == schedule.defaultSchedule)
-        #expect(try repository.loadTheme() == .eden)
+        #expect(try repository.loadTheme() == .outAndAbout)
     }
 
     @Test("Confirmed reset repairs a corrupt section and keeps its original bytes in a backup")
@@ -192,12 +192,12 @@ struct AppDataResetCoordinatorTests {
         let repository = UserDefaultsRepository(userDefaults: userDefaults)
         let custom = [Affirmation(text: "Custom")]
         try repository.saveAffirmations(custom)
-        try repository.saveTheme(.eden)
+        try repository.saveTheme(.outAndAbout)
         let corruptData = Data("invalid JSON".utf8)
         userDefaults.set(corruptData, forKey: "gayffirmations.schedule")
         let library = AffirmationStore(repository: repository, defaultAffirmations: [])
         let schedule = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let theme = ThemeStore(repository: repository, defaultTheme: .eden)
+        let theme = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
@@ -214,7 +214,7 @@ struct AppDataResetCoordinatorTests {
         #expect(userDefaults.data(forKey: "gayffirmations.schedule") == corruptData)
         try resetCoordinator.resetAll()
         #expect(try repository.loadAffirmations() == [])
-        #expect(try repository.loadTheme() == .eden)
+        #expect(try repository.loadTheme() == .outAndAbout)
         #expect(userDefaults.data(forKey: "gayffirmations.schedule") == nil)
         #expect(schedule.persistenceErrorMessage == nil)
         let backups = try #require(userDefaults.array(forKey: "gayffirmations.recoveryBackups") as? [[String: Any]])

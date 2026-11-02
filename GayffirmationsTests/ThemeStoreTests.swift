@@ -6,7 +6,7 @@ import Testing
 struct ThemeStoreTests {
     @Test("A schedule theme uses its own artwork without replacing the saved default")
     func scheduleThemeDoesNotChangeDefault() {
-        let repository = InMemoryThemeRepository(theme: .eden)
+        let repository = InMemoryThemeRepository(theme: .outAndAbout)
         let store = ThemeStore(repository: repository)
         let current = UUID()
         let next = UUID()
@@ -16,22 +16,22 @@ struct ThemeStoreTests {
 
         #expect(store.selectedImage(for: .steel)?.id == preview?.id)
         #expect(AppTheme.steel.images.contains { $0.id == preview?.id })
-        #expect(store.selectedTheme == .eden)
-        #expect(repository.theme == .eden)
+        #expect(store.selectedTheme == .outAndAbout)
+        #expect(repository.theme == .outAndAbout)
         #expect(repository.saveCallCount == 0)
     }
 
     @Test("Swipe previews leave the current image unchanged and match the committed destination")
     func swipeImagePreview() throws {
-        let store = ThemeStore(selectedTheme: .eden)
+        let store = ThemeStore(selectedTheme: .outAndAbout)
         let current = UUID()
         let next = UUID()
         store.updateDisplayedAffirmation(current)
         let original = store.selectedImage?.id
         let forward = store.image(for: next, direction: 1)
         let backward = store.image(for: next, direction: -1)
-        #expect(forward?.id == AppTheme.eden.images[1].id)
-        #expect(backward?.id == AppTheme.eden.images.last?.id)
+        #expect(forward?.id == AppTheme.outAndAbout.images[1].id)
+        #expect(backward?.id == AppTheme.outAndAbout.images.last?.id)
         #expect(store.selectedImage?.id == original)
 
         store.updateDisplayedAffirmation(next, direction: -1)
@@ -55,21 +55,21 @@ struct ThemeStoreTests {
     func savesDefaultTheme() {
         let repository = InMemoryThemeRepository()
 
-        let store = ThemeStore(repository: repository, defaultTheme: .eden)
+        let store = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
 
-        #expect(store.selectedTheme == .eden)
-        #expect(repository.theme == .eden)
+        #expect(store.selectedTheme == .outAndAbout)
+        #expect(repository.theme == .outAndAbout)
     }
 
     @Test("A theme selection survives recreating the store", arguments: AppTheme.allCases)
     func selectionSurvivesRestart(theme: AppTheme) throws {
         let repository = InMemoryThemeRepository()
-        let firstStore = ThemeStore(repository: repository, defaultTheme: .eden)
+        let firstStore = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
 
         try firstStore.select(theme)
         let restartedStore = ThemeStore(
             repository: repository,
-            defaultTheme: .eden
+            defaultTheme: .outAndAbout
         )
 
         #expect(restartedStore.selectedTheme == theme)
@@ -78,25 +78,25 @@ struct ThemeStoreTests {
     @Test("Reset restores and saves the default theme")
     func reset() throws {
         let repository = InMemoryThemeRepository()
-        let store = ThemeStore(repository: repository, defaultTheme: .eden)
+        let store = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
 
-        try store.select(.disco)
+        try store.select(.steel)
         try store.reset()
 
-        #expect(store.selectedTheme == .eden)
-        #expect(repository.theme == .eden)
+        #expect(store.selectedTheme == .outAndAbout)
+        #expect(repository.theme == .outAndAbout)
     }
 
     @Test("A load failure prevents the theme from being overwritten")
     func loadFailurePreventsOverwrite() {
         let repository = FailingThemeRepository()
-        let store = ThemeStore(repository: repository, defaultTheme: .eden)
+        let store = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
 
         #expect(store.persistenceErrorMessage != nil)
         #expect(throws: PersistenceUnavailableError.self) {
-            try store.select(.eden)
+            try store.select(.outAndAbout)
         }
-        #expect(store.selectedTheme == .eden)
+        #expect(store.selectedTheme == .outAndAbout)
         #expect(repository.saveCallCount == 0)
     }
 }

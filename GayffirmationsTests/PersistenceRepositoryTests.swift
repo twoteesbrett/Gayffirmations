@@ -250,7 +250,7 @@ struct PersistenceRepositoryTests {
             initialAffirmations: Affirmation.starterAffirmations
         )
         let library = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
-        let theme = ThemeStore(repository: repository, defaultTheme: .eden, backgroundRepository: repository)
+        let theme = ThemeStore(repository: repository, defaultTheme: .outAndAbout, backgroundRepository: repository)
         let selection = AffirmationSelectionStore(repository: repository)
         let reminders = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
 
@@ -369,15 +369,15 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let affirmations = [Affirmation(text: "Reset")]
         let schedule = AffirmationSchedule()
-        try fixture.repository.saveAppData(affirmations: affirmations, schedules: [schedule], theme: .eden, selection: .favourites)
+        try fixture.repository.saveAppData(affirmations: affirmations, schedules: [schedule], theme: .outAndAbout, selection: .favourites)
         #expect(try fixture.repository.loadAffirmations() == affirmations)
         #expect(try fixture.repository.loadSchedule() == schedule)
-        #expect(try fixture.repository.loadTheme() == .eden)
+        #expect(try fixture.repository.loadTheme() == .outAndAbout)
         #expect(try fixture.repository.loadAffirmationSelection() == .favourites)
     }
 
-    @Test("Removed themes decode and load as Eden without replacing the saved value", arguments: [
-        "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
+    @Test("Removed themes decode and load as Out & About without replacing the saved value", arguments: [
+        "eden", "disco", "concrete", "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
         "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
         "bubblegum", "daydream", "muscle", "spectrum", "together", "fruity", "refined"
     ])
@@ -386,10 +386,10 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let raw = try JSONEncoder().encode(name)
         fixture.userDefaults.set(raw, forKey: "gayffirmations.theme")
-        #expect(try JSONDecoder().decode(AppTheme.self, from: raw) == .eden)
+        #expect(try JSONDecoder().decode(AppTheme.self, from: raw) == .outAndAbout)
 
         let store = ThemeStore(repository: fixture.repository)
-        #expect(store.selectedTheme == .eden)
+        #expect(store.selectedTheme == .outAndAbout)
         #expect(store.persistenceErrorMessage == nil)
         #expect(fixture.userDefaults.data(forKey: "gayffirmations.theme") == raw)
         try store.select(.steel)
@@ -404,7 +404,7 @@ struct PersistenceRepositoryTests {
         let raw = value == "unknown-theme" ? try JSONEncoder().encode(value) : Data(value.utf8)
         fixture.userDefaults.set(raw, forKey: "gayffirmations.theme")
         let store = ThemeStore(repository: fixture.repository)
-        #expect(store.selectedTheme == .eden)
+        #expect(store.selectedTheme == .outAndAbout)
         #expect(store.persistenceErrorMessage != nil)
         #expect(throws: PersistenceUnavailableError.self) { try store.select(.steel) }
         #expect(fixture.userDefaults.data(forKey: "gayffirmations.theme") == raw)
@@ -415,9 +415,9 @@ struct PersistenceRepositoryTests {
         let fixture = RepositoryFixture()
         defer { fixture.removeSavedData() }
 
-        try fixture.repository.saveTheme(.eden)
+        try fixture.repository.saveTheme(.outAndAbout)
 
-        #expect(try fixture.repository.loadTheme() == .eden)
+        #expect(try fixture.repository.loadTheme() == .outAndAbout)
     }
 }
 

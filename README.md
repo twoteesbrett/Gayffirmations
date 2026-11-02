@@ -219,9 +219,9 @@ reminder’s schedule theme during that schedule’s daily period and returns to
 default outside it. Disabled schedules and schedules without ready affirmations
 do not supply a theme. Existing saved schedules inherit the default.
 
-The five themes are Eden, Disco, Steel, Concrete, and Out & About. Each has six images, including photographic and illustrated backgrounds.
-Out & About rotates from morning through midday to evening: Lakeside, Market,
-Pool Club, Park, Harbour, and Carnival.
+The two themes are Out & About (the default, with nine illustrated backgrounds) and Steel (with six monochrome backgrounds).
+Out & About rotates from morning to night: Lakeside, Alpine Café, Market, Pool Club, Park,
+Waterfall, Harbour, Carnival, and Moonlit Lakeside.
 Themes with images use them by default and offer a Use images switch saved
 separately for each theme. Turning it off uses the theme's colour background.
 The picker shows thumbnail previews. Steel renders images in greyscale;
@@ -252,7 +252,7 @@ seeded once, using stable IDs and matching text to avoid duplicates; later
 launches preserve edits and deletions. The earlier content-rebuild reset is
 no longer performed, including for installations with an old rebuild marker.
 
-Retired theme identifiers, including Nature and Refined, decode as Eden; current identifiers
+Retired theme identifiers, including Nature and Refined, decode as Out & About; current identifiers
 retain their identity. Unknown or malformed data reports an error rather than silently
 replacing saved content. Legacy fixed image IDs are ignored when decoding
 background preferences. Reset All clears saved background choices. Schedules
