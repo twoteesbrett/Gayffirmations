@@ -76,9 +76,9 @@ The rotation progresses from morning through twilight to moonlight.
 | Lakeside | `out-and-about-lakeside` |
 | Alpine Café | `out-and-about-alpine-cafe` |
 | Market | `out-and-about-market` |
-| Pool Club | `out-and-about-pool-club` |
 | Park | `out-and-about-park` |
+| Pool Club | `out-and-about-pool-club` |
+| Beach | `out-and-about-beach` |
 | Waterfall | `out-and-about-waterfall` |
 | Harbour | `out-and-about-harbour` |
-| Carnival | `out-and-about-carnival` |
 | Moonlit Lakeside | `out-and-about-moonlit-lakeside` |
