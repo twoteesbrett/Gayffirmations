@@ -219,7 +219,7 @@ reminder’s schedule theme during that schedule’s daily period and returns to
 default outside it. Disabled schedules and schedules without ready affirmations
 do not supply a theme. Existing saved schedules inherit the default.
 
-The two themes are Out & About (the default, with nine illustrated backgrounds) and Steel (with six monochrome backgrounds).
+The two themes are Out & About (the default, with nine illustrated backgrounds) and Steel (with nine monochrome backgrounds).
 Out & About rotates from morning to night: Lakeside, Alpine Café, Market, Park, Pool Club,
 Beach, Waterfall, Harbour, and Moonlit Lakeside.
 Themes with images use them by default and offer a Use images switch saved

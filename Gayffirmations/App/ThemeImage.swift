@@ -17,16 +17,22 @@ extension AppTheme {
             return [
                 ThemeImage(id: "steel-strength", name: "Strength", focalPoint: UnitPoint(x: 0.85, y: 0.5),
                            overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a standing man curling a barbell", textColor: .white),
-                ThemeImage(id: "steel-release", name: "Release", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white),
-                ThemeImage(id: "steel-curl", name: "Curl", focalPoint: UnitPoint(x: 0.70, y: 0.5),
-                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a seated man curling a dumbbell", textColor: .white),
-                ThemeImage(id: "steel-deadlift", name: "Deadlift", focalPoint: UnitPoint(x: 0.52, y: 0.5),
-                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a man preparing to deadlift a barbell", textColor: .white),
                 ThemeImage(id: "steel-squat", name: "Squat", focalPoint: UnitPoint(x: 0.55, y: 0.5),
                            overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man squatting with a barbell", textColor: .white),
+                ThemeImage(id: "steel-lunge", name: "Lunge", focalPoint: .center,
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man lunging with dumbbells", textColor: .white),
+                ThemeImage(id: "steel-deadlift", name: "Deadlift", focalPoint: UnitPoint(x: 0.52, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a man preparing to deadlift a barbell", textColor: .white),
+                ThemeImage(id: "steel-bench-press", name: "Bench Press", focalPoint: UnitPoint(x: 0.45, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man bench pressing a barbell", textColor: .white),
                 ThemeImage(id: "steel-pull-up", name: "Pull-up", focalPoint: .center,
-                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man doing a pull-up, viewed from behind", textColor: .white)
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man doing a pull-up, viewed from behind", textColor: .white),
+                ThemeImage(id: "steel-lateral-raise", name: "Lateral Raise", focalPoint: UnitPoint(x: 0.55, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "An AI-generated monochrome portrait of a man raising dumbbells out to his sides", textColor: .white),
+                ThemeImage(id: "steel-curl", name: "Curl", focalPoint: UnitPoint(x: 0.70, y: 0.5),
+                           overlayOpacity: 0.38, accessibilityDescription: "A monochrome portrait of a seated man curling a dumbbell", textColor: .white),
+                ThemeImage(id: "steel-release", name: "Release", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white)
             ]
         case .outAndAbout:
             return [

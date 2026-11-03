@@ -5,7 +5,7 @@ App behaviour and development guidance are in [README.md](README.md).
 
 ## Images
 
-Steel uses six user-supplied AI-generated images. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
+Steel uses nine user-supplied AI-generated images. Bundled JPEGs and PNGs preserve the supplied aspect ratios and resolution.
 
 | Image | Bundled asset identifier |
 | --- | --- |
@@ -15,6 +15,11 @@ Steel uses six user-supplied AI-generated images. Bundled JPEGs and PNGs preserv
 | Deadlift | `steel-deadlift` |
 | Squat | `steel-squat` |
 | Pull-up | `steel-pull-up` |
+| Bench Press | `steel-bench-press` |
+| Lateral Raise | `steel-lateral-raise` |
+| Lunge | `steel-lunge` |
+
+The three additional images were supplied from Desktop and copied into Assets and the app asset catalogue without resizing.
 
 Out & About retains colour; Steel renders in greyscale. Each image has a crop focal point and dark overlay.
 
