@@ -27,7 +27,7 @@ final class AppDataResetCoordinator {
             affirmationStore.persistenceErrorMessage.map { _ in "Affirmations" },
             scheduleStore.persistenceErrorMessage.map { _ in "Schedules and sound" },
             themeStore.persistenceErrorMessage.map { _ in "Theme and backgrounds" },
-            notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage.map { _ in "Today fallback" },
+            notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage.map { _ in "Default affirmations" },
             notificationCoordinator.personalizationStore.persistenceErrorMessage.map { _ in "Name" }
         ].compactMap { $0 }
     }

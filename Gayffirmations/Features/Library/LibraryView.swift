@@ -114,7 +114,7 @@ struct LibraryView: View {
                 .font(.subheadline)
             }
 
-            Text("Filter the list to find and edit affirmations. Choose fallback content in Settings → Today → Affirmations, and reminder content in each schedule.")
+            Text("Filter the list to find and edit affirmations. Choose default content in Settings → Defaults → Default affirmations, and reminder content in each schedule.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 

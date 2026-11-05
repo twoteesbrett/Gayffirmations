@@ -28,10 +28,27 @@ struct SettingsView: View {
                     .accessibilityHint("Edit the name used in personalised affirmations")
                 }
                 Section {
+                    TimelineView(.everyMinute) { timeline in
+                        let context = TodayAffirmationResolver().context(
+                            at: timeline.date, schedules: scheduleStore.schedules,
+                            affirmations: affirmationStore.affirmations,
+                            fallbackSelection: notificationCoordinator.fallbackSelectionStore.selection,
+                            name: notificationCoordinator.personalizationStore.name
+                        )
+                        LabeledContent {
+                            if let scheduleName = context.scheduleName {
+                                Text(scheduleName)
+                            } else {
+                                Text("Default affirmations")
+                            }
+                        } label: {
+                            Text("Currently using")
+                        }
+                    }
                     NavigationLink {
                         FallbackAffirmationsView(coordinator: notificationCoordinator)
                     } label: {
-                        LabeledContent("Affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
+                        LabeledContent("Default affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
                     }
                     NavigationLink {
                         ThemePickerView(store: themeStore)
@@ -39,9 +56,9 @@ struct SettingsView: View {
                         LabeledContent("Default theme", value: themeStore.selectedTheme.name)
                     }
                 } header: {
-                    Text("Today")
+                    Text("Defaults")
                 } footer: {
-                    Text("Shown when no scheduled reminders are ready. Changes daily and doesn’t send notifications.")
+                    Text("Default affirmations appear outside active schedule windows or when no active schedule has matching affirmations. They change daily and don’t send notifications.")
                 }
                 Section("Notifications") {
                     Button {

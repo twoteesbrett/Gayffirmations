@@ -31,7 +31,7 @@ struct FallbackAffirmationsView: View {
                     set: { select(selection.selectingFavourites($0)) }
                 ))
             } footer: {
-                Text("Choose what appears on Today when no schedule has reminders ready. Affirmations matching any selected tag or Favourites are included once. Clearing every filter returns to All.")
+                Text("Choose what appears on Today outside active schedule windows or when no active schedule has matching affirmations. Affirmations matching any selected tag or Favourites are included once. Clearing every filter returns to All.")
             }
 
             TagSelectionSection(
@@ -49,10 +49,10 @@ struct FallbackAffirmationsView: View {
             }
         }
         .themedBackground()
-        .navigationTitle("Today’s Affirmations")
+        .navigationTitle("Default affirmations")
         .navigationBarTitleDisplayMode(.inline)
         .disabled(coordinator.isUpdating)
-        .alert("Unable to Save Today’s Content", isPresented: Binding(
+        .alert("Unable to Save Default Affirmations", isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {

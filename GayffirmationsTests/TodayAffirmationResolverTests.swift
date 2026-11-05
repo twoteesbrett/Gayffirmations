@@ -15,12 +15,25 @@ struct TodayAffirmationResolverTests {
         calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute))!
     }
 
-    @Test func retainsLatestSlotBetweenRemindersAndOvernight() {
-        let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 2)
-        for date in [date(hour: 15), date(hour: 23), date(day: 3, hour: 0), date(day: 3, hour: 10, minute: 59)] {
-            #expect(resolver.affirmation(at: date, schedule: schedule, affirmations: affirmations, calendar: calendar)?.id == affirmations[1].id)
+    @Test func switchesContentAndThemeAtScheduleBoundaries() {
+        let fallback = Affirmation(text: "Fallback", tags: ["Fallback"])
+        let schedule = AffirmationSchedule(name: "Daytime", selection: .tag("Scheduled"), theme: .steel,
+                                           isEnabled: true, notificationsPerDay: 2)
+        let entries = affirmations.map { Affirmation(text: $0.text, tags: ["Scheduled"]) }
+        func context(_ date: Date) -> TodayAffirmationContext {
+            resolver.context(at: date, schedules: [schedule], affirmations: entries + [fallback],
+                             fallbackSelection: .tag("Fallback"), name: "", calendar: calendar)
         }
-        #expect(resolver.affirmation(at: date(hour: 11), schedule: schedule, affirmations: affirmations, calendar: calendar)?.id == affirmations[0].id)
+
+        for instant in [date(hour: 8, minute: 59), date(hour: 17, minute: 1), date(day: 3, hour: 8)] {
+            #expect(context(instant).affirmation == fallback)
+            #expect(context(instant).scheduleName == nil)
+            #expect(context(instant).theme == nil)
+        }
+        #expect(context(date(hour: 9)).affirmation == entries[0])
+        #expect(context(date(hour: 9)).scheduleName == "Daytime")
+        #expect(context(date(hour: 9)).theme == .steel)
+        #expect(context(date(hour: 15)).affirmation == entries[1])
     }
 
     @Test func dailyFallbackIsStableAndChangesAtMidnight() {
@@ -39,11 +52,12 @@ struct TodayAffirmationResolverTests {
         }
     }
 
-    @Test func manualSelectionExpiresAtNextReminderIncludingOvernight() {
+    @Test func manualSelectionExpiresAtScheduleBoundariesAndReminders() {
         let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 2)
-        #expect(resolver.nextChange(after: date(hour: 10), schedule: schedule, calendar: calendar) == date(hour: 11))
+        #expect(resolver.nextChange(after: date(hour: 8), schedule: schedule, calendar: calendar) == date(hour: 9))
         #expect(resolver.nextChange(after: date(hour: 11), schedule: schedule, calendar: calendar) == date(hour: 15))
-        #expect(resolver.nextChange(after: date(hour: 23), schedule: schedule, calendar: calendar) == date(day: 3, hour: 11))
+        #expect(resolver.nextChange(after: date(hour: 15), schedule: schedule, calendar: calendar) == date(hour: 17, minute: 1))
+        #expect(resolver.nextChange(after: date(hour: 23), schedule: schedule, calendar: calendar) == date(day: 3, hour: 0))
     }
 
     @Test func manualSelectionExpiresAtMidnightWithoutReminders() {
@@ -104,7 +118,7 @@ struct TodayAffirmationResolverTests {
         #expect(resolver.affirmation(at: shifted0330, schedule: schedule, affirmations: affirmations, calendar: calendar) == affirmations[2])
     }
 
-    @Test func themeFollowsTheLatestReminderDuringItsSchedulePeriod() {
+    @Test func themeFollowsTheActiveSchedule() {
         let morning = AffirmationSchedule(
             isEnabled: true, startTime: TimeOfDay(hour: 8, minute: 0),
             endTime: TimeOfDay(hour: 10, minute: 0), notificationsPerDay: 1
@@ -119,6 +133,7 @@ struct TodayAffirmationResolverTests {
                              affirmations: affirmations, fallbackSelection: .all, name: "", calendar: calendar)
         }
         #expect(context(hour: 12).theme == nil)
+        #expect(context(hour: 18).theme == .steel)
         #expect(context(hour: 19).theme == .steel)
         #expect(context(hour: 21).theme == nil)
         #expect(context(hour: 6).theme == nil)

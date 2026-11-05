@@ -42,7 +42,7 @@ struct ContentView: View {
                 "Schedule: \($0)"
             },
             notificationCoordinator.fallbackSelectionStore.persistenceErrorMessage.map {
-                "Today fallback: \($0)"
+                "Default affirmations: \($0)"
             },
             themeStore.persistenceErrorMessage.map {
                 "Theme: \($0)"

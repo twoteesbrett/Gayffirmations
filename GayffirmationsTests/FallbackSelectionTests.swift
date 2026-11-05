@@ -7,7 +7,7 @@ struct FallbackSelectionTests {
     private let body = Affirmation(text: "Body", tags: ["Body"])
     private let food = Affirmation(text: "Food", tags: ["Food"])
 
-    @Test("Fallback changes affect Today only without deliverable reminders", arguments: [false, true])
+    @Test("Fallback changes affect Today outside usable schedule windows", arguments: [false, true])
     func fallbackDoesNotChangeDelivery(enabled: Bool) throws {
         let schedule = AffirmationSchedule(selection: .tag("Body"), isEnabled: enabled)
         let schedules = ScheduleStore(schedule: schedule)
@@ -19,7 +19,7 @@ struct FallbackSelectionTests {
         let previousPlan = coordinator.dailyPlan
         try coordinator.setFallbackSelection(.tag("Food"))
         let context = TodayAffirmationResolver().context(
-            at: .now, schedules: schedules.schedules, affirmations: [body, food],
+            at: TimeOfDay(hour: 12, minute: 0).date(), schedules: schedules.schedules, affirmations: [body, food],
             fallbackSelection: coordinator.fallbackSelectionStore.selection, name: ""
         )
         #expect(context.affirmation == (enabled ? body : food))

@@ -73,16 +73,18 @@ struct MultipleScheduleTests {
             #expect(context.browsingAffirmations == (slot.scheduleID == schedules[0].id ? [body, confidence] : [food]))
         }
         let overnight = resolver.context(at: date(day: 2, hour: 5), schedules: schedules, affirmations: entries,
-                                         fallbackSelection: .all, name: "", calendar: calendar)
+                                         fallbackSelection: .tag("Food"), name: "", calendar: calendar)
         #expect(overnight.affirmation == food)
-        #expect(overnight.nextChange == plan[0].time.date(on: date(day: 2, hour: 0), calendar: calendar))
-        let now = date(hour: 12)
+        #expect(overnight.scheduleName == nil)
+        #expect(overnight.nextChange == date(day: 2, hour: 7))
+
+        let now = plan[1].time.date(on: date(hour: 0), calendar: calendar)
         let context = resolver.context(at: now, schedules: schedules, affirmations: entries,
-                                       fallbackSelection: .all, name: "", calendar: calendar)
+                                       fallbackSelection: .tag("Food"), name: "", calendar: calendar)
         var browsing = TodayBrowsingState()
-        #expect(browsing.cycle(by: 1, at: now, context: context) == body)
+        #expect(browsing.cycle(by: 1, at: now, context: context) != context.affirmation)
         let next = resolver.context(at: context.nextChange, schedules: schedules, affirmations: entries,
-                                    fallbackSelection: .all, name: "", calendar: calendar)
+                                    fallbackSelection: .tag("Food"), name: "", calendar: calendar)
         #expect(browsing.affirmation(at: context.nextChange, context: next) == food)
     }
 
@@ -277,11 +279,11 @@ struct MultipleScheduleTests {
     @Test func unusablePersonalizedContentUsesFallbackUntilReady() {
         let template = Affirmation(text: "Hello {name}", tags: ["Body"])
         let resolver = TodayAffirmationResolver()
-        let fallback = resolver.context(at: date(hour: 12), schedules: [morning()], affirmations: [template, food],
+        let fallback = resolver.context(at: date(hour: 8), schedules: [morning()], affirmations: [template, food],
                                         fallbackSelection: .tag("Food"), name: "", calendar: calendar)
         #expect(fallback.affirmation == food)
         #expect(fallback.nextChange == date(day: 2, hour: 0))
-        let ready = resolver.context(at: date(hour: 12), schedules: [morning()], affirmations: [template, food],
+        let ready = resolver.context(at: date(hour: 8), schedules: [morning()], affirmations: [template, food],
                                      fallbackSelection: .tag("Food"), name: "Alex", calendar: calendar)
         #expect(ready.affirmation?.text == "Hello Alex")
     }
