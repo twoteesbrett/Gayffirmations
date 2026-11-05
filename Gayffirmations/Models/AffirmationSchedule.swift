@@ -170,6 +170,17 @@ struct TimeOfDay: Codable, Equatable, Comparable {
         ) ?? date
     }
 
+    func occurrence(in day: DateInterval, calendar: Calendar) -> Date? {
+        // Resolve once per local day, keeping the minute when a clock jump skips the hour.
+        guard let occurrence = calendar.nextDate(
+            after: day.start.addingTimeInterval(-1),
+            matching: DateComponents(hour: hour, minute: minute, second: 0),
+            matchingPolicy: .nextTimePreservingSmallerComponents,
+            repeatedTimePolicy: .first
+        ), occurrence < day.end else { return nil }
+        return occurrence
+    }
+
     var minutesSinceMidnight: Int {
         hour * 60 + minute
     }

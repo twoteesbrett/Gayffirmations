@@ -62,6 +62,48 @@ struct TodayAffirmationResolverTests {
         #expect(expiry.timeIntervalSince(start) == 23 * 60 * 60)
     }
 
+    @Test func repeatedHourKeepsTheFirstOccurrenceWithoutExpiringBrowsingTwice() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Pacific/Auckland"))
+        let schedule = AffirmationSchedule(
+            isEnabled: true,
+            startTime: TimeOfDay(hour: 2, minute: 7),
+            endTime: TimeOfDay(hour: 3, minute: 37),
+            notificationsPerDay: 2
+        )
+        let first0230 = try Date("2026-04-04T13:30:00Z", strategy: .iso8601)
+        let second0210 = try Date("2026-04-04T14:10:00Z", strategy: .iso8601)
+        let next0315 = try Date("2026-04-04T15:15:00Z", strategy: .iso8601)
+
+        #expect(resolver.nextChange(after: first0230.addingTimeInterval(-1), schedule: schedule, calendar: calendar) == first0230)
+        for instant in [first0230, second0210] {
+            let context = resolver.context(at: instant, schedules: [schedule], affirmations: affirmations,
+                                           fallbackSelection: .all, name: "", calendar: calendar)
+            #expect(context.affirmation == affirmations[0])
+            #expect(context.nextChange == next0315)
+        }
+    }
+
+    @Test func missingHourShiftsTheReminderForwardAndOrdersItByTheResultingTime() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Pacific/Auckland"))
+        let schedule = AffirmationSchedule(
+            isEnabled: true,
+            startTime: TimeOfDay(hour: 2, minute: 7),
+            endTime: TimeOfDay(hour: 3, minute: 37),
+            notificationsPerDay: 2
+        )
+        let normal0315 = try Date("2026-09-26T14:15:00Z", strategy: .iso8601)
+        let shifted0330 = try Date("2026-09-26T14:30:00Z", strategy: .iso8601)
+
+        #expect(resolver.nextChange(after: normal0315.addingTimeInterval(-1), schedule: schedule, calendar: calendar) == normal0315)
+        let context = resolver.context(at: normal0315, schedules: [schedule], affirmations: affirmations,
+                                       fallbackSelection: .all, name: "", calendar: calendar)
+        #expect(context.affirmation == affirmations[1])
+        #expect(context.nextChange == shifted0330)
+        #expect(resolver.affirmation(at: shifted0330, schedule: schedule, affirmations: affirmations, calendar: calendar) == affirmations[0])
+    }
+
     @Test func themeFollowsTheLatestReminderDuringItsSchedulePeriod() {
         let morning = AffirmationSchedule(
             isEnabled: true, startTime: TimeOfDay(hour: 8, minute: 0),
