@@ -49,7 +49,7 @@ struct FallbackAffirmationsView: View {
             }
         }
         .themedBackground()
-        .navigationTitle("Default affirmations")
+        .navigationTitle("Default Affirmations")
         .navigationBarTitleDisplayMode(.inline)
         .disabled(coordinator.isUpdating)
         .alert("Unable to Save Default Affirmations", isPresented: Binding(

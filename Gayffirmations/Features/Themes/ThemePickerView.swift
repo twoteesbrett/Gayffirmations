@@ -106,6 +106,7 @@ struct ThemePickerView: View {
         }
         .themedBackground()
         .navigationTitle("Default Theme")
+        .navigationBarTitleDisplayMode(.inline)
         .onDisappear { saveDimming() }
         .onChange(of: store.selectedTheme) { _, _ in
             dimmingDraft = nil
