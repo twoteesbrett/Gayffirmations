@@ -41,7 +41,7 @@ struct ScheduleView: View {
                 Text("Each schedule has its own tags, theme, times, and daily rhythm. Swipe right to duplicate a schedule, or left to delete it.")
             }
 
-            Section("Daily preview") {
+            Section {
                 LabeledContent("Enabled reminders", value: "\(notificationCoordinator.dailyTotal) of \(ScheduleValidation.dailyReminderLimit)")
                 if plan.isEmpty {
                     Text("No reminders are ready to deliver. Enable a schedule with matching affirmations to see your day here.")
@@ -62,6 +62,12 @@ struct ScheduleView: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
+                }
+            } header: {
+                Text("Daily preview")
+            } footer: {
+                if !plan.isEmpty {
+                    Text("Messages rotate each day. Open the app periodically to refill your reminders. Delivery pauses if the queue runs out.")
                 }
             }
         }

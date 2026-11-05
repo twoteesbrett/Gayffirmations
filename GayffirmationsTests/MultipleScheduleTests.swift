@@ -42,7 +42,7 @@ struct MultipleScheduleTests {
         let restarted = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
         #expect(restarted.persistenceErrorMessage == nil)
         #expect(restarted.schedules.contains(schedule))
-        #expect(scheduler.scheduledReminders.count == schedule.notificationsPerDay)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(schedule.summary.contains(schedule.selection.name))
         #expect(schedule.summary.contains(schedule.timeRangeDescription))
     }
@@ -64,7 +64,7 @@ struct MultipleScheduleTests {
         let schedules = [morning(), evening()]
         let entries = [body, confidence, food]
         let resolver = TodayAffirmationResolver()
-        let plan = try NotificationPlanner().plan(for: schedules, affirmations: entries, name: "")
+        let plan = try NotificationPlanner().plan(for: schedules, affirmations: entries, name: "", on: date(hour: 0), calendar: calendar)
         for slot in plan {
             let context = resolver.context(at: slot.time.date(on: date(hour: 0), calendar: calendar),
                                            schedules: schedules, affirmations: entries,
@@ -111,11 +111,11 @@ struct MultipleScheduleTests {
         #expect(coordinator.isPaused(morning))
         #expect(!coordinator.isPaused(evening))
         #expect(!coordinator.deliveryIsPaused)
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         try library.add(text: "New body", tags: ["Body"])
         await coordinator.waitForLibraryRefresh()
         #expect(!coordinator.isPaused(morning))
-        #expect(scheduler.scheduledReminders.count == 4)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(store.schedules.allSatisfy { $0.isEnabled })
     }
 
@@ -143,10 +143,13 @@ struct MultipleScheduleTests {
         await coordinator.reconcileOnLaunch()
         let eveningReminders = scheduler.scheduledReminders.filter { $0.affirmationText == "Food" }
         try await coordinator.setEnabled(false, for: morning.id)
-        #expect(scheduler.scheduledReminders == eveningReminders)
+        let eveningOnly = scheduler.scheduledReminders
+        #expect(eveningOnly.starts(with: eveningReminders))
+        #expect(eveningOnly.count == NotificationReminder.pendingLimit)
+        #expect(eveningOnly.allSatisfy { $0.identifier.contains(evening.id.uuidString) })
         try await coordinator.deleteSchedule(id: morning.id)
         #expect(store.schedules == [evening])
-        #expect(scheduler.scheduledReminders == eveningReminders)
+        #expect(scheduler.scheduledReminders == eveningOnly)
         try await coordinator.deleteSchedule(id: evening.id)
         #expect(store.schedules.isEmpty)
         #expect(scheduler.scheduledReminders.isEmpty)

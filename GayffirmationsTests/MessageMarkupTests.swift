@@ -35,7 +35,12 @@ struct MessageMarkupTests {
         let schedule = AffirmationSchedule(isEnabled: true)
         let plan = try NotificationPlanner().plan(for: [schedule], affirmations: store.affirmations, name: "")
         #expect(plan.count == schedule.notificationsPerDay)
-        #expect(plan.allSatisfy { $0.reminder.affirmationText == "Hello\nWorld" })
+        let requests = try NotificationPlanner().upcomingReminders(
+            for: [schedule], affirmations: store.affirmations, name: "", sound: .none,
+            after: .now, calendar: .current
+        )
+        #expect(!requests.isEmpty)
+        #expect(requests.allSatisfy { $0.affirmationText == "Hello\nWorld" })
         #expect(try NotificationPlanner().plan(for: [schedule], affirmations: [blank], name: "").isEmpty)
         #expect(Affirmation(text: "{name}").resolved(name: "<br>") == nil)
         try store.update(id: blank.id, text: "Repaired")

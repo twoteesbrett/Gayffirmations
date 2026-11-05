@@ -78,7 +78,7 @@ struct PersistenceRepositoryTests {
             affirmationStore: library, scheduleStore: store, scheduler: scheduler
         )
         await coordinator.reconcileOnLaunch()
-        #expect(scheduler.scheduledReminders.count == 5)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
 
         scheduler.authorizationStatusValue = .denied
         await coordinator.reconcileOnLaunch()
@@ -101,7 +101,7 @@ struct PersistenceRepositoryTests {
         )
         await restarted.reconcileOnLaunch()
         #expect(restartedStore.schedules == schedules)
-        #expect(scheduler.scheduledReminders.count == 5)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == "Edited while denied" })
         #expect(scheduler.authorizationRequestCount == 0)
     }
@@ -164,7 +164,7 @@ struct PersistenceRepositoryTests {
         #expect(!restarted.schedule.isEnabled)
         #expect(restarted.notificationSound == .none)
         try await coordinator.setEnabled(true)
-        #expect(scheduler.scheduledReminders.count == 1)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
     }
 
     @Test("Legacy schedules keep evenly spaced times")

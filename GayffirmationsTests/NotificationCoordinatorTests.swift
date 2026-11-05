@@ -12,10 +12,11 @@ struct NotificationCoordinatorTests {
         let original = scheduler.scheduledReminders
         try await coordinator.setRhythm(.moreLate)
         try await coordinator.setEmphasis(.strong)
-        #expect(store.schedule.notificationsPerDay == original.count)
         #expect(scheduler.scheduledReminders.count == original.count)
-        #expect(scheduler.scheduledReminders.map(\.time)
+        #expect(coordinator.dailyPlan.map(\.time)
                 == (try ScheduleCalculator().notificationTimes(for: store.schedule)))
+        #expect(Set(scheduler.scheduledReminders.map { TimeOfDay(date: $0.deliveryDate).minutesSinceMidnight })
+                == Set(coordinator.dailyPlan.map { $0.time.minutesSinceMidnight }))
         #expect(scheduler.scheduledReminders != original)
         let saved = store.schedule
         let reminders = scheduler.scheduledReminders
@@ -135,7 +136,7 @@ struct NotificationCoordinatorTests {
         #expect(schedule.schedule == originalSchedule)
         #expect(try repository.loadSchedule() == originalSchedule)
         #expect(defaults.data(forKey: "gayffirmations.affirmationSelection") == corruptData)
-        #expect(scheduler.scheduledReminders.count == 4)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(scheduler.replaceCallCount == 2)
         #expect(coordinator.errorMessage == nil)
     }
@@ -194,7 +195,7 @@ struct NotificationCoordinatorTests {
             fallbackSelectionStore: AffirmationSelectionStore(repository: repository)
         )
         await coordinator.reconcileOnLaunch()
-        #expect(scheduler.scheduledReminders.count == 4)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(schedule.schedule.isEnabled)
     }
 
@@ -262,31 +263,54 @@ struct NotificationCoordinatorTests {
 
     @Test("Library text edits refresh delivery only when a planned reminder changes")
     func onlyEffectiveLibraryEditsRefreshReminders() async throws {
-        let entries = (1...5).map { Affirmation(text: "Message \($0)") }
+        let entries = (1...65).map { Affirmation(text: "Message \($0)") }
+        let date = Calendar.current.date(from: DateComponents(year: 2001, month: 1, day: 1))!
         let library = AffirmationStore(affirmations: entries)
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
-            affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler
+            affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler, now: { date }
         )
         try await coordinator.setEnabled(true)
         let originalReminders = scheduler.scheduledReminders
         let replacements = scheduler.replaceCallCount
         let removals = scheduler.removeCallCount
-        #expect(originalReminders.map(\.affirmationText) == entries.prefix(4).map(\.text))
+        #expect(originalReminders.map(\.affirmationText) == entries.prefix(64).map(\.text))
 
-        try library.update(id: entries[4].id, text: "Edited unused message")
+        try library.update(id: entries[64].id, text: "Edited unused message")
         try library.update(id: entries[0].id, text: "<small>Message 1</small>")
-        #expect(library.affirmations.first { $0.id == entries[4].id }?.text == "Edited unused message")
+        #expect(library.affirmations.first { $0.id == entries[64].id }?.text == "Edited unused message")
         #expect(!coordinator.isUpdating)
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.removeCallCount == removals)
         #expect(scheduler.replaceCallCount == replacements)
         #expect(scheduler.scheduledReminders == originalReminders)
 
-        try library.update(id: entries[0].id, text: "Edited scheduled message")
+        try library.update(id: entries[4].id, text: "Edited scheduled message")
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.replaceCallCount == replacements + 1)
-        #expect(scheduler.scheduledReminders.first?.affirmationText == "Edited scheduled message")
+        #expect(scheduler.scheduledReminders[4].affirmationText == "Edited scheduled message")
+    }
+
+    @Test func returningToTheAppRefillsTheQueueAndKeepsUpcomingMessagesStable() async throws {
+        let library = AffirmationStore(affirmations: (1...9).map { Affirmation(text: "Message \($0)") })
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let calendar = Calendar.current
+        var now = calendar.date(from: DateComponents(year: 2026, month: 11, day: 5))!
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler, now: { now }
+        )
+        try await coordinator.setEnabled(true)
+        let original = scheduler.scheduledReminders
+
+        now = calendar.date(byAdding: .day, value: 1, to: now)!
+        await coordinator.reconcileOnForeground()
+
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.deliveryDate > now })
+        #expect(scheduler.scheduledReminders.starts(with: original.dropFirst(4)))
+        let originalEnd = try #require(original.last?.deliveryDate)
+        let newEnd = try #require(scheduler.scheduledReminders.last?.deliveryDate)
+        #expect(newEnd > originalEnd)
     }
 
     @Test("Changing source replaces delivery and failed scheduling restores the old source")
@@ -337,7 +361,7 @@ struct NotificationCoordinatorTests {
         try await coordinator.setEnabled(true)
 
         #expect(scheduler.authorizationRequestCount == 1)
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(scheduleStore.schedule.isEnabled)
     }
 
@@ -351,7 +375,7 @@ struct NotificationCoordinatorTests {
         try await coordinator.setEnabled(true)
 
         #expect(scheduler.authorizationRequestCount == 0)
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
     }
 
     @Test("Denied permission leaves reminders disabled")
@@ -439,7 +463,7 @@ struct NotificationCoordinatorTests {
         #expect(scheduleStore.schedule.startTime == TimeOfDay(hour: 8, minute: 0))
         #expect(scheduleStore.schedule.notificationsPerDay == 3)
         #expect(scheduler.replaceCallCount == 2)
-        #expect(scheduler.scheduledReminders.count == 3)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
     }
 
     @Test("Library edits, deletions, and restores refresh reminder text")
@@ -487,7 +511,7 @@ struct NotificationCoordinatorTests {
         #expect(scheduler.scheduledReminders.isEmpty)
         scheduler.replacementError = nil
         await coordinator.reconcileOnForeground()
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(coordinator.errorMessage == nil)
     }
 

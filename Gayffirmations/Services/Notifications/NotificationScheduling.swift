@@ -7,10 +7,12 @@ enum NotificationAuthorizationStatus: Equatable {
 }
 
 struct NotificationReminder: Equatable {
-    let time: TimeOfDay
+    static let pendingLimit = 64
+
+    let deliveryDate: Date
     let affirmationText: String
-    var sound: NotificationSound = .systemDefault
-    var identifier: String = ""
+    let sound: NotificationSound
+    let identifier: String
 }
 
 protocol NotificationScheduling {

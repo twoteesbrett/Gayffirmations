@@ -12,7 +12,7 @@ struct TodayBrowsingStateTests {
     }
 
     private func date(hour: Int) -> Date {
-        calendar.date(from: DateComponents(year: 2026, month: 10, day: 1, hour: hour))!
+        calendar.date(from: DateComponents(year: 2026, month: 10, day: 2, hour: hour))!
     }
 
     @Test func browsingWrapsInBothDirections() {

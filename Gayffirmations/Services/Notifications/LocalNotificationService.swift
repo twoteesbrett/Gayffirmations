@@ -50,16 +50,16 @@ final class LocalNotificationService: NotificationScheduling {
     func replacePendingNotifications(
         with reminders: [NotificationReminder]
     ) async throws {
-        guard (1...ScheduleValidation.dailyReminderLimit).contains(reminders.count) else {
+        guard (1...NotificationReminder.pendingLimit).contains(reminders.count) else {
             throw ScheduleCalculatorError.invalidReminderCount
         }
         try Task.checkCancellation()
         removePendingNotifications()
 
         do {
-            for (index, reminder) in reminders.enumerated() {
+            for reminder in reminders where reminder.deliveryDate > .now {
                 try Task.checkCancellation()
-                try await center.add(request(for: reminder, index: index))
+                try await center.add(request(for: reminder))
                 try Task.checkCancellation()
             }
         } catch {
@@ -73,10 +73,7 @@ final class LocalNotificationService: NotificationScheduling {
         center.removeAllPendingNotificationRequests()
     }
 
-    func request(
-        for reminder: NotificationReminder,
-        index: Int
-    ) -> UNNotificationRequest {
+    func request(for reminder: NotificationReminder) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         content.title = "Gayffirmations"
         content.body = reminder.affirmationText
@@ -91,16 +88,17 @@ final class LocalNotificationService: NotificationScheduling {
             }
         }
 
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: DateComponents(
-                hour: reminder.time.hour,
-                minute: reminder.time.minute
-            ),
-            repeats: true
+        // Use UTC to preserve the exact instant during a repeated local hour.
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let components = calendar.dateComponents(
+            [.calendar, .timeZone, .year, .month, .day, .hour, .minute, .second],
+            from: reminder.deliveryDate
         )
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
 
         return UNNotificationRequest(
-            identifier: reminder.identifier.isEmpty ? "gayffirmations.daily.\(index)" : reminder.identifier,
+            identifier: reminder.identifier,
             content: content,
             trigger: trigger
         )

@@ -37,17 +37,20 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     let scheduleStore: ScheduleStore
     private let scheduler: any NotificationScheduling
     private let planner = NotificationPlanner()
+    private let now: () -> Date
 
     init(
         affirmationStore: AffirmationStore,
         scheduleStore: ScheduleStore,
         scheduler: any NotificationScheduling,
         fallbackSelectionStore: AffirmationSelectionStore? = nil,
-        personalizationStore: PersonalizationStore? = nil
+        personalizationStore: PersonalizationStore? = nil,
+        now: @escaping () -> Date = { .now }
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
         self.scheduler = scheduler
+        self.now = now
         self.fallbackSelectionStore = fallbackSelectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
         affirmationStore.attachChangeObserver(self)
@@ -68,7 +71,10 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         scheduleStore.schedules.filter(\.isEnabled).reduce(0) { $0 + $1.notificationsPerDay }
     }
     var dailyPlan: [ScheduledAffirmation] {
-        (try? plan(for: scheduleStore.schedules)) ?? []
+        (try? planner.plan(
+            for: scheduleStore.schedules, affirmations: affirmationStore.affirmations,
+            name: personalizationStore.name, sound: scheduleStore.notificationSound, on: now()
+        )) ?? []
     }
     var deliveryIsPaused: Bool { enabledCount > 0 && dailyPlan.isEmpty }
 
@@ -157,12 +163,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
             return
         }
         if enabledCount > 0 { try checkDeliveryData() }
-        let reminders = try planner.plan(
-            for: scheduleStore.schedules,
-            affirmations: affirmationStore.affirmations,
-            name: personalizationStore.name,
-            sound: sound
-        ).map(\.reminder)
+        let reminders = try upcomingReminders(for: scheduleStore.schedules, sound: sound, after: now())
         try await replaceRemindersAndSave(reminders) {
             try scheduleStore.setNotificationSound(sound)
         }
@@ -201,7 +202,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
             return
         }
         try checkDeliveryData()
-        let reminders = try plan(for: schedules).map(\.reminder)
+        let reminders = try upcomingReminders(for: schedules, after: now())
         try await replaceRemindersAndSave(reminders) {
             try scheduleStore.replace(with: schedules)
         }
@@ -239,18 +240,24 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         throw NotificationCoordinatorError.permissionDenied
     }
 
-    private func plan(
+    private func upcomingReminders(
         for schedules: [AffirmationSchedule],
-        affirmations: [Affirmation]? = nil
-    ) throws -> [ScheduledAffirmation] {
-        try planner.plan(for: schedules, affirmations: affirmations ?? affirmationStore.affirmations,
-                         name: personalizationStore.name, sound: scheduleStore.notificationSound)
+        affirmations: [Affirmation]? = nil,
+        sound: NotificationSound? = nil,
+        after date: Date,
+        calendar: Calendar = .current
+    ) throws -> [NotificationReminder] {
+        try planner.upcomingReminders(
+            for: schedules, affirmations: affirmations ?? affirmationStore.affirmations,
+            name: personalizationStore.name, sound: sound ?? scheduleStore.notificationSound,
+            after: date, calendar: calendar
+        )
     }
 
     private func restoreSavedReminders() async throws {
         do {
             if enabledCount > 0 { try checkDeliveryData() }
-            try await replaceReminders(with: plan(for: scheduleStore.schedules).map(\.reminder))
+            try await replaceReminders(with: upcomingReminders(for: scheduleStore.schedules, after: now()))
             clearDeliveryIssue()
         } catch {
             scheduler.removePendingNotifications()
@@ -305,11 +312,13 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     private func deliveryChanges(from previous: [Affirmation]) -> Bool {
         guard enabledCount > 0 else { return false }
         let schedules = scheduleStore.schedules
-        guard let previousPlan = try? plan(for: schedules, affirmations: previous),
-              let currentPlan = try? plan(for: schedules) else {
+        let date = now()
+        let calendar = Calendar.current
+        guard let previousPlan = try? upcomingReminders(for: schedules, affirmations: previous, after: date, calendar: calendar),
+              let currentPlan = try? upcomingReminders(for: schedules, after: date, calendar: calendar) else {
             return true // Let reconciliation report planning errors and clear stale reminders.
         }
-        return previousPlan.map(\.reminder) != currentPlan.map(\.reminder)
+        return previousPlan != currentPlan
     }
 
     private func replaceReminders(with reminders: [NotificationReminder]) async throws {

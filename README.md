@@ -162,6 +162,11 @@ Schedules are identified by their time range and affirmation selection, without
 requiring a name. Existing installations preserve all delivery settings and copy
 the old shared content selection once.
 
+Each schedule rotates through its matching affirmations by local date, wrapping
+around when it reaches the end. The app queues the next 64 reminders and refills
+the queue when it opens or returns to the foreground. Four reminders per day
+give about 16 days of delivery before the queue runs out.
+
 Today and notifications use the same combined daily plan. Today shows the most
 recent scheduled affirmation across all enabled, deliverable schedules, keeping
 the final reminder current overnight. Tied times retain saved schedule order;

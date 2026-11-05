@@ -34,24 +34,24 @@ struct LocalNotificationServiceTests {
         #expect(center.events.isEmpty)
     }
 
-    @Test("Submitted requests preserve identifiers, text, exact time components, and daily repetition")
+    @Test("Submitted requests preserve identifiers, text, and exact one-time delivery dates")
     func requestContract() async throws {
         let center = NotificationCenterFake()
         let service = LocalNotificationService(client: center)
         let reminders = [
-            NotificationReminder(time: TimeOfDay(hour: 0, minute: 0), affirmationText: "Midnight", sound: .none, identifier: "schedule-A.0"),
-            NotificationReminder(time: TimeOfDay(hour: 23, minute: 59), affirmationText: "Late", sound: .systemDefault, identifier: "schedule-B.0"),
-            NotificationReminder(time: TimeOfDay(hour: 12, minute: 34), affirmationText: "Legacy", sound: .none)
+            reminder(hour: 0, text: "Midnight", identifier: "schedule-A.0", sound: .none),
+            reminder(hour: 23, text: "Late", identifier: "schedule-B.0"),
+            reminder(hour: 12, text: "Another", identifier: "schedule-C.0", sound: .none)
         ]
         try await service.replacePendingNotifications(with: reminders)
-        #expect(center.events == ["remove", "add:schedule-A.0", "add:schedule-B.0", "add:gayffirmations.daily.2"])
+        #expect(center.events == ["remove", "add:schedule-A.0", "add:schedule-B.0", "add:schedule-C.0"])
         #expect(center.requests.count == 3)
         for (request, reminder) in zip(center.requests, reminders) {
             #expect(request.content.title == "Gayffirmations")
             #expect(request.content.body == reminder.affirmationText)
             let trigger = try #require(request.trigger as? UNCalendarNotificationTrigger)
-            #expect(trigger.dateComponents == DateComponents(hour: reminder.time.hour, minute: reminder.time.minute))
-            #expect(trigger.repeats)
+            #expect(trigger.nextTriggerDate() == reminder.deliveryDate)
+            #expect(!trigger.repeats)
         }
         #expect(center.requests[0].content.sound == nil)
         #expect(center.requests[1].content.sound == UNNotificationSound.default)
@@ -72,17 +72,17 @@ struct LocalNotificationServiceTests {
         let center = NotificationCenterFake()
         let service = LocalNotificationService(client: center)
         try await service.replacePendingNotifications(with: [
-            NotificationReminder(time: TimeOfDay(hour: 9, minute: 0), affirmationText: "Hello", sound: mapping.0)
+            reminder(hour: 9, text: "Hello", identifier: "hello", sound: mapping.0)
         ])
         let request = try #require(center.requests.first)
         #expect(request.content.sound == UNNotificationSound(named: UNNotificationSoundName(mapping.1)))
     }
 
-    @Test("Invalid counts leave previously submitted requests untouched", arguments: [0, 25])
+    @Test("Invalid counts leave previously submitted requests untouched", arguments: [0, 65])
     func invalidCounts(count: Int) async throws {
         let center = NotificationCenterFake()
         let service = LocalNotificationService(client: center)
-        let reminder = NotificationReminder(time: TimeOfDay(hour: 9, minute: 0), affirmationText: "Saved", identifier: "saved")
+        let reminder = reminder(hour: 9, text: "Saved", identifier: "saved")
         try await service.replacePendingNotifications(with: [reminder])
         let previous = center.requests
         let events = center.events
@@ -99,7 +99,7 @@ struct LocalNotificationServiceTests {
         let center = NotificationCenterFake()
         let service = LocalNotificationService(client: center)
         let reminders = (0..<3).map {
-            NotificationReminder(time: TimeOfDay(hour: 9 + $0, minute: 0), affirmationText: "Message \($0)", identifier: "new.\($0)")
+            reminder(hour: 9 + $0, text: "Message \($0)", identifier: "new.\($0)")
         }
         try await service.replacePendingNotifications(with: [reminders[0]])
         center.failAtAddIndex = center.addCallCount + index
@@ -122,7 +122,7 @@ struct LocalNotificationServiceTests {
         center.suspension = gate
         let service = LocalNotificationService(client: center)
         let reminders = (0..<3).map {
-            NotificationReminder(time: TimeOfDay(hour: 9 + $0, minute: 0), affirmationText: "Message", identifier: "new.\($0)")
+            reminder(hour: 9 + $0, text: "Message", identifier: "new.\($0)")
         }
         let replacement = Task { try await service.replacePendingNotifications(with: reminders) }
         await gate.waitUntilSuspended()
@@ -132,6 +132,15 @@ struct LocalNotificationServiceTests {
         #expect(center.addCallCount == 1)
         #expect(center.requests.isEmpty)
         #expect(center.events == ["remove", "add:new.0", "remove"])
+    }
+
+    private func reminder(
+        hour: Int, text: String, identifier: String, sound: NotificationSound = .systemDefault
+    ) -> NotificationReminder {
+        let calendar = Calendar(identifier: .gregorian)
+        let tomorrow = calendar.dateInterval(of: .day, for: .now)!.end
+        let date = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: tomorrow)!
+        return NotificationReminder(deliveryDate: date, affirmationText: text, sound: sound, identifier: identifier)
     }
 
     @Test("Coordinator rollback through the real adapter restores the previous request collection")

@@ -50,7 +50,7 @@ struct NotificationSoundTests {
         let original = scheduler.scheduledReminders
         try await coordinator.setSound(sound)
         #expect(store.notificationSound == sound)
-        #expect(scheduler.scheduledReminders.map(\.time) == original.map(\.time))
+        #expect(scheduler.scheduledReminders.map(\.deliveryDate) == original.map(\.deliveryDate))
         #expect(scheduler.scheduledReminders.map(\.affirmationText) == original.map(\.affirmationText))
         #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == sound })
     }
@@ -108,8 +108,7 @@ struct NotificationSoundTests {
     @Test("Notification requests omit sound only for None", arguments: NotificationSound.allCases)
     func requestSound(sound: NotificationSound) {
         let request = LocalNotificationService().request(
-            for: NotificationReminder(time: TimeOfDay(hour: 9, minute: 0), affirmationText: "Hello", sound: sound),
-            index: 0
+            for: NotificationReminder(deliveryDate: .now, affirmationText: "Hello", sound: sound, identifier: "test")
         )
         #expect((request.content.sound == nil) == (sound == .none))
     }
@@ -127,12 +126,12 @@ struct NotificationSoundTests {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = makeCoordinator(store: store, scheduler: scheduler)
         await coordinator.reconcileOnLaunch()
-        #expect(scheduler.scheduledReminders.count == 5)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == .magicMarimba })
         let previous = scheduler.scheduledReminders
         try await coordinator.setSound(.choirHarpBless)
         #expect(scheduler.scheduledReminders.map(\.identifier) == previous.map(\.identifier))
-        #expect(scheduler.scheduledReminders.map(\.time) == previous.map(\.time))
+        #expect(scheduler.scheduledReminders.map(\.deliveryDate) == previous.map(\.deliveryDate))
         #expect(scheduler.scheduledReminders.allSatisfy { $0.sound == .choirHarpBless })
         try await coordinator.deleteSchedule(id: first.id)
         try await coordinator.deleteSchedule(id: second.id)

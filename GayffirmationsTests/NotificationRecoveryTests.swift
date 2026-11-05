@@ -26,7 +26,7 @@ struct NotificationRecoveryTests {
         #expect(coordinator.deliveryState == .permissionBlocked)
         scheduler.authorizationStatusValue = .authorized
         await coordinator.reconcileOnForeground()
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(coordinator.errorMessage == nil)
         #expect(scheduler.authorizationRequestCount == 0)
     }
@@ -42,7 +42,7 @@ struct NotificationRecoveryTests {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = fixture.coordinator(store: store, scheduler: scheduler)
         await coordinator.reconcileOnLaunch()
-        #expect(scheduler.scheduledReminders.count == 6)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         scheduler.authorizationStatusValue = status
         await coordinator.reconcileOnForeground()
         #expect(coordinator.deliveryState == .permissionBlocked)
@@ -63,7 +63,7 @@ struct NotificationRecoveryTests {
         await coordinator.reconcileOnForeground()
         #expect(coordinator.deliveryState == .active)
         #expect(coordinator.errorMessage == nil)
-        #expect(scheduler.scheduledReminders.count == 3)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(scheduler.scheduledReminders.allSatisfy {
             $0.identifier.contains(edited.id.uuidString) && $0.sound == .none
         })
@@ -117,7 +117,7 @@ struct NotificationRecoveryTests {
         #expect(scheduler.scheduledReminders.isEmpty)
         await coordinator.reconcileOnForeground()
         #expect(coordinator.deliveryState == .active)
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
     }
 
     @Test("Transient failures preserve intent and recover on foreground",
@@ -163,7 +163,7 @@ struct NotificationRecoveryTests {
         await coordinator.reconcileOnForeground()
         #expect(coordinator.deliveryState == .active)
         #expect(coordinator.errorMessage == nil)
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         let expected = operation == "library" ? "Edited Before" : operation == "name" ? "Hello After" : "Hello Before"
         #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == expected })
         #expect(scheduler.authorizationRequestCount == 0)
@@ -195,7 +195,7 @@ struct NotificationRecoveryTests {
         try await save.value
         await coordinator.waitForReconciliation()
         #expect(store.schedules == [updated])
-        #expect(scheduler.scheduledReminders.count == 3)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(scheduler.replaceCallCount == 3)
         #expect(coordinator.deliveryState == .active)
     }
@@ -224,7 +224,7 @@ struct NotificationRecoveryTests {
         #expect(scheduler.scheduledReminders.isEmpty)
         #expect(coordinator.deliveryState == .failed)
         await coordinator.reconcileOnForeground()
-        #expect(scheduler.scheduledReminders.count == 2)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
         #expect(coordinator.errorMessage == nil)
     }
 
