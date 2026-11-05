@@ -27,7 +27,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .accessibilityHint("Edit the name used in personalised affirmations")
                 }
-                Section {
+                Section("Currently Showing") {
                     TimelineView(.everyMinute) { timeline in
                         let context = TodayAffirmationResolver().context(
                             at: timeline.date, schedules: scheduleStore.schedules,
@@ -35,16 +35,14 @@ struct SettingsView: View {
                             fallbackSelection: notificationCoordinator.fallbackSelectionStore.selection,
                             name: notificationCoordinator.personalizationStore.name
                         )
-                        LabeledContent {
-                            if let scheduleName = context.scheduleName {
-                                Text(scheduleName)
-                            } else {
-                                Text("Default affirmations")
-                            }
-                        } label: {
-                            Text("Currently using")
+                        if let scheduleName = context.scheduleName {
+                            Text(scheduleName)
+                        } else {
+                            Text("Defaults")
                         }
                     }
+                }
+                Section {
                     NavigationLink {
                         FallbackAffirmationsView(coordinator: notificationCoordinator)
                     } label: {
