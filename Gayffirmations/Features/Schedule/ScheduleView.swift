@@ -15,10 +15,13 @@ struct ScheduleView: View {
         let plan = notificationCoordinator.dailyPlan
         let deliveryMinutes = plan.map { $0.time.minutesSinceMidnight }
         let hasOverlappingReminders = Set(deliveryMinutes).count != deliveryMinutes.count
+        let sortedSchedules = store.schedules.sorted {
+            ($0.startTime, $0.endTime) < ($1.startTime, $1.endTime)
+        }
 
         List {
             Section {
-                ForEach(store.schedules) { schedule in
+                ForEach(sortedSchedules) { schedule in
                     scheduleRow(schedule)
                         .padding(.vertical, 4)
                         .swipeActions {
