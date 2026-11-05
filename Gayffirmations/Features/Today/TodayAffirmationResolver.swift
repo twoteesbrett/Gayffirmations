@@ -28,7 +28,7 @@ struct TodayAffirmationResolver {
             return TodayAffirmationContext(
                 affirmation: slot.affirmation,
                 browsingAffirmations: resolved(schedule.selection, in: affirmations, name: name),
-                theme: currentTime >= schedule.startTime && currentTime < schedule.endTime ? schedule.theme : nil,
+                theme: (schedule.startTime...schedule.endTime).contains(currentTime) ? schedule.theme : nil,
                 nextChange: nextChange
             )
         }

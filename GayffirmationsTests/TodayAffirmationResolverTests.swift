@@ -84,6 +84,24 @@ struct TodayAffirmationResolverTests {
         #expect(context(hour: 21).theme == nil)
     }
 
+    @Test func themeAppliesToReminderRoundedToScheduleEnd() {
+        let schedule = AffirmationSchedule(
+            theme: .steel,
+            isEnabled: true,
+            startTime: TimeOfDay(hour: 9, minute: 0),
+            endTime: TimeOfDay(hour: 9, minute: 1),
+            notificationsPerDay: 1
+        )
+        func context(minute: Int) -> TodayAffirmationContext {
+            resolver.context(at: date(hour: 9, minute: minute), schedules: [schedule],
+                             affirmations: affirmations, fallbackSelection: .all, name: "", calendar: calendar)
+        }
+
+        #expect(context(minute: 0).nextChange == date(hour: 9, minute: 1))
+        #expect(context(minute: 1).theme == .steel)
+        #expect(context(minute: 2).theme == nil)
+    }
+
     @Test func schedulesWithoutReadyAffirmationsUseTheDefaultTheme() {
         let schedule = AffirmationSchedule(selection: .tag("Missing"), theme: .steel, isEnabled: true)
         let context = resolver.context(at: date(hour: 12), schedules: [schedule],
