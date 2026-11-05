@@ -53,7 +53,7 @@ nonisolated extension Affirmation {
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000002",
-                "I can want it and still say,<br><small>“Nah, I'm good.”</small>",
+                "<small>I can want it and still say,</small><br>“Nah, I'm good.”",
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000004",

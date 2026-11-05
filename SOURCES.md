@@ -72,18 +72,53 @@ and [system alert playback limitations](https://developer.apple.com/documentatio
 
 ## Out & About
 
-Out & About uses nine user-supplied AI-generated images imported from Desktop/out-and-about.
+Out & About uses nine user-supplied AI-generated images imported from Desktop/assets/out and about.
 Renamed source copies in Assets and bundled PNGs preserve the originals' resolution and aspect ratio.
-The rotation progresses from morning through twilight to moonlight.
+The rotation progresses from daylight through sunset and twilight to moonlight.
 
 | Image | Bundled asset identifier |
 | --- | --- |
-| Lakeside | `out-and-about-lakeside` |
-| Alpine Café | `out-and-about-alpine-cafe` |
+| Lakeside Café | `out-and-about-lakeside-cafe` |
 | Market | `out-and-about-market` |
-| Park | `out-and-about-park` |
-| Pool Club | `out-and-about-pool-club` |
+| Greenhouse Garden | `out-and-about-greenhouse-garden` |
 | Beach | `out-and-about-beach` |
+| Villa Pool | `out-and-about-villa-pool` |
 | Waterfall | `out-and-about-waterfall` |
-| Harbour | `out-and-about-harbour` |
-| Moonlit Lakeside | `out-and-about-moonlit-lakeside` |
+| Thermal Baths | `out-and-about-thermal-baths` |
+| Twilight Dinner | `out-and-about-twilight-dinner` |
+| Moonlit Piazza | `out-and-about-moonlit-piazza` |
+
+## Together
+
+Together uses nine user-supplied AI-generated images imported from Desktop/assets/together.
+Renamed source copies in Assets and bundled PNGs preserve the original files, resolution and aspect ratio.
+The ordered rotation follows the accompanying life-stage brief, from first love around 1970 to companionship around 2012. Dates and stages are narrative interpretations of the images and brief.
+
+| Order | Original image | Bundled asset identifier |
+| --- | --- | --- |
+| 1 | Golden 70s Pickup Romance | `together-pickup-romance` |
+| 2 | Retro Beach Camping Getaway | `together-beach-camping` |
+| 3 | Faded Retro Beach Portrait | `together-sunny-shore` |
+| 4 | Cosy 1980s Couch Reading | `together-couch-reading` |
+| 5 | 1980s Kitchen Cooking Together | `together-kitchen` |
+| 6 | Cycling Adventure on Rural Roads | `together-cycling` |
+| 7 | Mountain Break by the Water | `together-mountain-break` |
+| 8 | Warm Conversation Over Coffee | `together-coffee` |
+| 9 | Golden Companionship by the Coast | `together-coastal-companionship` |
+
+## Ages
+
+Ages uses nine user-supplied images imported from Desktop/assets/ages.
+The renamed copies in Assets and the asset catalogue preserve the original PNG files.
+
+| Original image | Bundled asset identifier |
+| --- | --- |
+| Vintage Harbour Bus Stop | `ages-harbour-bus-stop` |
+| Studying at University | `ages-university` |
+| A Quiet Moment of Support | `ages-quiet-support` |
+| Seaside Campfire at Sunset | `ages-seaside-campfire` |
+| Warm 1980s Office Collaboration | `ages-office` |
+| Support Along the Wet Coast | `ages-coastal-walk` |
+| Warm Vintage Kitchen Cooking | `ages-kitchen` |
+| Nostalgic Memories Among Moving Boxes | `ages-moving-boxes` |
+| Sunny Garden Carrot Harvest | `ages-garden-harvest` |

@@ -203,8 +203,10 @@ struct ThemePreviewRow: View {
     private var previewImage: ThemeImage? {
         let imageID: String?
         switch theme {
+        case .together: imageID = "together-pickup-romance"
+        case .ages: imageID = "ages-garden-harvest"
         case .steel: imageID = "steel-strength"
-        case .outAndAbout: imageID = "out-and-about-lakeside"
+        case .outAndAbout: imageID = "out-and-about-lakeside-cafe"
         }
         return theme.images.first { $0.id == imageID }
     }

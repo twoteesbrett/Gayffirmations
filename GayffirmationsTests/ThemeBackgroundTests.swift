@@ -282,6 +282,17 @@ struct ThemeBackgroundTests {
         #expect(rotation.imageIndex == 0)
     }
 
+    @Test("Together is an active theme with a chronological life-stage rotation")
+    func togetherChronology() throws {
+        let theme = try JSONDecoder().decode(AppTheme.self, from: Data(#""together""#.utf8))
+        #expect(theme == .together)
+        #expect(theme.images.map(\.id) == [
+            "together-pickup-romance", "together-beach-camping", "together-sunny-shore",
+            "together-couch-reading", "together-kitchen", "together-cycling",
+            "together-mountain-break", "together-coffee", "together-coastal-companionship"
+        ])
+    }
+
     @Test("Every theme image has a bundled image")
     func bundledImages() {
         for image in AppTheme.allCases.flatMap({ $0.images }) {

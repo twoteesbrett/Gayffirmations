@@ -379,7 +379,7 @@ struct PersistenceRepositoryTests {
     @Test("Removed themes decode and load as Out & About without replacing the saved value", arguments: [
         "eden", "disco", "concrete", "nature", "ember", "warm", "midnight", "pop", "playful", "neutral", "paper",
         "slate", "coast", "forest", "goldenHour", "afterHours", "cherry",
-        "bubblegum", "daydream", "muscle", "spectrum", "together", "fruity", "refined"
+        "bubblegum", "daydream", "muscle", "spectrum", "fruity", "refined"
     ])
     func removedThemeMigration(name: String) throws {
         let fixture = RepositoryFixture()
