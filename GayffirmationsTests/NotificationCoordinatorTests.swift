@@ -260,6 +260,35 @@ struct NotificationCoordinatorTests {
         #expect(!coordinator.isUpdating)
     }
 
+    @Test("Library text edits refresh delivery only when a planned reminder changes")
+    func onlyEffectiveLibraryEditsRefreshReminders() async throws {
+        let entries = (1...5).map { Affirmation(text: "Message \($0)") }
+        let library = AffirmationStore(affirmations: entries)
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: ScheduleStore(), scheduler: scheduler
+        )
+        try await coordinator.setEnabled(true)
+        let originalReminders = scheduler.scheduledReminders
+        let replacements = scheduler.replaceCallCount
+        let removals = scheduler.removeCallCount
+        #expect(originalReminders.map(\.affirmationText) == entries.prefix(4).map(\.text))
+
+        try library.update(id: entries[4].id, text: "Edited unused message")
+        try library.update(id: entries[0].id, text: "<small>Message 1</small>")
+        #expect(library.affirmations.first { $0.id == entries[4].id }?.text == "Edited unused message")
+        #expect(!coordinator.isUpdating)
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.removeCallCount == removals)
+        #expect(scheduler.replaceCallCount == replacements)
+        #expect(scheduler.scheduledReminders == originalReminders)
+
+        try library.update(id: entries[0].id, text: "Edited scheduled message")
+        await coordinator.waitForLibraryRefresh()
+        #expect(scheduler.replaceCallCount == replacements + 1)
+        #expect(scheduler.scheduledReminders.first?.affirmationText == "Edited scheduled message")
+    }
+
     @Test("Changing source replaces delivery and failed scheduling restores the old source")
     func sourceChangeRecoversOnFailure() async throws {
         let first = Affirmation(text: "First", isFavorite: true)

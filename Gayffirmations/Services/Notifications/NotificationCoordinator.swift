@@ -239,8 +239,11 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         throw NotificationCoordinatorError.permissionDenied
     }
 
-    private func plan(for schedules: [AffirmationSchedule]) throws -> [ScheduledAffirmation] {
-        try planner.plan(for: schedules, affirmations: affirmationStore.affirmations,
+    private func plan(
+        for schedules: [AffirmationSchedule],
+        affirmations: [Affirmation]? = nil
+    ) throws -> [ScheduledAffirmation] {
+        try planner.plan(for: schedules, affirmations: affirmations ?? affirmationStore.affirmations,
                          name: personalizationStore.name, sound: scheduleStore.notificationSound)
     }
 
@@ -300,13 +303,13 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     }
 
     private func deliveryChanges(from previous: [Affirmation]) -> Bool {
-        scheduleStore.schedules.filter(\.isEnabled).contains { schedule in
-            @MainActor func texts(in entries: [Affirmation]) -> [String] {
-                schedule.selection.matchingAffirmations(in: entries)
-                    .compactMap { $0.resolved(name: personalizationStore.name)?.text }
-            }
-            return texts(in: previous) != texts(in: affirmationStore.affirmations)
+        guard enabledCount > 0 else { return false }
+        let schedules = scheduleStore.schedules
+        guard let previousPlan = try? plan(for: schedules, affirmations: previous),
+              let currentPlan = try? plan(for: schedules) else {
+            return true // Let reconciliation report planning errors and clear stale reminders.
         }
+        return previousPlan.map(\.reminder) != currentPlan.map(\.reminder)
     }
 
     private func replaceReminders(with reminders: [NotificationReminder]) async throws {
