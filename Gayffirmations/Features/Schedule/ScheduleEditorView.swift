@@ -49,7 +49,7 @@ struct ScheduleEditorView: View {
                     NavigationLink {
                         ScheduleThemePicker(selection: $draft.theme)
                     } label: {
-                        LabeledContent("Theme", value: draft.theme?.name ?? "Use default")
+                        LabeledContent("Theme", value: draft.theme?.whenAvailable?.name ?? "Use default")
                     }
                 }
                 Section("Daily period") {
@@ -216,7 +216,7 @@ private struct ScheduleContentPicker: View {
                 Text("Affirmations matching any selected tag or Favourites are included once. With nothing selected, this schedule pauses.")
             }
             TagSelectionSection(
-                tags: TagChoices.sortedUnique(availableTags + selection.selectedTags),
+                tags: TagChoices.available(availableTags + selection.selectedTags),
                 selection: selection,
                 onChange: { selection = $0 }
             )
@@ -240,13 +240,13 @@ private struct ScheduleThemePicker: View {
                     HStack {
                         Text("Use default")
                         Spacer()
-                        if selection == nil {
+                        if selection?.whenAvailable == nil {
                             Image(systemName: "checkmark")
                         }
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityAddTraits(selection == nil ? .isSelected : [])
+                .accessibilityAddTraits(selection?.whenAvailable == nil ? .isSelected : [])
             } footer: {
                 Text("Uses the default theme chosen under Appearance in Settings.")
             }
@@ -265,7 +265,7 @@ private struct ScheduleThemePicker: View {
                 }
             }
 
-            ThemeImagePreviewSection(theme: selection ?? defaultTheme)
+            ThemeImagePreviewSection(theme: selection?.whenAvailable ?? defaultTheme)
         }
         .themedBackground()
         .navigationTitle("Theme")

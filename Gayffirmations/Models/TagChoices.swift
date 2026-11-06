@@ -1,6 +1,10 @@
 import Foundation
 
 enum TagChoices {
+    static func available(_ tags: [String]) -> [String] {
+        sortedUnique(tags).filter(ContentAvailability.allowsTag)
+    }
+
     /// Preserve the first spelling of each tag while sorting choices for display.
     static func sortedUnique(_ tags: [String]) -> [String] {
         var uniqueTags: [String] = []

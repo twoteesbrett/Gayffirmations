@@ -145,7 +145,7 @@ struct LibraryView: View {
     }
 
     private var tagChoices: [String] {
-        TagChoices.sortedUnique(filter.selectedTags + store.availableTags)
+        TagChoices.available(filter.selectedTags + store.availableTags)
     }
 
     private var tagPicker: some View {

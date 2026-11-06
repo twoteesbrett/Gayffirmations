@@ -25,7 +25,10 @@ enum AffirmationStoreError: LocalizedError, Equatable {
 @MainActor
 @Observable
 final class AffirmationStore {
-    private(set) var affirmations: [Affirmation]
+    private var storedAffirmations: [Affirmation]
+    var affirmations: [Affirmation] {
+        storedAffirmations.filter(ContentAvailability.allowsAffirmation)
+    }
     private(set) var persistenceErrorMessage: String?
 
     @ObservationIgnored private weak var changeObserver: (any AffirmationChangeObserver)?
@@ -42,7 +45,7 @@ final class AffirmationStore {
     let defaultAffirmations: [Affirmation]
 
     var availableTags: [String] {
-        TagChoices.sortedUnique(affirmations.flatMap(\.tags))
+        TagChoices.available(affirmations.flatMap(\.tags))
     }
 
     func affirmations(tagged tag: String) -> [Affirmation] {
@@ -51,7 +54,7 @@ final class AffirmationStore {
 
     /// Creates an in-memory library for previews and isolated UI tests.
     init(affirmations: [Affirmation] = []) {
-        self.affirmations = affirmations
+        self.storedAffirmations = affirmations
         self.defaultAffirmations = affirmations
         self.repository = nil
     }
@@ -70,13 +73,13 @@ final class AffirmationStore {
             fallback = defaultAffirmations
             if let savedAffirmations = try repository.loadAffirmations() {
                 try AffirmationValidation.validate(savedAffirmations)
-                affirmations = savedAffirmations
+                storedAffirmations = savedAffirmations
             } else {
-                affirmations = defaultAffirmations
+                storedAffirmations = defaultAffirmations
                 try repository.saveAffirmations(defaultAffirmations)
             }
         } catch {
-            affirmations = fallback
+            storedAffirmations = fallback
             persistenceErrorMessage = error.localizedDescription
         }
     }
@@ -87,18 +90,18 @@ final class AffirmationStore {
             text: try validatedText(text),
             tags: normalizedTags(tags)
         )
-        try persist(affirmations + [affirmation])
+        try persist(storedAffirmations + [affirmation])
         return affirmation
     }
 
     // Omitting tags preserves them for callers that only edit text.
     func update(id: Affirmation.ID, text: String, tags: [String]? = nil) throws {
-        guard let index = affirmations.firstIndex(where: { $0.id == id }) else {
+        guard let index = storedAffirmations.firstIndex(where: { $0.id == id }) else {
             return
         }
 
         let text = try validatedText(text, excluding: id)
-        var updatedAffirmations = affirmations
+        var updatedAffirmations = storedAffirmations
         updatedAffirmations[index].text = text
         if let tags {
             updatedAffirmations[index].tags = normalizedTags(tags)
@@ -107,23 +110,23 @@ final class AffirmationStore {
     }
 
     func delete(id: Affirmation.ID) throws {
-        try persist(affirmations.filter { $0.id != id })
+        try persist(storedAffirmations.filter { $0.id != id })
     }
 
     func toggleFavorite(id: Affirmation.ID) throws {
-        guard let index = affirmations.firstIndex(where: { $0.id == id }) else {
+        guard let index = storedAffirmations.firstIndex(where: { $0.id == id }) else {
             return
         }
 
-        var updatedAffirmations = affirmations
+        var updatedAffirmations = storedAffirmations
         updatedAffirmations[index].isFavorite.toggle()
         try persist(updatedAffirmations)
     }
 
     func restoreDefaults() throws {
         let defaultIDs = Set(defaultAffirmations.map(\.id))
-        var reservedIDs = Set(affirmations.map(\.id)).union(defaultIDs)
-        let personal = affirmations.filter { !$0.isBundled }.map { entry in
+        var reservedIDs = Set(storedAffirmations.map(\.id)).union(defaultIDs)
+        let personal = storedAffirmations.filter { !$0.isBundled }.map { entry in
             guard defaultIDs.contains(entry.id) else { return entry }
             // Legacy personal rewrites retain bundled IDs. Move the personal copy
             // once, in the same save that restores the catalogue's stable identity.
@@ -135,7 +138,7 @@ final class AffirmationStore {
                 tags: entry.tags, source: .user
             )
         }
-        let favourites = Set(affirmations.filter { $0.isBundled && $0.isFavorite }.map(\.id))
+        let favourites = Set(storedAffirmations.filter { $0.isBundled && $0.isFavorite }.map(\.id))
         try persist(defaultAffirmations.map {
             var original = $0
             original.isFavorite = favourites.contains($0.id)
@@ -144,15 +147,15 @@ final class AffirmationStore {
     }
 
     func canRestoreOriginal(id: Affirmation.ID) -> Bool {
-        affirmations.contains { $0.id == id && $0.isBundled }
+        storedAffirmations.contains { $0.id == id && $0.isBundled }
             && defaultAffirmations.contains { $0.id == id }
     }
 
     func restoreOriginal(id: Affirmation.ID) throws {
         // Personal ownership takes precedence over a historical catalogue ID.
-        guard !affirmations.contains(where: { $0.id == id && !$0.isBundled }) else { return }
+        guard !storedAffirmations.contains(where: { $0.id == id && !$0.isBundled }) else { return }
         guard var original = defaultAffirmations.first(where: { $0.id == id }) else { return }
-        var updated = affirmations
+        var updated = storedAffirmations
         if let index = updated.firstIndex(where: { $0.id == id }) {
             original.isFavorite = updated[index].isFavorite
             updated[index] = original
@@ -163,7 +166,7 @@ final class AffirmationStore {
     }
 
     func applyPersistedDefaults() {
-        affirmations = defaultAffirmations
+        storedAffirmations = defaultAffirmations
         persistenceErrorMessage = nil
     }
 
@@ -173,11 +176,11 @@ final class AffirmationStore {
         }
 
         try AffirmationValidation.validate(updatedAffirmations)
-        guard updatedAffirmations != affirmations else { return }
+        guard updatedAffirmations != storedAffirmations else { return }
         try changeObserver?.willChangeAffirmations()
         try repository?.saveAffirmations(updatedAffirmations)
         let previousAffirmations = affirmations
-        affirmations = updatedAffirmations
+        storedAffirmations = updatedAffirmations
         changeObserver?.didChangeAffirmations(from: previousAffirmations)
     }
 
@@ -213,13 +216,13 @@ final class AffirmationStore {
         // Restoration can legitimately retain personal and bundled copies with
         // matching text. Metadata edits must not force either copy to be rewritten.
         if let excludedID,
-           let existing = affirmations.first(where: { $0.id == excludedID }),
+           let existing = storedAffirmations.first(where: { $0.id == excludedID }),
            existing.text.trimmingCharacters(in: .whitespacesAndNewlines)
                .compare(trimmedText, options: .caseInsensitive) == .orderedSame {
             return trimmedText
         }
 
-        let isDuplicate = affirmations.contains { affirmation in
+        let isDuplicate = storedAffirmations.contains { affirmation in
             affirmation.id != excludedID
                 && affirmation.text.trimmingCharacters(in: .whitespacesAndNewlines)
                     .compare(trimmedText, options: .caseInsensitive) == .orderedSame

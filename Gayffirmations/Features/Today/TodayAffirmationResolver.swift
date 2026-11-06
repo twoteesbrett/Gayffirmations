@@ -61,7 +61,7 @@ struct TodayAffirmationResolver {
                 affirmation: current.affirmation,
                 browsingAffirmations: schedule.selection.rotation(in: affirmations, name: name),
                 scheduleName: schedule.name.isEmpty ? schedule.summary : schedule.name,
-                theme: schedule.theme,
+                theme: schedule.theme?.whenAvailable,
                 nextChange: nextChange
             )
         }

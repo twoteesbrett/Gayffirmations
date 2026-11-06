@@ -127,7 +127,7 @@ struct ScheduleView: View {
                         Text(schedule.selection.name)
                         Text("\(schedule.notificationsPerDay) per day")
                         Text(schedule.rhythm.title)
-                        Text("Theme: \(schedule.theme?.name ?? "Use default")")
+                        Text("Theme: \(schedule.theme?.whenAvailable?.name ?? "Use default")")
                         if notificationCoordinator.isPaused(schedule) {
                             Label("Paused · No matching affirmations ready", systemImage: "pause.circle")
                         }

@@ -4,8 +4,10 @@ nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
     case outAndAbout, together, ages, steel, gayWonderland
 
     static var alphabetical: [Self] {
-        allCases.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        allCases.filter(ContentAvailability.allowsTheme).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
+
+    var whenAvailable: Self? { ContentAvailability.allowsTheme(self) ? self : nil }
 
     var id: Self { self }
     var name: String {

@@ -35,7 +35,7 @@ struct FallbackAffirmationsView: View {
             }
 
             TagSelectionSection(
-                tags: TagChoices.sortedUnique(coordinator.availableTags + selection.selectedTags),
+                tags: TagChoices.available(coordinator.availableTags + selection.selectedTags),
                 selection: selection,
                 onChange: select
             )

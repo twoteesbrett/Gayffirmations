@@ -42,6 +42,7 @@ final class ThemeStore {
 
     /// Creates an in-memory store for previews and isolated UI tests.
     init(selectedTheme: AppTheme = .outAndAbout) {
+        let selectedTheme = selectedTheme.whenAvailable ?? ContentAvailability.fallbackTheme
         self.selectedTheme = selectedTheme
         self.defaultTheme = selectedTheme
         self.repository = nil
@@ -56,14 +57,14 @@ final class ThemeStore {
     ) {
         self.repository = repository
         self.backgroundRepository = backgroundRepository
+        let defaultTheme = defaultTheme.whenAvailable ?? ContentAvailability.fallbackTheme
         self.defaultTheme = defaultTheme
 
         do {
             let backgrounds = try backgroundRepository?.loadThemeBackgrounds() ?? [:]
-            if let savedTheme = try repository.loadTheme() {
-                selectedTheme = savedTheme
-            } else {
-                selectedTheme = defaultTheme
+            let savedTheme = try repository.loadTheme()
+            selectedTheme = savedTheme?.whenAvailable ?? defaultTheme
+            if savedTheme == nil {
                 try repository.saveTheme(defaultTheme)
             }
 
@@ -71,7 +72,7 @@ final class ThemeStore {
                 backgroundChoice = appearance
             } else if backgrounds.keys.contains(where: { AppTheme(rawValue: $0) != nil }) {
                 // Use the saved default theme's preferences when consolidating old settings.
-                let appearance = backgrounds[selectedTheme.rawValue] ?? backgroundChoice
+                let appearance = backgrounds[(savedTheme ?? defaultTheme).rawValue] ?? backgroundChoice
                 try backgroundRepository?.saveThemeBackgrounds([Self.appearanceKey: appearance])
                 backgroundChoice = appearance
             }
@@ -109,6 +110,7 @@ final class ThemeStore {
     }
 
     func select(_ theme: AppTheme) throws {
+        guard ContentAvailability.allowsTheme(theme) else { return }
         try persist(theme)
     }
 

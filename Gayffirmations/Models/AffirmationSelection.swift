@@ -47,7 +47,7 @@ enum AffirmationSelection: Codable, Hashable {
     }
 
     func containsTag(_ tag: String) -> Bool {
-        selectedTags.contains { $0.compare(AffirmationTag.canonicalTag(tag), options: .caseInsensitive) == .orderedSame }
+        ContentAvailability.allowsTag(tag) && selectedTags.contains { $0.compare(AffirmationTag.canonicalTag(tag), options: .caseInsensitive) == .orderedSame }
     }
 
     func selectingFavourites(_ included: Bool) -> AffirmationSelection {
