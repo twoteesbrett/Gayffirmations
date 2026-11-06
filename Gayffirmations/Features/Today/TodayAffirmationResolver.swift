@@ -59,21 +59,17 @@ struct TodayAffirmationResolver {
             let schedule = current.schedule
             return TodayAffirmationContext(
                 affirmation: current.affirmation,
-                browsingAffirmations: resolved(schedule.selection, in: affirmations, name: name),
+                browsingAffirmations: schedule.selection.rotation(in: affirmations, name: name),
                 scheduleName: schedule.name.isEmpty ? schedule.summary : schedule.name,
                 theme: schedule.theme,
                 nextChange: nextChange
             )
         }
 
-        let entries = resolved(fallbackSelection, in: affirmations, name: name)
+        let entries = fallbackSelection.rotation(in: affirmations, name: name)
         let referenceDay = calendar.startOfDay(for: Date(timeIntervalSince1970: 0))
         let index = calendar.dateComponents([.day], from: referenceDay, to: calendar.startOfDay(for: date)).day ?? 0
         let affirmation = entries.isEmpty ? nil : entries[((index % entries.count) + entries.count) % entries.count]
         return TodayAffirmationContext(affirmation: affirmation, browsingAffirmations: entries, nextChange: nextChange)
-    }
-
-    private func resolved(_ selection: AffirmationSelection, in affirmations: [Affirmation], name: String) -> [Affirmation] {
-        selection.matchingAffirmations(in: affirmations).compactMap { $0.resolved(name: name) }
     }
 }

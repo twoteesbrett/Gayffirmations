@@ -54,7 +54,10 @@ struct NotificationPlannerTests {
 
     @Test func upcomingRemindersRotateWrapAndMatchToday() throws {
         let schedule = AffirmationSchedule(isEnabled: true)
-        let entries = (1...9).map { Affirmation(text: "Message \($0)") }
+        let entries = (1...9).map {
+            Affirmation(text: "Message \($0)", tags: [$0 <= 5 ? "human" : "gay"])
+        }
+        let mixedEntries = [0, 5, 1, 6, 2, 7, 3, 8, 4].map { entries[$0] }
         let reminders = try planner.upcomingReminders(
             for: [schedule], affirmations: entries, name: "", sound: .none,
             after: epoch, calendar: calendar
@@ -63,7 +66,7 @@ struct NotificationPlannerTests {
         #expect(Set(reminders.map(\.identifier)).count == reminders.count)
         #expect(reminders.allSatisfy { $0.deliveryDate > epoch && $0.sound == .none })
         #expect(reminders.map(\.deliveryDate) == reminders.map(\.deliveryDate).sorted())
-        #expect(reminders.prefix(12).map(\.affirmationText) == (Array(entries) + entries.prefix(3)).map(\.text))
+        #expect(reminders.prefix(12).map(\.affirmationText) == (mixedEntries + mixedEntries.prefix(3)).map(\.text))
 
         for reminder in reminders.prefix(12) {
             let context = TodayAffirmationResolver().context(
@@ -71,6 +74,7 @@ struct NotificationPlannerTests {
                 fallbackSelection: .all, name: "", calendar: calendar
             )
             #expect(context.affirmation?.text == reminder.affirmationText)
+            #expect(context.browsingAffirmations == mixedEntries)
         }
     }
 

@@ -69,6 +69,38 @@ enum AffirmationSelection: Codable, Hashable {
                 || affirmation.tags.contains(where: containsTag)
         }
     }
+
+    func rotation(in affirmations: [Affirmation], name: String) -> [Affirmation] {
+        let entries = matchingAffirmations(in: affirmations).compactMap { $0.resolved(name: name) }
+        let hasTagFilter = !selectedTags.isEmpty
+        var bucketIndices: [String?: Int] = [:]
+        var buckets: [[Affirmation]] = []
+
+        for entry in entries {
+            // Assign each entry to one category. Favourites that match no selected tag
+            // share a bucket, as do untagged entries in an unfiltered rotation.
+            let tag = hasTagFilter ? entry.tags.first(where: containsTag) : entry.tags.first
+            let key = tag?.lowercased()
+            let index = bucketIndices[key, default: buckets.count]
+            if index == buckets.count {
+                bucketIndices[key] = index
+                buckets.append([])
+            }
+            buckets[index].append(entry)
+        }
+
+        var rotation: [Affirmation] = []
+        var remaining = buckets.map { $0[...] }
+        while !remaining.isEmpty {
+            remaining = remaining.compactMap { bucket in
+                guard let entry = bucket.first else { return nil }
+                rotation.append(entry)
+                let tail = bucket.dropFirst()
+                return tail.isEmpty ? nil : tail
+            }
+        }
+        return rotation
+    }
 }
 
 /// Library source choices are independent of favourites and tags.

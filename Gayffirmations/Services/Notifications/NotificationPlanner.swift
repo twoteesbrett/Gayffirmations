@@ -87,8 +87,7 @@ struct NotificationPlanner {
     ) throws -> [Routine] {
         try ScheduleValidation.validate(schedules)
         return try schedules.filter(\.isEnabled).compactMap { schedule in
-            let entries = schedule.selection.matchingAffirmations(in: affirmations)
-                .compactMap { $0.resolved(name: name) }
+            let entries = schedule.selection.rotation(in: affirmations, name: name)
             guard !entries.isEmpty else { return nil }
             return Routine(id: schedule.id, times: try calculator.notificationTimes(for: schedule), entries: entries)
         }
