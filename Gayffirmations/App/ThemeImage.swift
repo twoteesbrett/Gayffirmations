@@ -77,6 +77,28 @@ extension AppTheme {
                 ThemeImage(id: "steel-release", name: "Release", focalPoint: .center,
                            overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white)
             ]
+        case .gayWonderland:
+            // Follow the Pride rainbow, with transitional shades between the main colours.
+            return [
+                ThemeImage(id: "gay-wonderland-crimson-archway", name: "Crimson Archway", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Red drapery and flowers frame men and classical stonework beneath a crimson sun", textColor: .white),
+                ThemeImage(id: "gay-wonderland-coral-paradise", name: "Coral Paradise", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge by a turquoise pool under a coral sky with floating lips and flowers", textColor: .white),
+                ThemeImage(id: "gay-wonderland-orange-desert", name: "Orange Desert", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A surreal orange desert with giant sculptural figures and a turquoise pool", textColor: .white),
+                ThemeImage(id: "gay-wonderland-amber-hourglass", name: "Amber Hourglass", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A giant hourglass towers above men, sunflowers, and amber desert arches", textColor: .white),
+                ThemeImage(id: "gay-wonderland-golden-pool", name: "Golden Pool", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge beside a pool framed by yellow flowers and golden arches", textColor: .white),
+                ThemeImage(id: "gay-wonderland-emerald-pool", name: "Emerald Pool", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Men gather by an emerald pool and waterfall cradled in a giant stone hand", textColor: .white),
+                ThemeImage(id: "gay-wonderland-blue-oasis", name: "Blue Oasis", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Men stand amid blue waterfalls, white arches, and giant blue flowers", textColor: .white),
+                ThemeImage(id: "gay-wonderland-indigo-waterfall", name: "Indigo Waterfall", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge beside indigo waterfalls beneath a full moon and blue orchids", textColor: .white),
+                ThemeImage(id: "gay-wonderland-violet-portal", name: "Violet Portal", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Men stand among violet arches, floating spheres, and purple orchids above still water", textColor: .white)
+            ]
         case .outAndAbout:
             return [
                 ThemeImage(id: "out-and-about-lakeside-cafe", name: "Lakeside Café", focalPoint: .center,

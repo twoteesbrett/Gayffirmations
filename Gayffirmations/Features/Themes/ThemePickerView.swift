@@ -8,7 +8,7 @@ struct ThemePickerView: View {
     var body: some View {
         List {
             Section {
-                ForEach(AppTheme.allCases) { theme in
+                ForEach(AppTheme.alphabetical) { theme in
                     Button {
                         select(theme)
                     } label: {
@@ -264,6 +264,7 @@ struct ThemePreviewRow: View {
         switch theme {
         case .together: imageID = "together-pickup-romance"
         case .ages: imageID = "ages-garden-harvest"
+        case .gayWonderland: imageID = "gay-wonderland-crimson-archway"
         case .steel: imageID = "steel-strength"
         case .outAndAbout: imageID = "out-and-about-lakeside-cafe"
         }

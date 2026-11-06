@@ -3,12 +3,13 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .steel, .outAndAbout, .together, .ages: .dark
+        case .steel, .outAndAbout, .together, .ages, .gayWonderland: .dark
         }
     }
 
     var accentColor: Color {
         switch self {
+        case .gayWonderland: Color(hex: 0xF4BFFF)
         case .ages: Color(hex: 0xEBC992)
         case .together: Color(hex: 0xF3CC9E)
         case .steel: Color(hex: 0xA7C9E0)
@@ -18,6 +19,7 @@ extension AppTheme {
 
     var textColor: Color {
         switch self {
+        case .gayWonderland: Color(hex: 0xFFF4FD)
         case .ages: Color(hex: 0xFFF6E8)
         case .together: Color(hex: 0xFFF5E9)
         case .steel: Color(hex: 0xF0F4F7)
@@ -27,6 +29,9 @@ extension AppTheme {
 
     var backgroundGradient: LinearGradient {
         switch self {
+        case .gayWonderland:
+            LinearGradient(colors: [Color(hex: 0x65304E), Color(hex: 0x29204E)],
+                           startPoint: .top, endPoint: .bottom)
         case .ages:
             LinearGradient(colors: [Color(hex: 0x6B5940), Color(hex: 0x302A24)],
                            startPoint: .top, endPoint: .bottom)
@@ -44,13 +49,13 @@ extension AppTheme {
 
     var interfaceFontDesign: Font.Design? {
         switch self {
-        case .steel, .outAndAbout, .together, .ages: nil
+        case .steel, .outAndAbout, .together, .ages, .gayWonderland: nil
         }
     }
 
     var affirmationLineSpacing: CGFloat {
         switch self {
-        case .outAndAbout, .together, .ages: 8
+        case .outAndAbout, .together, .ages, .gayWonderland: 8
         case .steel: 4
         }
     }
@@ -59,7 +64,7 @@ extension AppTheme {
         switch self {
         case .steel:
             .system(role.textStyle, design: .default, weight: .bold)
-        case .outAndAbout, .together, .ages:
+        case .outAndAbout, .together, .ages, .gayWonderland:
             .system(role.textStyle, design: .default, weight: .regular)
         }
     }

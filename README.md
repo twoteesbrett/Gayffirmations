@@ -222,7 +222,7 @@ inherit it with Use default or choose its own theme. Today uses the active sched
 shows default affirmations. Disabled schedules and schedules without ready affirmations
 do not supply a theme. Existing saved schedules inherit the default.
 
-The four themes are Out & About (the default, with nine illustrated backgrounds), Together (with nine photographs following adulthood from first love to mature companionship), Ages (with nine scenes of friendship and love across adulthood), and Steel (with nine monochrome backgrounds).
+The five themes are Out & About (the default, with nine illustrated backgrounds), Together (with nine photographs following adulthood from first love to mature companionship), Ages (with nine scenes of friendship and love across adulthood), Steel (with nine monochrome backgrounds), and Gay Wonderland (with nine surreal collages in Pride rainbow order).
 Out & About rotates from morning to night: Lakeside Café, Market, Greenhouse Garden, Beach,
 Villa Pool, Waterfall, Thermal Baths, Twilight Dinner, and Moonlit Piazza.
 Settings → Appearance → Background controls images, dimming, and text outlines

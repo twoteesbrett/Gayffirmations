@@ -122,3 +122,19 @@ The renamed copies in Assets and the asset catalogue preserve the original PNG f
 | Warm Vintage Kitchen Cooking | `ages-kitchen` |
 | Nostalgic Memories Among Moving Boxes | `ages-moving-boxes` |
 | Sunny Garden Carrot Harvest | `ages-garden-harvest` |
+## Gay Wonderland
+
+Gay Wonderland uses nine user-supplied PNGs from `Desktop/assets/wonderland`.
+The renamed copies in `Assets` and the asset catalogue preserve the original PNG files.
+
+| Rotation | Original image | Bundled asset identifier |
+| --- | --- | --- |
+| 1 | Crimson Archway Dreamscape | `gay-wonderland-crimson-archway` |
+| 2 | Surreal Retro Paradise Collage | `gay-wonderland-coral-paradise` |
+| 3 | Surreal Desert Collage with Floating Forms | `gay-wonderland-orange-desert` |
+| 4 | Golden Hourglass Desert Dream | `gay-wonderland-amber-hourglass` |
+| 5 | Golden Surrealist Pool Collage | `gay-wonderland-golden-pool` |
+| 6 | Surreal Emerald Pool Dreamscape | `gay-wonderland-emerald-pool` |
+| 7 | Surreal Blue Oasis Waterfall Collage | `gay-wonderland-blue-oasis` |
+| 8 | Surreal Moonlit Waterfall Collage | `gay-wonderland-indigo-waterfall` |
+| 9 | Surreal Purple Portal Retreat | `gay-wonderland-violet-portal` |

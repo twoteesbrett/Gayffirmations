@@ -1,12 +1,23 @@
 import Foundation
 
 nonisolated enum AppTheme: String, Codable, CaseIterable, Identifiable {
-    case outAndAbout, together, ages, steel
+    case outAndAbout, together, ages, steel, gayWonderland
+
+    static var alphabetical: [Self] {
+        allCases.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
 
     var id: Self { self }
-    var name: String { self == .outAndAbout ? "Out & About" : rawValue.capitalized }
+    var name: String {
+        switch self {
+        case .outAndAbout: "Out & About"
+        case .gayWonderland: "Gay Wonderland"
+        default: rawValue.capitalized
+        }
+    }
     var description: String {
         switch self {
+        case .gayWonderland: "Surreal landscapes in Pride rainbow colours."
         case .ages: "Friendship and love through the years."
         case .together: "Growing, loving and becoming. Through the years."
         case .steel: "Cool gunmetal. Quiet strength."

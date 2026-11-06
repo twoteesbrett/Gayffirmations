@@ -251,7 +251,7 @@ private struct ScheduleThemePicker: View {
                 Text("Uses the default theme chosen under Appearance in Settings.")
             }
             Section {
-                ForEach(AppTheme.allCases) { theme in
+                ForEach(AppTheme.alphabetical) { theme in
                     Button {
                         selection = theme
                     } label: {
