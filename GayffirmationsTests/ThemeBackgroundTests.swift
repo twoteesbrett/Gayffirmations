@@ -86,7 +86,7 @@ struct ThemeBackgroundTests {
         #expect(ImageViewport.constrainedOffset(smallOffset, zoom: 1.2).height > smallOffset.height)
     }
 
-    @Test("Text outline defaults off and persists per theme without changing dimming")
+    @Test("Text outline defaults off and persists across themes without changing dimming")
     func textOutlinePreference() throws {
         let oldChoice = try JSONDecoder().decode(
             ThemeBackgroundChoice.self, from: Data(#"{"usesPhoto":true}"#.utf8)
@@ -104,7 +104,7 @@ struct ThemeBackgroundTests {
         #expect(store.backgroundChoice.outlinesText == true)
         #expect(store.backgroundChoice.imageDimming == -0.5)
         try store.select(.steel)
-        #expect(!(store.backgroundChoice.outlinesText ?? false))
+        #expect(store.backgroundChoice.outlinesText == true)
         try store.select(.outAndAbout)
         let restarted = ThemeStore(repository: repository, backgroundRepository: repository)
         #expect(restarted.backgroundChoice.outlinesText == true)
@@ -123,7 +123,7 @@ struct ThemeBackgroundTests {
         #expect(ThemeBackgroundChoice.snappedDimming(-0.5) == -0.5)
     }
 
-    @Test("Dimming persists per theme and survives toggling images")
+    @Test("Dimming persists across themes and survives toggling images")
     func persistsDimming() throws {
         let suite = "gayffirmations.dimming.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -135,7 +135,7 @@ struct ThemeBackgroundTests {
         try store.setUsesImage(true)
         #expect(store.backgroundChoice.imageDimming == -0.5)
         try store.select(.steel)
-        #expect(store.backgroundChoice.imageDimming == nil)
+        #expect(store.backgroundChoice.imageDimming == -0.5)
         try store.select(.outAndAbout)
         let restarted = ThemeStore(repository: repository, backgroundRepository: repository)
         #expect(restarted.backgroundChoice.imageDimming == -0.5)
@@ -153,8 +153,6 @@ struct ThemeBackgroundTests {
                                              "eden": ThemeBackgroundChoice(usesImage: false)])
         let store = ThemeStore(repository: repository, backgroundRepository: repository)
         #expect(store.backgroundChoice.usesImage)
-        #expect(store.backgrounds["eden"] == nil)
-        #expect(store.backgrounds["nature"] == nil)
     }
 
     @Test("Image mode persists, rotates with affirmations and resets with app data")
@@ -188,11 +186,11 @@ struct ThemeBackgroundTests {
         #expect(restarted.selectedImage != nil)
         try repository.saveAppData(affirmations: [], schedules: [AffirmationSchedule()], theme: .outAndAbout, selection: .all)
         store.applyPersistedDefaults()
-        #expect(store.backgrounds.isEmpty)
+        #expect(store.backgroundChoice == ThemeBackgroundChoice(usesImage: true))
         #expect(try repository.loadThemeBackgrounds().isEmpty)
     }
 
-    @Test("Image themes default to images while an explicit opt-out survives switching and restart")
+    @Test("The global image opt-out survives switching themes and restart")
     func defaultImageModePreservesOptOut() throws {
         let suite = "gayffirmations.images.defaults.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -201,13 +199,14 @@ struct ThemeBackgroundTests {
         let store = ThemeStore(repository: repository, defaultTheme: .outAndAbout, backgroundRepository: repository)
         for theme in AppTheme.allCases {
             try store.select(theme)
-            #expect(store.backgroundChoice.usesImage == !theme.images.isEmpty)
+            #expect(store.backgroundChoice.usesImage)
             #expect((store.selectedImage != nil) == !theme.images.isEmpty)
         }
         try store.select(.steel)
         try store.setUsesImage(false)
         try store.select(.outAndAbout)
-        #expect(store.backgroundChoice.usesImage)
+        #expect(!store.backgroundChoice.usesImage)
+        #expect(store.selectedImage == nil)
         try store.select(.steel)
         #expect(!store.backgroundChoice.usesImage)
         let restarted = ThemeStore(repository: repository, defaultTheme: .outAndAbout, backgroundRepository: repository)
@@ -300,8 +299,8 @@ struct ThemeBackgroundTests {
         }
     }
 
-    @Test("Out & About and Steel save independent image modes and rotate within their own collection")
-    func independentThemeModes() throws {
+    @Test("Themes rotate within their own collection and share the image toggle")
+    func sharedImageMode() throws {
         let store = ThemeStore(selectedTheme: .outAndAbout)
         try store.setUsesImage(true)
         let first = UUID()
@@ -315,7 +314,9 @@ struct ThemeBackgroundTests {
         #expect(store.selectedImage?.id.hasPrefix("steel-") == true)
         try store.setUsesImage(false)
         try store.select(.outAndAbout)
-        #expect(store.backgroundChoice.usesImage)
+        #expect(!store.backgroundChoice.usesImage)
+        #expect(store.selectedImage == nil)
+        try store.setUsesImage(true)
         #expect(store.selectedImage?.id.hasPrefix("out-and-about-") == true)
     }
 
@@ -326,7 +327,7 @@ struct ThemeBackgroundTests {
         #expect(throws: BackgroundTestError.self) { try store.setUsesImage(false) }
         #expect(store.selectedImage != nil)
         #expect(store.backgroundChoice.usesImage)
-        #expect(store.backgrounds.isEmpty)
+        #expect(store.backgroundChoice == ThemeBackgroundChoice(usesImage: true))
     }
 }
 

@@ -17,7 +17,7 @@ struct AppDataResetCoordinatorTests {
         try repository.saveSchedules([AffirmationSchedule(isEnabled: true)])
         try repository.saveNotificationSound(.none)
         try repository.saveTheme(.steel)
-        try repository.saveThemeBackgrounds(["steel": ThemeBackgroundChoice(usesImage: false)])
+        try ThemeStore(repository: repository, backgroundRepository: repository).setUsesImage(false)
         try repository.saveAffirmationSelection(.favourites)
         try repository.saveName("Saved name")
         let key = "gayffirmations.\(section)"
@@ -76,7 +76,7 @@ struct AppDataResetCoordinatorTests {
         #expect(schedules.schedules == [schedules.defaultSchedule])
         #expect(schedules.notificationSound == .systemDefault)
         #expect(theme.selectedTheme == .outAndAbout)
-        #expect(theme.backgrounds.isEmpty)
+        #expect(theme.backgroundChoice == ThemeBackgroundChoice(usesImage: true))
         #expect(selection.selection == .all)
         #expect(name.name.isEmpty)
         let backups = try #require(preferences.array(forKey: "gayffirmations.recoveryBackups") as? [[String: Any]])

@@ -163,7 +163,7 @@ struct TodayInteractionView: View {
         TodayAffirmationPage(
             affirmation: affirmation, size: size, centeringInset: centeringInset,
             browsingForward: browsingForward,
-            outlinesText: themeImage != nil && (themeStore?.backgroundChoice(for: appTheme).outlinesText ?? false),
+            outlinesText: themeImage != nil && (themeStore?.backgroundChoice.outlinesText ?? false),
             onCycle: cycleAffirmation,
             emptyContent: { emptyState }
         )

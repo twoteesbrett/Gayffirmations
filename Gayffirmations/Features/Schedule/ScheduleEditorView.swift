@@ -229,6 +229,7 @@ private struct ScheduleContentPicker: View {
 
 private struct ScheduleThemePicker: View {
     @Binding var selection: AppTheme?
+    @Environment(\.appTheme) private var defaultTheme
 
     var body: some View {
         List {
@@ -247,7 +248,7 @@ private struct ScheduleThemePicker: View {
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selection == nil ? .isSelected : [])
             } footer: {
-                Text("Uses the default theme chosen under Today in Settings.")
+                Text("Uses the default theme chosen under Appearance in Settings.")
             }
             Section {
                 ForEach(AppTheme.allCases) { theme in
@@ -263,6 +264,8 @@ private struct ScheduleThemePicker: View {
                     .accessibilityAddTraits(selection == theme ? .isSelected : [])
                 }
             }
+
+            ThemeImagePreviewSection(theme: selection ?? defaultTheme)
         }
         .themedBackground()
         .navigationTitle("Theme")

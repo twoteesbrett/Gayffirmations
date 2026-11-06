@@ -80,7 +80,7 @@ struct ContentView: View {
                 )
                 .themeAppearance(theme)
                 .environment(\.themeImage, themeStore.selectedImage(for: theme))
-                .environment(\.imageDimming, themeStore.backgroundChoice(for: theme).imageDimming ?? 0)
+                .environment(\.imageDimming, themeStore.backgroundChoice.imageDimming ?? 0)
             }
             .sheet(item: $destination) { destination in
                 destinationView(destination)

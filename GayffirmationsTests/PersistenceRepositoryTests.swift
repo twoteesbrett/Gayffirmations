@@ -236,7 +236,11 @@ struct PersistenceRepositoryTests {
         defer { fixture.removeSavedData() }
         let saved = [Affirmation(text: "My custom affirmation", isFavorite: true, tags: ["Work"])]
         let schedule = AffirmationSchedule(isEnabled: true, notificationsPerDay: 6)
-        let backgrounds = [AppTheme.steel.rawValue: ThemeBackgroundChoice(usesImage: false)]
+        let steelBackground = ThemeBackgroundChoice(usesImage: false, imageDimming: 0.5)
+        let backgrounds = [
+            AppTheme.steel.rawValue: steelBackground,
+            AppTheme.outAndAbout.rawValue: ThemeBackgroundChoice(usesImage: true)
+        ]
         try fixture.repository.saveAffirmations(saved)
         try fixture.repository.saveTheme(.steel)
         try fixture.repository.saveThemeBackgrounds(backgrounds)
@@ -256,7 +260,7 @@ struct PersistenceRepositoryTests {
 
         #expect(library.affirmations.contains(saved[0]))
         #expect(theme.selectedTheme == .steel)
-        #expect(theme.backgrounds == backgrounds)
+        #expect(theme.backgroundChoice == steelBackground)
         #expect(selection.selection == .favourites)
         #expect(reminders.schedule == schedule)
         #expect(fixture.userDefaults.object(forKey: "gayffirmations.contentBeforeRebuild") == nil)
@@ -268,6 +272,11 @@ struct PersistenceRepositoryTests {
         #expect(try restarted.loadAffirmations() == library.affirmations)
         #expect(try restarted.loadTheme() == .steel)
         #expect(try restarted.loadAffirmationSelection() == .favourites)
+
+        try theme.select(.outAndAbout)
+        let reopenedTheme = ThemeStore(repository: repository, backgroundRepository: repository)
+        #expect(reopenedTheme.selectedTheme == .outAndAbout)
+        #expect(reopenedTheme.backgroundChoice == steelBackground)
     }
 
     @Test("Initial content seeds the empty baseline once and preserves edits and deletions")

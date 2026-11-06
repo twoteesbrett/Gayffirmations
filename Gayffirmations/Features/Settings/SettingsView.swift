@@ -46,17 +46,24 @@ struct SettingsView: View {
                     NavigationLink {
                         FallbackAffirmationsView(coordinator: notificationCoordinator)
                     } label: {
-                        LabeledContent("Default affirmations", value: notificationCoordinator.fallbackSelectionStore.selection.name)
+                        Text(notificationCoordinator.fallbackSelectionStore.selection.name)
                     }
+                } header: {
+                    Text("Default Affirmations")
+                } footer: {
+                    Text("Default affirmations appear outside active schedule windows or when no active schedule has matching affirmations. They change daily and don’t send notifications.")
+                }
+                Section("Appearance") {
                     NavigationLink {
                         ThemePickerView(store: themeStore)
                     } label: {
                         LabeledContent("Default theme", value: themeStore.selectedTheme.name)
                     }
-                } header: {
-                    Text("Defaults")
-                } footer: {
-                    Text("Default affirmations appear outside active schedule windows or when no active schedule has matching affirmations. They change daily and don’t send notifications.")
+                    NavigationLink {
+                        BackgroundAppearanceView(store: themeStore)
+                    } label: {
+                        Text("Background")
+                    }
                 }
                 Section("Notifications") {
                     Button {
@@ -149,6 +156,8 @@ struct SettingsView: View {
                 Text(errorMessage ?? "Your settings could not be saved.")
             }
         }
+        .environment(\.usesThemeImages, themeStore.backgroundChoice.usesImage)
+        .environment(\.imageDimming, themeStore.backgroundChoice.imageDimming ?? 0)
     }
 
     private func disclosureLabel(_ title: String, value: String) -> some View {

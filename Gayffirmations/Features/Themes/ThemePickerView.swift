@@ -4,12 +4,6 @@ struct ThemePickerView: View {
     let store: ThemeStore
 
     @State private var errorMessage: String?
-    @State private var dimmingDraft: Double?
-    @State private var isEditingDimming = false
-
-    private var displayedDimming: Double {
-        dimmingDraft ?? store.backgroundChoice.imageDimming ?? 0
-    }
 
     var body: some View {
         List {
@@ -22,7 +16,6 @@ struct ThemePickerView: View {
                             theme: theme,
                             isSelected: store.selectedTheme == theme
                         )
-                        .environment(\.imageDimming, theme == store.selectedTheme ? displayedDimming : (store.backgrounds[theme.rawValue]?.imageDimming ?? 0))
                     }
                     .buttonStyle(.plain)
                     .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
@@ -34,84 +27,11 @@ struct ThemePickerView: View {
                 }
             }
 
-            if !store.selectedTheme.images.isEmpty {
-                Section {
-                    Toggle("Use images", isOn: Binding(
-                        get: { store.backgroundChoice.usesImage },
-                        set: { enabled in updateBackground { try store.setUsesImage(enabled) } }
-                    ))
-
-                    if store.backgroundChoice.usesImage {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Image dimming")
-                                Spacer()
-                                Button("Default") {
-                                    dimmingDraft = 0
-                                    saveDimming()
-                                }
-                                .disabled(displayedDimming == 0)
-                            }
-                            Slider(value: Binding(
-                                get: { displayedDimming },
-                                set: { value in
-                                    dimmingDraft = ThemeBackgroundChoice.snappedDimming(value)
-                                    // Accessibility adjustments need not start a drag session.
-                                    if !isEditingDimming { saveDimming() }
-                                }
-                            ), in: -1...1, onEditingChanged: { editing in
-                                isEditingDimming = editing
-                                if !editing { saveDimming() }
-                            })
-                            .accessibilityLabel("Image dimming")
-                            .accessibilityValue(displayedDimming == 0
-                                                ? "Default" : "\(Int((displayedDimming + 1) * 50)) percent")
-                            HStack {
-                                Text("Clear")
-                                Spacer()
-                                Text("Default")
-                                Spacer()
-                                Text("Darker")
-                            }
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .accessibilityHidden(true)
-                        }
-                        Toggle("Outline text", isOn: Binding(
-                            get: { store.backgroundChoice.outlinesText ?? false },
-                            set: { enabled in updateBackground { try store.setOutlinesText(enabled) } }
-                        ))
-                        .accessibilityHint("Adds a thin black outline to affirmation text over images")
-
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 12)], spacing: 12) {
-                            ForEach(store.selectedTheme.images) { image in
-                                ImageBackground(image: image)
-                                    .environment(\.imageDimming, displayedDimming)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 110)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .accessibilityHidden(false)
-                                    .accessibilityLabel(image.accessibilityDescription)
-                            }
-                        }
-                    }
-                } header: {
-                    Text("Background")
-                } footer: {
-                    Text(store.backgroundChoice.usesImage
-                         ? "Images rotate with each affirmation."
-                         : "Uses \(store.selectedTheme.name)’s colour background.")
-                }
-            }
+            ThemeImagePreviewSection(theme: store.selectedTheme)
         }
         .themedBackground()
         .navigationTitle("Default Theme")
         .navigationBarTitleDisplayMode(.inline)
-        .onDisappear { saveDimming() }
-        .onChange(of: store.selectedTheme) { _, _ in
-            dimmingDraft = nil
-            isEditingDimming = false
-        }
         .alert("Unable to Change Theme", isPresented: errorIsPresented) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -126,6 +46,103 @@ struct ThemePickerView: View {
         )
     }
 
+    private func select(_ theme: AppTheme) {
+        do {
+            try store.select(theme)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
+struct BackgroundAppearanceView: View {
+    let store: ThemeStore
+
+    @State private var errorMessage: String?
+    @State private var dimmingDraft: Double?
+    @State private var isEditingDimming = false
+
+    private var displayedDimming: Double {
+        dimmingDraft ?? store.backgroundChoice.imageDimming ?? 0
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Use images", isOn: Binding(
+                    get: { store.backgroundChoice.usesImage },
+                    set: { enabled in updateBackground { try store.setUsesImage(enabled) } }
+                ))
+
+                if store.backgroundChoice.usesImage {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Image dimming")
+                            Spacer()
+                            Button("Default") {
+                                dimmingDraft = 0
+                                saveDimming()
+                            }
+                            .disabled(displayedDimming == 0)
+                        }
+                        Slider(value: Binding(
+                            get: { displayedDimming },
+                            set: { value in
+                                dimmingDraft = ThemeBackgroundChoice.snappedDimming(value)
+                                // Accessibility adjustments need not start a drag session.
+                                if !isEditingDimming { saveDimming() }
+                            }
+                        ), in: -1...1, onEditingChanged: { editing in
+                            isEditingDimming = editing
+                            if !editing { saveDimming() }
+                        })
+                        .accessibilityLabel("Image dimming")
+                        .accessibilityValue(displayedDimming == 0
+                                            ? "Default" : "\(Int((displayedDimming + 1) * 50)) percent")
+                        HStack {
+                            Text("Clear")
+                            Spacer()
+                            Text("Default")
+                            Spacer()
+                            Text("Darker")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+                    }
+                    Toggle("Outline text", isOn: Binding(
+                        get: { store.backgroundChoice.outlinesText ?? false },
+                        set: { enabled in updateBackground { try store.setOutlinesText(enabled) } }
+                    ))
+                    .accessibilityHint("Adds a thin black outline to affirmation text over images")
+
+                    Text("Preview · \(store.selectedTheme.name)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    ThemeImagePreviewGrid(theme: store.selectedTheme)
+                        .environment(\.imageDimming, displayedDimming)
+                }
+            } header: {
+                Text("Background")
+            } footer: {
+                Text("These settings apply to all themes and schedules. Images rotate with each affirmation.")
+            }
+        }
+        .themedBackground()
+        .navigationTitle("Background")
+        .navigationBarTitleDisplayMode(.inline)
+        .onDisappear { saveDimming() }
+        .alert("Unable to Save Appearance", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "Your appearance settings could not be saved.")
+        }
+    }
+
     private func saveDimming() {
         guard let value = dimmingDraft else { return }
         defer { dimmingDraft = nil }
@@ -137,20 +154,60 @@ struct ThemePickerView: View {
         do { try change() }
         catch { errorMessage = error.localizedDescription }
     }
+}
 
-    private func select(_ theme: AppTheme) {
-        saveDimming()
-        do {
-            try store.select(theme)
-        } catch {
-            errorMessage = error.localizedDescription
+struct ThemeImagePreviewSection: View {
+    let theme: AppTheme
+    @Environment(\.usesThemeImages) private var usesThemeImages
+
+    var body: some View {
+        if !theme.images.isEmpty {
+            Section {
+                ThemeImagePreviewGrid(theme: theme)
+            } header: {
+                Text("Image previews · \(theme.name)")
+            } footer: {
+                if !usesThemeImages {
+                    Text("Background images are turned off in Settings → Appearance.")
+                }
+            }
         }
+    }
+}
+
+private struct ThemeImagePreviewGrid: View {
+    let theme: AppTheme
+
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 12)], spacing: 12) {
+            ForEach(theme.images) { image in
+                ImageBackground(image: image)
+                    .environment(\.appTheme, theme)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 110)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .accessibilityHidden(false)
+                    .accessibilityLabel(image.accessibilityDescription)
+            }
+        }
+    }
+}
+
+private struct UsesThemeImagesKey: EnvironmentKey {
+    static let defaultValue = true
+}
+
+extension EnvironmentValues {
+    var usesThemeImages: Bool {
+        get { self[UsesThemeImagesKey.self] }
+        set { self[UsesThemeImagesKey.self] = newValue }
     }
 }
 
 struct ThemePreviewRow: View {
     let theme: AppTheme
     let isSelected: Bool
+    @Environment(\.usesThemeImages) private var usesThemeImages
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
@@ -202,7 +259,8 @@ struct ThemePreviewRow: View {
 
     /// Stable covers make the collections recognizable while browsing the picker.
     private var previewImage: ThemeImage? {
-        let imageID: String?
+        guard usesThemeImages else { return nil }
+        let imageID: String
         switch theme {
         case .together: imageID = "together-pickup-romance"
         case .ages: imageID = "ages-garden-harvest"
@@ -274,7 +332,7 @@ struct ThemePreviewRow: View {
 #Preview("Steel images") {
     let store = ThemeStore(selectedTheme: .steel)
     let _ = try? store.setUsesImage(true)
-    NavigationStack { ThemePickerView(store: store) }
+    NavigationStack { BackgroundAppearanceView(store: store) }
         .themeAppearance(.steel)
 }
 #endif

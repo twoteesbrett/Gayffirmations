@@ -8,18 +8,10 @@ final class ThemeStore {
     private(set) var selectedTheme: AppTheme
     private(set) var persistenceErrorMessage: String?
 
-    private(set) var backgrounds: [String: ThemeBackgroundChoice] = [:]
+    private static let appearanceKey = "appearance"
+    private(set) var backgroundChoice = ThemeBackgroundChoice(usesImage: true)
     private var imageRotation = AffirmationImageRotation()
     private let backgroundRepository: (any ThemeBackgroundRepository)?
-
-    var backgroundChoice: ThemeBackgroundChoice {
-        backgroundChoice(for: selectedTheme)
-    }
-
-    func backgroundChoice(for theme: AppTheme) -> ThemeBackgroundChoice {
-        backgrounds[theme.rawValue]
-            ?? ThemeBackgroundChoice(usesImage: !theme.images.isEmpty)
-    }
 
     var selectedImage: ThemeImage? {
         selectedImage(for: selectedTheme)
@@ -27,7 +19,7 @@ final class ThemeStore {
 
     func selectedImage(for theme: AppTheme) -> ThemeImage? {
         let images = theme.images
-        guard backgroundChoice(for: theme).usesImage, !images.isEmpty else { return nil }
+        guard backgroundChoice.usesImage, !images.isEmpty else { return nil }
         return images[imageRotation.imageIndex % images.count]
     }
 
@@ -35,7 +27,7 @@ final class ThemeStore {
     func image(for affirmationID: UUID, direction: Int, theme: AppTheme? = nil) -> ThemeImage? {
         let theme = theme ?? selectedTheme
         let images = theme.images
-        guard backgroundChoice(for: theme).usesImage, !images.isEmpty else { return nil }
+        guard backgroundChoice.usesImage, !images.isEmpty else { return nil }
         var preview = imageRotation
         preview.update(affirmationID: affirmationID, imageCount: images.count, direction: direction)
         return images[preview.imageIndex % images.count]
@@ -67,13 +59,21 @@ final class ThemeStore {
         self.defaultTheme = defaultTheme
 
         do {
-            backgrounds = (try backgroundRepository?.loadThemeBackgrounds() ?? [:])
-                .filter { AppTheme(rawValue: $0.key) != nil }
+            let backgrounds = try backgroundRepository?.loadThemeBackgrounds() ?? [:]
             if let savedTheme = try repository.loadTheme() {
                 selectedTheme = savedTheme
             } else {
                 selectedTheme = defaultTheme
                 try repository.saveTheme(defaultTheme)
+            }
+
+            if let appearance = backgrounds[Self.appearanceKey] {
+                backgroundChoice = appearance
+            } else if backgrounds.keys.contains(where: { AppTheme(rawValue: $0) != nil }) {
+                // Use the saved default theme's preferences when consolidating old settings.
+                let appearance = backgrounds[selectedTheme.rawValue] ?? backgroundChoice
+                try backgroundRepository?.saveThemeBackgrounds([Self.appearanceKey: appearance])
+                backgroundChoice = appearance
             }
         } catch {
             selectedTheme = defaultTheme
@@ -82,7 +82,6 @@ final class ThemeStore {
     }
 
     func setUsesImage(_ enabled: Bool) throws {
-        guard !enabled || !selectedTheme.images.isEmpty else { return }
         var choice = backgroundChoice
         choice.usesImage = enabled
         try saveBackground(choice)
@@ -105,10 +104,8 @@ final class ThemeStore {
         if let persistenceErrorMessage {
             throw PersistenceUnavailableError(reason: persistenceErrorMessage)
         }
-        var updated = backgrounds
-        updated[selectedTheme.rawValue] = choice
-        try backgroundRepository?.saveThemeBackgrounds(updated)
-        backgrounds = updated
+        try backgroundRepository?.saveThemeBackgrounds([Self.appearanceKey: choice])
+        backgroundChoice = choice
     }
 
     func select(_ theme: AppTheme) throws {
@@ -121,7 +118,7 @@ final class ThemeStore {
 
     func applyPersistedDefaults() {
         persistenceErrorMessage = nil
-        backgrounds = [:]
+        backgroundChoice = ThemeBackgroundChoice(usesImage: true)
         imageRotation = AffirmationImageRotation()
         selectedTheme = defaultTheme
     }

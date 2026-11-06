@@ -217,7 +217,7 @@ selections continue to work. Audio preparation and file sizes are in
 
 ## Themes and images
 
-Choose the default theme in Settings → Defaults → Default theme. Each schedule can
+Choose the default theme in Settings → Appearance → Default theme. Each schedule can
 inherit it with Use default or choose its own theme. Today uses the active schedule’s theme and returns to the default when it
 shows default affirmations. Disabled schedules and schedules without ready affirmations
 do not supply a theme. Existing saved schedules inherit the default.
@@ -225,9 +225,10 @@ do not supply a theme. Existing saved schedules inherit the default.
 The four themes are Out & About (the default, with nine illustrated backgrounds), Together (with nine photographs following adulthood from first love to mature companionship), Ages (with nine scenes of friendship and love across adulthood), and Steel (with nine monochrome backgrounds).
 Out & About rotates from morning to night: Lakeside Café, Market, Greenhouse Garden, Beach,
 Villa Pool, Waterfall, Thermal Baths, Twilight Dinner, and Moonlit Piazza.
-Themes with images use them by default and offer a Use images switch saved
-separately for each theme. Turning it off uses the theme's colour background.
-The picker shows thumbnail previews. Steel renders images in greyscale;
+Settings → Appearance → Background controls images, dimming, and text outlines
+for all themes and schedules. Images are on by default. Turning them off uses
+each theme’s colour background. Both theme pickers show the selected theme’s
+image gallery with the saved dimming. Steel renders images in greyscale;
 other themes retain colour. Source images retain their original colours.
 
 Images appear on Today; Library and Settings use the theme gradient. Each
@@ -238,7 +239,7 @@ Images advance when the displayed affirmation changes, including swipes and
 scheduled changes. Swiping back reverses the image sequence. The incoming
 image follows the message's swipe direction; Reduce Motion uses a crossfade.
 The collection cycles in order. Rotation is session state and restarts at the
-first image on launch; only the Use images preference is saved. Unrelated
+first image on launch. Unrelated
 view updates, favouriting, and opening Settings do not advance images.
 There is no separate timer or daily image rotation.
 
@@ -246,7 +247,7 @@ To add images, bundle image assets and add entries to `AppTheme.images` with
 stable IDs, descriptive accessibility labels, focal points, and checked
 overlay and foreground settings. Record the originals in [SOURCES.md](SOURCES.md).
 Check portrait and landscape crops, long affirmations, accessibility text
-sizes, and toolbar contrast. Themes with images automatically offer the switch.
+sizes, and toolbar contrast.
 
 ## Saved-data compatibility
 
