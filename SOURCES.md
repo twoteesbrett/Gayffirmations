@@ -9,15 +9,15 @@ Steel uses nine user-supplied AI-generated images. Bundled JPEGs and PNGs preser
 
 | Image | Bundled asset identifier |
 | --- | --- |
-| Strength | `steel-strength` |
+| Dramatic Monochrome Barbell Curl Portrait | `steel-strength` |
 | Release | `steel-release` |
-| Curl | `steel-curl` |
-| Deadlift | `steel-deadlift` |
-| Squat | `steel-squat` |
-| Pull-up | `steel-pull-up` |
-| Bench Press | `steel-bench-press` |
-| Lateral Raise | `steel-lateral-raise` |
-| Lunge | `steel-lunge` |
+| Monochrome Gym Curl Portrait | `steel-curl` |
+| High-Contrast Deadlift in the Gym | `steel-deadlift` |
+| Dramatic Barbell Squat in Monochrome | `steel-squat` |
+| Monochrome Pull-Up Muscle Definition | `steel-pull-up` |
+| Monochrome Bench Press Strength | `steel-bench-press` |
+| Monochrome Dumbbell Lateral Raise | `steel-lateral-raise` |
+| Monochrome Dumbbell Lunge in the Gym | `steel-lunge` |
 
 The three additional images were supplied from Desktop and copied into Assets and the app asset catalogue without resizing.
 
@@ -96,15 +96,15 @@ The ordered rotation follows the accompanying life-stage brief, from first love 
 
 | Order | Original image | Bundled asset identifier |
 | --- | --- | --- |
-| 1 | Golden 70s Pickup Romance | `together-pickup-romance` |
-| 2 | Retro Beach Camping Getaway | `together-beach-camping` |
-| 3 | Faded Retro Beach Portrait | `together-sunny-shore` |
-| 4 | Cosy 1980s Couch Reading | `together-couch-reading` |
-| 5 | 1980s Kitchen Cooking Together | `together-kitchen` |
-| 6 | Cycling Adventure on Rural Roads | `together-cycling` |
-| 7 | Mountain Break by the Water | `together-mountain-break` |
-| 8 | Warm Conversation Over Coffee | `together-coffee` |
-| 9 | Golden Companionship by the Coast | `together-coastal-companionship` |
+| 1 | Vintage Pickup by the Lake | `together-pickup-romance` |
+| 2 | Vintage Beachside Camping Companions | `together-beach-camping` |
+| 3 | Retro Shoreline Companions | `together-sunny-shore` |
+| 4 | Cosy Vintage Living Room Reading | `together-couch-reading` |
+| 5 | Loving Retro Kitchen Tomato Prep | `together-kitchen` |
+| 6 | Cyclists Consulting a Roadside Map | `together-cycling` |
+| 7 | Hikers Overlooking a Mountain Lake | `together-mountain-break` |
+| 8 | Warm Park Café Conversation | `together-coffee` |
+| 9 | Sunset Shoreline Portrait of Two Friends | `together-coastal-companionship` |
 
 ## Ages
 
