@@ -61,7 +61,7 @@ struct CatalogueMigrationTests {
         #expect(AffirmationTag.roleModel.displayName == "Be the Man You Needed")
         #expect(entries.first?.text == "Be the gay man you needed when you were younger.")
         #expect(entries.last?.text == "Let your kindness do the talking.")
-        #expect(Set(Affirmation.starterAffirmations.map(\.id)).count == 50)
+        #expect(Set(Affirmation.starterAffirmations.map(\.id)).count == 65)
         try AffirmationValidation.validate(Affirmation.starterAffirmations)
     }
 

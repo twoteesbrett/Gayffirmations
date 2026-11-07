@@ -20,7 +20,7 @@ struct TagSelectionSection: View {
                 )) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(AffirmationTag(rawValue: tag)?.name ?? tag.lowercased())
-                        if let category = AffirmationTag(rawValue: tag) {
+                        if let category = AffirmationTag(rawValue: tag), category.displayName != category.name {
                             Text(category.displayName)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)

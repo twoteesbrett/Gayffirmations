@@ -212,7 +212,69 @@ nonisolated extension Affirmation {
 
         starter("B7E77000-0000-4000-8000-000000000085",
                 "Let your kindness do the talking.",
-                [.roleModel])
+                [.roleModel]),
+
+        // MARK: - Inner Cynic
+
+        starter("B7E77000-0000-4000-8000-000000000086",
+                "Everything is temporary.<br><small>Including this particular shitshow.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000087",
+                "My life hasn't gone according to plan.<br><small>Admittedly, the plan was a bit shit.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000088",
+                "<small>Other people are making it up as they go along too.</small><br>Some just have better shoes.",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000089",
+                "I'm not required to become a better person before lunchtime.",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000090",
+                "Yep, life’s a bitch and then you die.<br><small>Fuck it.</small><br>🖕",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000091",
+                "I can make sensible decisions.<br><small>And not feel remotely positive about them.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000092",
+                "I embrace my imperfections.<br><small>It's not as though they've given me a choice.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000093",
+                "I don't need to shine today.<br><small>I'm not a frickin’ lighthouse.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000094",
+                "Apparently, telling myself I'm wonderful is a substitute for actually feeling wonderful.",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000095",
+                "Another day, another attempt to gaslight myself into happiness.",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000096",
+                "I downloaded an app to improve my life.<br><small>Apparently, that's where we're at.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000097",
+                "<small>Positive thinking isn't going to solve everything.</small><br>Neither is being a miserable bastard.",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000098",
+                "<small>I don't need to convince myself that life is wonderful.</small><br>Maybe I can just make today slightly less shit.",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000099",
+                "My problems remain unresolved.<br><small>But at least I've looked at a pretty picture.</small>",
+                [.innerCynic]),
+
+        starter("B7E77000-0000-4000-8000-000000000100",
+                "I don't believe a word of this.<br><small>Still, I've read this far.</small>",
+                [.innerCynic])
     ]
 
     private static func starter(

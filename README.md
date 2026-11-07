@@ -96,9 +96,10 @@ receives a new saved ID. Its text, tags, and favourite choice stay with the pers
 copy; the bundled original is restored separately. Restore Original is available
 only for bundled messages.
 
-The bundled catalogue contains 50 affirmations, ten each across Food, Critic, Gay, Human and Role Model. Food challenges impulse snacking. Existing saved
-libraries keep their content; use Restore Bundled Affirmations to load the revised
-catalogue.
+The bundled catalogue contains 65 affirmations, with 15 in Inner Cynic and ten
+each in Food, Critic, Gay, Human and Role Model. Food challenges impulse snacking.
+Use Restore Bundled Affirmations to load the revised catalogue into an existing
+library.
 
 ## Personalised messages
 
