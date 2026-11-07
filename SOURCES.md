@@ -153,5 +153,5 @@ The renamed copies in `Assets` and the asset catalogue preserve the original PNG
 | 5 | Matching Hibiscus Shirts at the Garden Party | `shit-happens-matching-shirts` |
 | 6 | Coffee Spill at the Outdoor Café | `shit-happens-coffee-spill` |
 | 7 | Muddy Trail Companions and a Happy Dog | `shit-happens-muddy-trail` |
-| 8 | Poolside Chair Mishap | `shit-happens-poolside-chair` |
+| 8 | Sunlit Poolside Laughter and Swimwear | `shit-happens-poolside-chair` |
 | 9 | Sheepish Downward Dog in the Park | `shit-happens-park-yoga` |
