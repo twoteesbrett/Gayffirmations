@@ -65,12 +65,13 @@ extension AppTheme {
         }
     }
 
-    func affirmationFont(for role: AffirmationTextRole, scaledSize: CGFloat? = nil) -> Font {
-        let weight: Font.Weight = self == .steel ? .bold : .regular
-        if let scaledSize {
-            return .system(size: scaledSize, weight: weight, design: .default)
+    func affirmationFont(for role: AffirmationTextRole) -> Font {
+        switch self {
+        case .steel:
+            .system(role.textStyle, design: .default, weight: .bold)
+        case .outAndAbout, .together, .ages, .gayWonderland, .shitHappens:
+            .system(role.textStyle, design: .default, weight: .regular)
         }
-        return .system(role.textStyle, design: .default, weight: weight)
     }
 
 }
@@ -122,11 +123,9 @@ extension View {
             .fontDesign(theme.interfaceFontDesign)
     }
 
-    func affirmationTypography(
-        _ theme: AppTheme, role: AffirmationTextRole = .message, scaledSize: CGFloat? = nil
-    ) -> some View {
+    func affirmationTypography(_ theme: AppTheme, role: AffirmationTextRole = .message) -> some View {
         // Affirmation typefaces own their design, independently of interface typography.
-        font(theme.affirmationFont(for: role, scaledSize: scaledSize))
+        font(theme.affirmationFont(for: role))
             .fontDesign(nil)
     }
 
