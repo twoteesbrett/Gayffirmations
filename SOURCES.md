@@ -150,7 +150,7 @@ The renamed copies in `Assets` and the asset catalogue preserve the original PNG
 | 2 | Burnt Toast Kitchen Mishap | `shit-happens-burnt-toast` |
 | 3 | Café Mishap and Laughter | `shit-happens-cafe-laughter` |
 | 4 | Laundromat Mishap with Rainbow Tank Top | `shit-happens-laundromat` |
-| 5 | Matching Hibiscus Shirts at the Garden Party | `shit-happens-matching-shirts` |
+| 5 | Garden Party Laughter Under String Lights | `shit-happens-matching-shirts` |
 | 6 | Coffee Spill at the Outdoor Café | `shit-happens-coffee-spill` |
 | 7 | Muddy Trail Companions and a Happy Dog | `shit-happens-muddy-trail` |
 | 8 | Sunlit Poolside Laughter and Swimwear | `shit-happens-poolside-chair` |
