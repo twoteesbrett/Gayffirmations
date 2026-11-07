@@ -11,6 +11,8 @@ struct TodayAffirmationPage<EmptyContent: View>: View {
     @ViewBuilder let emptyContent: () -> EmptyContent
     @Environment(\.appTheme) private var appTheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .largeTitle) private var messageSize: CGFloat = 40
+    @ScaledMetric(relativeTo: .body) private var contextSize: CGFloat = 20
 
     var body: some View {
         ZStack {
@@ -30,10 +32,15 @@ struct TodayAffirmationPage<EmptyContent: View>: View {
     }
 
     private func affirmationMessage(_ affirmation: Affirmation) -> some View {
-        MessageText(source: affirmation.text, theme: appTheme)
-            .affirmationTypography(appTheme)
+        // Use the available window width so the type also adapts in iPad Split View.
+        let wideLayoutProgress = min(max((size.width - 440) / 320, 0), 1)
+        let widthScale = 1 + 0.4 * wideLayoutProgress
+        return MessageText(
+            source: affirmation.text, theme: appTheme, scaledContextSize: contextSize * widthScale
+        )
+            .affirmationTypography(appTheme, scaledSize: messageSize * widthScale)
             .lineSpacing(appTheme.affirmationLineSpacing)
-            .frame(maxWidth: 560)
+            .frame(maxWidth: 560 + 120 * wideLayoutProgress)
             .multilineTextAlignment(.center)
             .modifier(TextOutline(enabled: outlinesText))
             .accessibilityLabel("Affirmation: \(MessageMarkup(affirmation.text).plainText)")
