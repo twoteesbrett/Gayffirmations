@@ -99,6 +99,27 @@ extension AppTheme {
                 ThemeImage(id: "gay-wonderland-violet-portal", name: "Violet Portal", focalPoint: .center,
                            overlayOpacity: 0.48, accessibilityDescription: "Men stand among violet arches, floating spheres, and purple orchids above still water", textColor: .white)
             ]
+        case .shitHappens:
+            return [
+                ThemeImage(id: "shit-happens-mirror-check", name: "Mirror Check", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man in an untied bow tie examines his nose in a bathroom mirror", textColor: .white),
+                ThemeImage(id: "shit-happens-burnt-toast", name: "Burnt Toast", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man holds up two charred slices of toast beside a smoking toaster", textColor: .white),
+                ThemeImage(id: "shit-happens-cafe-laughter", name: "Café Laughter", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man looks up from his outdoor café table while his companion laughs", textColor: .white),
+                ThemeImage(id: "shit-happens-laundromat", name: "Laundromat", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man holds up a shrunken rainbow tank top at a laundromat", textColor: .white),
+                ThemeImage(id: "shit-happens-matching-shirts", name: "Matching Shirts", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "Two men react to wearing matching hibiscus shirts at a garden party", textColor: .white),
+                ThemeImage(id: "shit-happens-coffee-spill", name: "Coffee Spill", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man looks down at coffee spilled across his shirt while his companion laughs", textColor: .white),
+                ThemeImage(id: "shit-happens-muddy-trail", name: "Muddy Trail", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man sits in the mud while his companion leans over to help and a dog stands nearby", textColor: .white),
+                ThemeImage(id: "shit-happens-poolside-chair", name: "Poolside Chair", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man sits in a collapsed poolside chair while his friends laugh", textColor: .white),
+                ThemeImage(id: "shit-happens-park-yoga", name: "Park Yoga", focalPoint: .center,
+                           overlayOpacity: 0.48, accessibilityDescription: "A man gives a sheepish smile while holding a downward dog pose in the park", textColor: .white)
+            ]
         case .outAndAbout:
             return [
                 ThemeImage(id: "out-and-about-lakeside-cafe", name: "Lakeside Café", focalPoint: .center,

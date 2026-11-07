@@ -138,3 +138,20 @@ The renamed copies in `Assets` and the asset catalogue preserve the original PNG
 | 7 | Surreal Blue Oasis Waterfall Collage | `gay-wonderland-blue-oasis` |
 | 8 | Surreal Moonlit Waterfall Collage | `gay-wonderland-indigo-waterfall` |
 | 9 | Surreal Purple Portal Retreat | `gay-wonderland-violet-portal` |
+
+## Shit Happens
+
+Shit Happens uses nine user-supplied PNGs from `Desktop/assets/shit happens`.
+The renamed copies in `Assets` and the asset catalogue preserve the original PNG files.
+
+| Rotation | Original image | Bundled asset identifier |
+| --- | --- | --- |
+| 1 | Mirror Check Before the Big Day | `shit-happens-mirror-check` |
+| 2 | Burnt Toast Kitchen Mishap | `shit-happens-burnt-toast` |
+| 3 | Café Mishap and Laughter | `shit-happens-cafe-laughter` |
+| 4 | Laundromat Mishap with Rainbow Tank Top | `shit-happens-laundromat` |
+| 5 | Matching Hibiscus Shirts at the Garden Party | `shit-happens-matching-shirts` |
+| 6 | Coffee Spill at the Outdoor Café | `shit-happens-coffee-spill` |
+| 7 | Muddy Trail Companions and a Happy Dog | `shit-happens-muddy-trail` |
+| 8 | Poolside Chair Mishap | `shit-happens-poolside-chair` |
+| 9 | Sheepish Downward Dog in the Park | `shit-happens-park-yoga` |

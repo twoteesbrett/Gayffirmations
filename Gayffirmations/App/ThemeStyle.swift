@@ -3,15 +3,16 @@ import SwiftUI
 extension AppTheme {
     var colorScheme: ColorScheme {
         switch self {
-        case .steel, .outAndAbout, .together, .ages, .gayWonderland: .dark
+        case .steel, .outAndAbout, .together, .ages, .gayWonderland, .shitHappens: .dark
         }
     }
 
     var accentColor: Color {
         switch self {
         case .gayWonderland: Color(hex: 0xF4BFFF)
+        case .shitHappens: Color(hex: 0xF3CC9E)
         case .ages: Color(hex: 0xEBC992)
-        case .together: Color(hex: 0xF3CC9E)
+        case .together: Color(hex: 0xC6EF9C)
         case .steel: Color(hex: 0xA7C9E0)
         case .outAndAbout: Color(hex: 0xB9E2F5)
         }
@@ -20,8 +21,9 @@ extension AppTheme {
     var textColor: Color {
         switch self {
         case .gayWonderland: Color(hex: 0xFFF4FD)
+        case .shitHappens: Color(hex: 0xFFF5E9)
         case .ages: Color(hex: 0xFFF6E8)
-        case .together: Color(hex: 0xFFF5E9)
+        case .together: Color(hex: 0xF2F9E9)
         case .steel: Color(hex: 0xF0F4F7)
         case .outAndAbout: Color(hex: 0xF0F7FC)
         }
@@ -29,6 +31,9 @@ extension AppTheme {
 
     var backgroundGradient: LinearGradient {
         switch self {
+        case .shitHappens:
+            LinearGradient(colors: [Color(hex: 0x80553C), Color(hex: 0x392A29)],
+                           startPoint: .top, endPoint: .bottom)
         case .gayWonderland:
             LinearGradient(colors: [Color(hex: 0x65304E), Color(hex: 0x29204E)],
                            startPoint: .top, endPoint: .bottom)
@@ -36,7 +41,7 @@ extension AppTheme {
             LinearGradient(colors: [Color(hex: 0x6B5940), Color(hex: 0x302A24)],
                            startPoint: .top, endPoint: .bottom)
         case .together:
-            LinearGradient(colors: [Color(hex: 0x80553C), Color(hex: 0x392A29)],
+            LinearGradient(colors: [Color(hex: 0x34583A), Color(hex: 0x142C22)],
                            startPoint: .top, endPoint: .bottom)
         case .outAndAbout:
             LinearGradient(colors: [Color(hex: 0x327FA8), Color(hex: 0x123E5A)],
@@ -49,13 +54,13 @@ extension AppTheme {
 
     var interfaceFontDesign: Font.Design? {
         switch self {
-        case .steel, .outAndAbout, .together, .ages, .gayWonderland: nil
+        case .steel, .outAndAbout, .together, .ages, .gayWonderland, .shitHappens: nil
         }
     }
 
     var affirmationLineSpacing: CGFloat {
         switch self {
-        case .outAndAbout, .together, .ages, .gayWonderland: 8
+        case .outAndAbout, .together, .ages, .gayWonderland, .shitHappens: 8
         case .steel: 4
         }
     }
@@ -64,7 +69,7 @@ extension AppTheme {
         switch self {
         case .steel:
             .system(role.textStyle, design: .default, weight: .bold)
-        case .outAndAbout, .together, .ages, .gayWonderland:
+        case .outAndAbout, .together, .ages, .gayWonderland, .shitHappens:
             .system(role.textStyle, design: .default, weight: .regular)
         }
     }

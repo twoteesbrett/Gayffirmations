@@ -7,6 +7,7 @@ nonisolated enum ContentAvailability {
         .ages,
 //        .steel,
 //        .gayWonderland,
+//        .shitHappens,
     ]
 
     static let disabledCategories: Set<AffirmationTag> = [
