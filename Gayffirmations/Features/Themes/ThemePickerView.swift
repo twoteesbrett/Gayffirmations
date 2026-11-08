@@ -264,7 +264,7 @@ struct ThemePreviewRow: View {
         switch theme {
         case .together: imageID = "together-pickup-romance"
         case .ages: imageID = "ages-garden-harvest"
-        case .gayWonderland: imageID = "gay-wonderland-crimson-archway"
+        case .gayWonderland: imageID = "gay-wonderland-red-telephone-stage"
         case .shitHappens: imageID = "shit-happens-burnt-toast"
         case .steel: imageID = "steel-strength"
         case .outAndAbout: imageID = "out-and-about-lakeside-cafe"

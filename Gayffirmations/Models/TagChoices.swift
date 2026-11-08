@@ -14,6 +14,10 @@ enum TagChoices {
             }
             if !alreadyIncluded { uniqueTags.append(tag) }
         }
-        return uniqueTags.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+        return uniqueTags.sorted { first, second in
+            let firstName = AffirmationTag(rawValue: first)?.name ?? first
+            let secondName = AffirmationTag(rawValue: second)?.name ?? second
+            return firstName.localizedStandardCompare(secondName) == .orderedAscending
+        }
     }
 }

@@ -78,26 +78,25 @@ extension AppTheme {
                            overlayOpacity: 0.48, accessibilityDescription: "An AI-generated monochrome portrait of a man lifting a kettlebell with his head tilted back", textColor: .white)
             ]
         case .gayWonderland:
-            // Follow the Pride rainbow, with transitional shades between the main colours.
             return [
-                ThemeImage(id: "gay-wonderland-crimson-archway", name: "Crimson Archway", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Red drapery and flowers frame men and classical stonework beneath a crimson sun", textColor: .white),
-                ThemeImage(id: "gay-wonderland-coral-paradise", name: "Coral Paradise", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge by a turquoise pool under a coral sky with floating lips and flowers", textColor: .white),
-                ThemeImage(id: "gay-wonderland-orange-desert", name: "Orange Desert", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "A surreal orange desert with giant sculptural figures and a turquoise pool", textColor: .white),
-                ThemeImage(id: "gay-wonderland-amber-hourglass", name: "Amber Hourglass", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "A giant hourglass towers above men, sunflowers, and amber desert arches", textColor: .white),
-                ThemeImage(id: "gay-wonderland-golden-pool", name: "Golden Pool", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge beside a pool framed by yellow flowers and golden arches", textColor: .white),
-                ThemeImage(id: "gay-wonderland-emerald-pool", name: "Emerald Pool", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Men gather by an emerald pool and waterfall cradled in a giant stone hand", textColor: .white),
-                ThemeImage(id: "gay-wonderland-blue-oasis", name: "Blue Oasis", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Men stand amid blue waterfalls, white arches, and giant blue flowers", textColor: .white),
-                ThemeImage(id: "gay-wonderland-indigo-waterfall", name: "Indigo Waterfall", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge beside indigo waterfalls beneath a full moon and blue orchids", textColor: .white),
-                ThemeImage(id: "gay-wonderland-violet-portal", name: "Violet Portal", focalPoint: .center,
-                           overlayOpacity: 0.48, accessibilityDescription: "Men stand among violet arches, floating spheres, and purple orchids above still water", textColor: .white)
+                ThemeImage(id: "gay-wonderland-pink-couture-runway", name: "Pink Couture Runway", focalPoint: UnitPoint(x: 0.51, y: 0.46),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man walks a pink runway amid giant makeup, roses, and oversized scissors", textColor: .white),
+                ThemeImage(id: "gay-wonderland-red-telephone-stage", name: "Red Telephone Stage", focalPoint: UnitPoint(x: 0.52, y: 0.30),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man holds a red receiver while standing on a giant rotary phone beneath red curtains", textColor: .white),
+                ThemeImage(id: "gay-wonderland-coral-paradise", name: "Coral Paradise", focalPoint: UnitPoint(x: 0.75, y: 0.54),
+                           overlayOpacity: 0.48, accessibilityDescription: "Men lounge beside turquoise waterfalls under a coral sky filled with giant lips and hibiscus flowers", textColor: .white),
+                ThemeImage(id: "gay-wonderland-lemon-factory", name: "Lemon Factory", focalPoint: UnitPoint(x: 0.49, y: 0.61),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man kneels and feeds a giant lemon into a machine beneath a sun with a human face", textColor: .white),
+                ThemeImage(id: "gay-wonderland-emerald-apple", name: "Emerald Apple", focalPoint: UnitPoint(x: 0.49, y: 0.27),
+                           overlayOpacity: 0.48, accessibilityDescription: "A spiral of green apple peel wraps around a man beside a parakeet and a record player", textColor: .white),
+                ThemeImage(id: "gay-wonderland-iceberg-ironing", name: "Iceberg Ironing", focalPoint: UnitPoint(x: 0.36, y: 0.46),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man irons a shirt in an icy landscape while another reads inside a floating block of ice", textColor: .white),
+                ThemeImage(id: "gay-wonderland-indigo-zebra-carnival", name: "Indigo Zebra Carnival", focalPoint: UnitPoint(x: 0.33, y: 0.18),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man rides a carousel zebra beneath a purple moon and a disco ball", textColor: .white),
+                ThemeImage(id: "gay-wonderland-lavender-banana", name: "Lavender Banana", focalPoint: UnitPoint(x: 0.55, y: 0.39),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man reaches forward through a swirl of banana peel, floating dice, and clocks", textColor: .white),
+                ThemeImage(id: "gay-wonderland-clouds-chrome-and-pearls", name: "Clouds, Chrome, and Pearls", focalPoint: UnitPoint(x: 0.47, y: 0.40),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man rests his cheek on his hand amid clouds, floating laundry, and chrome washing machines", textColor: .white)
             ]
         case .shitHappens:
             return [
@@ -115,7 +114,7 @@ extension AppTheme {
                            overlayOpacity: 0.48, accessibilityDescription: "A man looks down at coffee spilled across his shirt while his companion laughs", textColor: .white),
                 ThemeImage(id: "shit-happens-muddy-trail", name: "Muddy Trail", focalPoint: UnitPoint(x: 0.10, y: 0.42),
                            overlayOpacity: 0.48, accessibilityDescription: "A man sits in the mud while his companion leans over to help and a dog stands nearby", textColor: .white),
-                ThemeImage(id: "shit-happens-poolside-chair", name: "Poolside Chair", focalPoint: UnitPoint(x: 0.50, y: 0.78),
+                ThemeImage(id: "shit-happens-poolside-chair", name: "Poolside Chair", focalPoint: UnitPoint(x: 0.32, y: 0.33),
                            overlayOpacity: 0.48, accessibilityDescription: "A man sits in a collapsed poolside chair while his friends laugh", textColor: .white),
                 ThemeImage(id: "shit-happens-park-yoga", name: "Park Yoga", focalPoint: UnitPoint(x: 0.75, y: 0.13),
                            overlayOpacity: 0.48, accessibilityDescription: "A man gives a sheepish smile while holding a downward dog pose in the park", textColor: .white)

@@ -124,24 +124,24 @@ The renamed copies in Assets and the asset catalogue preserve the original PNG f
 | Sunny Garden Carrot Harvest | `ages-garden-harvest` |
 ## Gay Wonderland
 
-Gay Wonderland uses nine user-supplied PNGs from `Desktop/assets/wonderland`.
-The renamed copies in `Assets` and the asset catalogue preserve the original PNG files.
+Gay Wonderland uses nine user-supplied PNGs from `Desktop/assets/gay wonderland`.
+The copies in `Assets` and the asset catalogue preserve the original PNG files.
 
-| Rotation | Original image | Bundled asset identifier |
+| Rotation | Original filename (without .png) | Bundled asset identifier |
 | --- | --- | --- |
-| 1 | Crimson Archway Dreamscape | `gay-wonderland-crimson-archway` |
-| 2 | Surreal Retro Paradise Collage | `gay-wonderland-coral-paradise` |
-| 3 | Surreal Desert Collage with Floating Forms | `gay-wonderland-orange-desert` |
-| 4 | Golden Hourglass Desert Dream | `gay-wonderland-amber-hourglass` |
-| 5 | Golden Surrealist Pool Collage | `gay-wonderland-golden-pool` |
-| 6 | Surreal Emerald Pool Dreamscape | `gay-wonderland-emerald-pool` |
-| 7 | Surreal Blue Oasis Waterfall Collage | `gay-wonderland-blue-oasis` |
-| 8 | Surreal Moonlit Waterfall Collage | `gay-wonderland-indigo-waterfall` |
-| 9 | Surreal Purple Portal Retreat | `gay-wonderland-violet-portal` |
+| 1 | Surreal Pink Couture Runway | `gay-wonderland-pink-couture-runway` |
+| 2 | Velvet Rebellion_ The Red Phone Shrug | `gay-wonderland-red-telephone-stage` |
+| 3 | gay-wonderland-coral-paradise | `gay-wonderland-coral-paradise` |
+| 4 | Focused Lemon Factory Worker | `gay-wonderland-lemon-factory` |
+| 5 | Surreal Emerald Apple Dreamscape | `gay-wonderland-emerald-apple` |
+| 6 | Surreal Iceberg Ironing Dreamscape | `gay-wonderland-iceberg-ironing` |
+| 7 | Dreamy Carousel Rider in Purple Fantasy | `gay-wonderland-indigo-zebra-carnival` |
+| 8 | Retro Surreal Banana Vortex Collage | `gay-wonderland-lavender-banana` |
+| 9 | Clouds, Chrome, and Pearls | `gay-wonderland-clouds-chrome-and-pearls` |
 
 ## Shit Happens
 
-Shit Happens uses nine user-supplied PNGs from `Desktop/assets/shit happens`.
+Shit Happens uses nine user-supplied PNGs. Poolside Chair came from `Desktop/assets` and the other eight came from `Desktop/assets/shit happens`.
 The renamed copies in `Assets` and the asset catalogue preserve the original PNG files.
 
 | Rotation | Original image | Bundled asset identifier |
@@ -153,5 +153,5 @@ The renamed copies in `Assets` and the asset catalogue preserve the original PNG
 | 5 | Garden Party Laughter Under String Lights | `shit-happens-matching-shirts` |
 | 6 | Coffee Spill at the Outdoor Café | `shit-happens-coffee-spill` |
 | 7 | Muddy Trail Companions and a Happy Dog | `shit-happens-muddy-trail` |
-| 8 | Sunlit Poolside Laughter and Swimwear | `shit-happens-poolside-chair` |
+| 8 | Poolside Chair Mishap | `shit-happens-poolside-chair` |
 | 9 | Sheepish Downward Dog in the Park | `shit-happens-park-yoga` |

@@ -15,7 +15,7 @@ nonisolated enum AffirmationTag: String, CaseIterable {
         case .gay: "Gay"
         case .human: "Human"
         case .roleModel: "Role Model"
-        case .innerCynic: "Inner Cynic"
+        case .innerCynic: "Cynic"
         }
     }
 
@@ -26,7 +26,7 @@ nonisolated enum AffirmationTag: String, CaseIterable {
         case .gay: "Proudly Gay"
         case .human: "Being Human"
         case .roleModel: "Be the Man You Needed"
-        case .innerCynic: name
+        case .innerCynic: "One of Those Days"
         }
     }
 

@@ -8,6 +8,12 @@ struct TagChoicesTests {
         #expect(tags == ["anxiety", "Travel", "Work 2", "Work 10"])
     }
 
+    @Test("Categories sort by their visible names")
+    func categoriesSortByVisibleName() {
+        let tags = TagChoices.sortedUnique(AffirmationTag.allCases.map(\.rawValue))
+        #expect(tags == ["critic", "inner-cynic", "food", "gay", "human", "role-model"])
+    }
+
     @Test("Retired categories merge without breaking saved selections")
     func retiredCategories() {
         #expect(TagChoices.sortedUnique(["body", "confidence", "self-kindness", "inner-critic", "food"]) == ["critic", "food", "human"])
