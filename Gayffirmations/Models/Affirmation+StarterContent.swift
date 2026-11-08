@@ -165,11 +165,11 @@ nonisolated extension Affirmation {
                 [.critic]),
 
         starter("B7E77000-0000-4000-8000-000000000063",
-                "I could use a little tenderness. Yes, me. Don't make it weird.",
+                "I could use a little tenderness.<br><small>Yes, me!</small>",
                 [.critic]),
 
         starter("B7E77000-0000-4000-8000-000000000064",
-                "I've been hard on myself for long enough. It's time to let go.",
+                "<small>I've been hard on myself for long enough.</small><br>It's time to let go.",
                 [.critic]),
 
         // MARK: - Be the Man You Needed
@@ -191,7 +191,7 @@ nonisolated extension Affirmation {
                 [.roleModel]),
 
         starter("B7E77000-0000-4000-8000-000000000080",
-                "Own your shit. Apologise. Do better.",
+                "Own your shit.<br>Apologise.<br>Be better.",
                 [.roleModel]),
 
         starter("B7E77000-0000-4000-8000-000000000081",
@@ -217,19 +217,19 @@ nonisolated extension Affirmation {
         // MARK: - Inner Cynic
 
         starter("B7E77000-0000-4000-8000-000000000086",
-                "Everything is temporary.<br><small>Including this particular shitshow.</small>",
+                "Everything is temporary.<br><small>Including this shitshow.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000087",
-                "My life hasn't gone according to plan.<br><small>Admittedly, the plan was a bit shit.</small>",
+                "My life hasn't gone according to plan.<br><small>Admittedly, the plan was rubbish.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000088",
-                "<small>Other people are making it up as they go along too.</small><br>Some just have better shoes.",
+                "Other people are making it up as they go along too.<br><small>Some just have better fashion sense.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000089",
-                "I'm not required to become a better person before lunchtime.",
+                "<small>I'm not required to become a</small><br>better person<br><small>before lunchtime.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000090",
@@ -237,7 +237,7 @@ nonisolated extension Affirmation {
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000091",
-                "I can make sensible decisions.<br><small>And not feel remotely positive about them.</small>",
+                "I can make sensible decisions.<br><small>And I don't have to feel remotely positive about them.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000092",
@@ -245,11 +245,11 @@ nonisolated extension Affirmation {
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000093",
-                "I don't need to shine today.<br><small>I'm not a frickin’ lighthouse.</small>",
+                "I don't need to shine today.<br><small>Because I'm not a lighthouse.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000094",
-                "Apparently, telling myself I'm wonderful is a substitute for actually feeling wonderful.",
+                "<small>Apparently, telling myself</small><br>I'm wonderful<br><small>is a substitute for actually feeling wonderful.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000095",
@@ -261,11 +261,11 @@ nonisolated extension Affirmation {
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000097",
-                "<small>Positive thinking isn't going to solve everything.</small><br>Neither is being a miserable bastard.",
+                "Positive thinking<br><small>isn't going to solve everything.<br>Neither is being a miserable bastard.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000098",
-                "<small>I don't need to convince myself that life is wonderful.</small><br>Maybe I can just make today slightly less shit.",
+                "I don't need to convince myself that life is wonderful.<br><small>Maybe I can just make today slightly less shit.</small>",
                 [.innerCynic]),
 
         starter("B7E77000-0000-4000-8000-000000000099",
