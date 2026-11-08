@@ -26,7 +26,7 @@ struct TodayCornerControls: View {
             HStack {
                 if showsImageInspection {
                     icon(
-                        isInspectingImage ? "eye.slash" : "eye",
+                        isInspectingImage ? "text.quote" : "photo",
                         label: isInspectingImage ? "Show affirmation" : "Inspect background image",
                         action: onToggleImageInspection
                     )
