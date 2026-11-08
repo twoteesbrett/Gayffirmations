@@ -15,7 +15,7 @@ struct StarterContentTests {
             #expect(entries.filter { $0.tags.contains(tag.rawValue) }.count == expectedCount)
         }
         #expect(entries.first?.text == "You've got this, bitch.")
-        #expect(entries.last?.text == "I don't believe a word of this. Still, I've read this far.")
+        #expect(entries.last?.text == "I don't believe a word of this.<br><small>Still, I've read this far.</small>")
     }
 
     @Test("Retired themes load as Out & About", arguments: [

@@ -61,7 +61,7 @@ struct ThemeStoreTests {
         #expect(repository.theme == .outAndAbout)
     }
 
-    @Test("A theme selection survives recreating the store", arguments: AppTheme.allCases)
+    @Test("A theme selection survives recreating the store", arguments: AppTheme.allCases.filter(ContentAvailability.allowsTheme))
     func selectionSurvivesRestart(theme: AppTheme) throws {
         let repository = InMemoryThemeRepository()
         let firstStore = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
@@ -73,6 +73,20 @@ struct ThemeStoreTests {
         )
 
         #expect(restartedStore.selectedTheme == theme)
+    }
+
+    @Test("Unavailable saved themes use a fallback without overwriting the preference",
+          arguments: AppTheme.allCases.filter { !ContentAvailability.allowsTheme($0) })
+    func unavailableThemePreservesSavedPreference(theme: AppTheme) throws {
+        let repository = InMemoryThemeRepository(theme: theme)
+        let store = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
+        #expect(store.selectedTheme == .outAndAbout)
+        #expect(repository.theme == theme)
+        #expect(repository.saveCallCount == 0)
+        try store.select(theme)
+        #expect(store.selectedTheme == .outAndAbout)
+        #expect(repository.theme == theme)
+        #expect(repository.saveCallCount == 0)
     }
 
     @Test("Reset restores and saves the default theme")

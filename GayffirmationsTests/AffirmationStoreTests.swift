@@ -257,7 +257,10 @@ struct AffirmationStoreTests {
 
     @Test("Loading preserves saved bundled content and custom messages")
     func refreshesBundledContent() throws {
-        var old = Affirmation.starterAffirmations
+        var old = [
+            Affirmation(text: "Bundled original", tags: ["Original"], source: .bundled),
+            Affirmation(text: "Another original", tags: ["Original"], source: .bundled)
+        ]
         old[0].isFavorite = true
         var custom = old.removeLast()
         custom = Affirmation(id: custom.id, text: "My rewrite", isFavorite: true, tags: ["Mine"])
@@ -282,7 +285,7 @@ struct AffirmationStoreTests {
             defaultAffirmations: Affirmation.starterAffirmations
         )
 
-        #expect(store.affirmations == Affirmation.starterAffirmations)
+        #expect(store.affirmations == Affirmation.starterAffirmations.filter(ContentAvailability.allowsAffirmation))
         #expect(repository.affirmations == Affirmation.starterAffirmations)
     }
 

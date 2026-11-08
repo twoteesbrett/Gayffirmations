@@ -5,7 +5,7 @@ import Testing
 @MainActor
 struct BundledAffirmationTests {
     @Test func failedRestorationPreservesPersonalContentUntilRetry() throws {
-        let original = try #require(Affirmation.starterAffirmations.first)
+        let original = Affirmation(text: "Bundled original", tags: ["Restoration"], source: .bundled)
         let personal = Affirmation(
             id: original.id, text: "My rewrite", isFavorite: true, tags: ["Mine"]
         )
@@ -33,18 +33,18 @@ struct BundledAffirmationTests {
     }
 
     @Test func bundledEditsAndDeletionSurviveReloadAndCanBeRestored() throws {
-        let entry = try #require(Affirmation.starterAffirmations.first { $0.id == UUID(uuidString: "B7E77000-0000-4000-8000-000000000015") })
+        let entry = Affirmation(text: "Bundled original", tags: ["Restoration"], source: .bundled)
         let repository = BundledMessageRepository()
         let store = AffirmationStore(repository: repository, defaultAffirmations: [entry])
         try store.update(id: entry.id, text: "Changed", tags: ["Mine"])
         try store.toggleFavorite(id: entry.id)
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: [entry])
-        #expect(restarted.affirmations[0].text == "Changed")
-        #expect(restarted.affirmations[0].tags == ["Mine"])
+        #expect(restarted.affirmations.first?.text == "Changed")
+        #expect(restarted.affirmations.first?.tags == ["Mine"])
         try restarted.restoreOriginal(id: entry.id)
-        #expect(restarted.affirmations[0].text == entry.text)
-        #expect(restarted.affirmations[0].tags == entry.tags)
-        #expect(restarted.affirmations[0].isFavorite)
+        #expect(restarted.affirmations.first?.text == entry.text)
+        #expect(restarted.affirmations.first?.tags == entry.tags)
+        #expect(restarted.affirmations.first?.isFavorite == true)
         try restarted.delete(id: entry.id)
         let deleted = AffirmationStore(repository: repository, defaultAffirmations: [entry])
         #expect(deleted.affirmations.isEmpty)
@@ -58,8 +58,8 @@ struct BundledAffirmationTests {
         let entry = try store.add(text: "My message")
         try store.update(id: entry.id, text: "My edited message")
         let reloaded = try JSONDecoder().decode([Affirmation].self, from: JSONEncoder().encode(store.affirmations))
-        #expect(reloaded[0].source == .user)
-        #expect(reloaded[0].text == "My edited message")
+        #expect(reloaded.first?.source == .user)
+        #expect(reloaded.first?.text == "My edited message")
     }
 
     @Test func legacySourcesPreserveCustomisations() throws {
@@ -105,7 +105,7 @@ struct BundledAffirmationTests {
         #expect(reloaded == migrated)
         let store = AffirmationStore(affirmations: [reloaded])
         try store.update(id: reloaded.id, text: reloaded.text, tags: ["Updated"])
-        #expect(store.affirmations[0].tags == ["Updated"])
+        #expect(store.affirmations.first?.tags == ["Updated"])
         try store.delete(id: reloaded.id)
         #expect(store.affirmations.isEmpty)
     }

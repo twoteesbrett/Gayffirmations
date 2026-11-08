@@ -36,7 +36,8 @@ struct PersistenceRepositoryTests {
         #expect(store.affirmations == personal)
         try store.restoreDefaults()
 
-        let saved = store.affirmations
+        let saved = try #require(try fixture.repository.loadAffirmations())
+        let visible = saved.filter(ContentAvailability.allowsAffirmation)
         let restored = try #require(saved.first { $0.id == starter.id })
         #expect(restored.isBundled)
         #expect(restored.text == current.first { $0.id == starter.id }?.text)
@@ -54,9 +55,9 @@ struct PersistenceRepositoryTests {
         #expect(try fixture.repository.loadAffirmations() == saved)
         for _ in 0..<2 {
             let restarted = AffirmationStore(repository: fixture.repository, defaultAffirmations: current)
-            #expect(restarted.affirmations == saved)
+            #expect(restarted.affirmations == visible)
             try restarted.restoreDefaults()
-            #expect(restarted.affirmations == saved)
+            #expect(restarted.affirmations == visible)
             #expect(try fixture.repository.loadAffirmations() == saved)
         }
     }
@@ -269,7 +270,9 @@ struct PersistenceRepositoryTests {
             userDefaults: fixture.userDefaults,
             initialAffirmations: Affirmation.starterAffirmations
         )
-        #expect(try restarted.loadAffirmations() == library.affirmations)
+        let persisted = try #require(try repository.loadAffirmations())
+        #expect(try restarted.loadAffirmations() == persisted)
+        #expect(library.affirmations == persisted.filter(ContentAvailability.allowsAffirmation))
         #expect(try restarted.loadTheme() == .steel)
         #expect(try restarted.loadAffirmationSelection() == .favourites)
 

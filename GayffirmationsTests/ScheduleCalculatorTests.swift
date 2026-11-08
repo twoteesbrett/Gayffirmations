@@ -59,7 +59,7 @@ struct ScheduleCalculatorTests {
             let times = try calculator.notificationTimes(for: AffirmationSchedule(
                 notificationsPerDay: 1, rhythm: rhythm
             ))
-            #expect(times.count == 1)
+            try #require(times.count == 1)
             #expect(rhythm == .moreEarly ? times[0].hour < 13 : times[0].hour > 13)
         }
     }

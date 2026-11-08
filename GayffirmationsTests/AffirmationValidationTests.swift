@@ -53,7 +53,7 @@ struct AffirmationValidationTests {
         #expect(preferences.bool(forKey: "gayffirmations.initialAffirmationsSeeded") == seeded)
         let store = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
         #expect(store.persistenceErrorMessage != nil)
-        #expect(store.affirmations == Affirmation.starterAffirmations)
+        #expect(store.affirmations == Affirmation.starterAffirmations.filter(ContentAvailability.allowsAffirmation))
         #expect(Set(store.affirmations.map(\.id)).count == store.affirmations.count)
         #expect(throws: PersistenceUnavailableError.self) { try store.add(text: "Blocked") }
         #expect(throws: PersistenceUnavailableError.self) { try store.restoreDefaults() }

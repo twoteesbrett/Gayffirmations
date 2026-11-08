@@ -47,9 +47,9 @@ struct MessageMarkupTests {
         #expect(try repository.loadAffirmations()?.first?.text == "Repaired")
     }
 
-    @Test func parsesSmallRunsAndPreservesLineBreaks() {
+    @Test func parsesSmallRunsAndPreservesLineBreaks() throws {
         let markup = MessageMarkup("<small>Let it go means to</small>\nLet it be")
-        #expect(markup.runs.count == 2)
+        try #require(markup.runs.count == 2)
         #expect(markup.runs[0].style == .small)
         #expect(markup.runs[1].style == .normal)
         #expect(markup.plainText == "Let it go means to\nLet it be")
@@ -63,11 +63,12 @@ struct MessageMarkupTests {
     }
 
     @Test(arguments: ["<br>", "<br/>", "<br />"])
-    func breakTagsProduceNewlines(_ tag: String) {
+    func breakTagsProduceNewlines(_ tag: String) throws {
         #expect(MessageMarkup("First\(tag)Second\(tag)\(tag)Third").plainText == "First\nSecond\n\nThird")
         #expect(MessageMarkup("\(tag)Text\(tag)").plainText == "\nText\n")
         let markup = MessageMarkup("<small>Let it go\(tag)means to</small>\(tag)Let it be")
         #expect(markup.plainText == "Let it go\nmeans to\nLet it be")
+        try #require(markup.runs.count >= 2)
         #expect(markup.runs[0].style == .small)
         #expect(markup.runs[1].style == .small)
         #expect(markup.runs.last?.style == .normal)

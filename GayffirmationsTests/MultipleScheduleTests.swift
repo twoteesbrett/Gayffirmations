@@ -78,6 +78,7 @@ struct MultipleScheduleTests {
         #expect(overnight.scheduleName == nil)
         #expect(overnight.nextChange == date(day: 2, hour: 7))
 
+        try #require(plan.count == 4)
         let now = plan[1].time.date(on: date(hour: 0), calendar: calendar)
         let context = resolver.context(at: now, schedules: schedules, affirmations: entries,
                                        fallbackSelection: .tag("Food"), name: "", calendar: calendar)
@@ -93,7 +94,7 @@ struct MultipleScheduleTests {
         let second = AffirmationSchedule(selection: .tag("Food"), isEnabled: true, notificationsPerDay: 1)
         let schedules = [first, second]
         let plan = try NotificationPlanner().plan(for: schedules, affirmations: [body, food], name: "")
-        #expect(plan.count == 2)
+        try #require(plan.count == 2)
         #expect(plan[0].time == plan[1].time)
         #expect(plan[0].id != plan[1].id)
         let context = TodayAffirmationResolver().context(at: date(hour: 13), schedules: schedules,
@@ -210,7 +211,7 @@ struct MultipleScheduleTests {
         let selection = AffirmationSelection.sources(favourites: true, tags: ["Body", "Confidence"])
         try repository.saveAffirmationSelection(selection)
         let loaded = try #require(try repository.loadSchedules())
-        #expect(loaded.count == 1)
+        try #require(loaded.count == 1)
         #expect(loaded[0].selection == selection)
         #expect(loaded[0].name == "Daily affirmations")
         #expect(loaded[0].isEnabled)
@@ -259,7 +260,7 @@ struct MultipleScheduleTests {
         try reset.resetAll()
         #expect(store.schedules == [store.defaultSchedule])
         #expect(try repository.loadSchedules() == [store.defaultSchedule])
-        #expect(!store.schedules[0].isEnabled)
+        #expect(store.schedules.first?.isEnabled == false)
         #expect(scheduler.scheduledReminders.isEmpty)
     }
 
