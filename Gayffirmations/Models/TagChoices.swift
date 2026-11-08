@@ -2,7 +2,9 @@ import Foundation
 
 enum TagChoices {
     static func available(_ tags: [String]) -> [String] {
-        sortedUnique(tags).filter(ContentAvailability.allowsTag)
+        // Callers supply tags from visible entries and saved selections. Keep
+        // those choices editable even if a bundled category is unavailable.
+        sortedUnique(tags)
     }
 
     /// Preserve the first spelling of each tag while sorting choices for display.

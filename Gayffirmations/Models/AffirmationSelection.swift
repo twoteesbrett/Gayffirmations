@@ -47,7 +47,9 @@ enum AffirmationSelection: Codable, Hashable {
     }
 
     func containsTag(_ tag: String) -> Bool {
-        ContentAvailability.allowsTag(tag) && selectedTags.contains { $0.compare(AffirmationTag.canonicalTag(tag), options: .caseInsensitive) == .orderedSame }
+        // The store filters unavailable bundled content. Personal tags and saved
+        // selections still match even when their bundled category is hidden.
+        selectedTags.contains { $0.compare(AffirmationTag.canonicalTag(tag), options: .caseInsensitive) == .orderedSame }
     }
 
     func selectingFavourites(_ included: Bool) -> AffirmationSelection {

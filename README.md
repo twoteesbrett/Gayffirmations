@@ -85,6 +85,10 @@ intentionally outside the first release.
 
 ## Bundled and personal messages
 
+Disabling a bundled category hides its bundled messages and category presets.
+Personal messages keep matching their tags, including legacy category aliases;
+tags already used by visible messages or saved selections remain editable.
+
 All messages can be edited, tagged, favourited, and deleted. Edits and deletions
 survive relaunch. Restore Original in the editor restores one bundled message;
 Restore Bundled Affirmations recovers bundled messages while keeping personal additions

@@ -83,7 +83,8 @@ struct AffirmationEditorView: View {
     }
 
     private var tagChoices: [String] {
-        TagChoices.available(selectedTags + availableTags + AffirmationTag.allCases.map(\.rawValue))
+        let presets = AffirmationTag.allCases.map(\.rawValue).filter(ContentAvailability.allowsTag)
+        return TagChoices.available(selectedTags + availableTags + presets)
     }
 
     private var tagSection: some View {
@@ -114,11 +115,6 @@ struct AffirmationEditorView: View {
     private func addTag() {
         let name = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }
-        guard ContentAvailability.allowsTag(name) else {
-            validationMessage = "This category is currently unavailable."
-            validationMessageIsFocused = true
-            return
-        }
         let tag = tagChoices.first {
             $0.compare(name, options: .caseInsensitive) == .orderedSame
         } ?? name

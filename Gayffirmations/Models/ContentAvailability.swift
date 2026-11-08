@@ -25,6 +25,7 @@ nonisolated enum ContentAvailability {
         theme == fallbackTheme || !disabledThemes.contains(theme)
     }
 
+    // Controls bundled content and category presets, not personal tag matching.
     static func allowsTag(_ tag: String) -> Bool {
         guard let category = AffirmationTag(rawValue: AffirmationTag.canonicalTag(tag).lowercased()) else {
             return true

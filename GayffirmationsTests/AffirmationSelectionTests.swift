@@ -4,6 +4,51 @@ import Testing
 
 @MainActor
 struct AffirmationSelectionTests {
+    @Test("Saved legacy tags keep personal content usable when the bundled category is hidden",
+          arguments: ["Body", "Confidence", "Self-kindness"])
+    func personalTagsSurviveDisabledCategory(legacyTag: String) async throws {
+        let fixture = SelectionRepositoryFixture()
+        defer { fixture.removeSavedData() }
+        // Exercise the shipped availability policy, including its legacy aliases.
+        try #require(!ContentAvailability.allowsTag(legacyTag))
+        let personal = Affirmation(text: "My personal message", tags: [legacyTag])
+        let bundled = Affirmation(text: "Hidden bundled message", tags: [legacyTag], source: .bundled)
+        let selection = AffirmationSelection.tag(legacyTag)
+        try fixture.repository.saveAffirmations([bundled, personal])
+        try fixture.repository.saveAffirmationSelection(selection)
+        try fixture.repository.saveSchedules([AffirmationSchedule(selection: selection, isEnabled: true)])
+
+        let library = AffirmationStore(repository: fixture.repository, defaultAffirmations: [])
+        let fallback = AffirmationSelectionStore(repository: fixture.repository)
+        let schedules = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let coordinator = NotificationCoordinator(
+            affirmationStore: library, scheduleStore: schedules, scheduler: scheduler,
+            fallbackSelectionStore: fallback
+        )
+
+        #expect(library.affirmations == [personal])
+        #expect(fallback.selection.matchingAffirmations(in: library.affirmations) == [personal])
+        #expect(coordinator.fallbackAffirmations == [personal])
+        let choices = TagChoices.available(library.availableTags + fallback.selection.selectedTags)
+        #expect(choices == ["human"])
+        #expect(fallback.selection.containsTag("HUMAN"))
+        #expect(fallback.selection.selectingTag("human", included: false).selectedTags.isEmpty)
+
+        await coordinator.reconcileOnLaunch()
+        #expect(coordinator.deliveryState == .active)
+        #expect(scheduler.scheduledReminders.count == NotificationReminder.pendingLimit)
+        #expect(scheduler.scheduledReminders.allSatisfy { $0.affirmationText == personal.text })
+        let reminder = try #require(scheduler.scheduledReminders.first)
+        let context = TodayAffirmationResolver().context(
+            at: reminder.deliveryDate, schedules: schedules.schedules,
+            affirmations: library.affirmations, fallbackSelection: fallback.selection, name: ""
+        )
+        #expect(context.affirmation == personal)
+        // Availability only changes the visible collection; stored content is preserved.
+        #expect(try fixture.repository.loadAffirmations() == [bundled, personal])
+    }
+
     @Test("Bundled and Mine combine independently with favourites and tags")
     func combinesLibrarySourceFilters() {
         let bundledFavourite = Affirmation(text: "Bundled favourite", isFavorite: true, source: .bundled)
