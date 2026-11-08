@@ -38,6 +38,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     private let scheduler: any NotificationScheduling
     private let planner = NotificationPlanner()
     private let now: () -> Date
+    private let calendar: () -> Calendar
 
     init(
         affirmationStore: AffirmationStore,
@@ -45,12 +46,14 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         scheduler: any NotificationScheduling,
         fallbackSelectionStore: AffirmationSelectionStore? = nil,
         personalizationStore: PersonalizationStore? = nil,
-        now: @escaping () -> Date = { .now }
+        now: @escaping () -> Date = { .now },
+        calendar: @escaping () -> Calendar = { .current }
     ) {
         self.affirmationStore = affirmationStore
         self.scheduleStore = scheduleStore
         self.scheduler = scheduler
         self.now = now
+        self.calendar = calendar
         self.fallbackSelectionStore = fallbackSelectionStore ?? AffirmationSelectionStore()
         self.personalizationStore = personalizationStore ?? PersonalizationStore()
         affirmationStore.attachChangeObserver(self)
@@ -73,7 +76,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     var dailyPlan: [ScheduledAffirmation] {
         (try? planner.plan(
             for: scheduleStore.schedules, affirmations: affirmationStore.affirmations,
-            name: personalizationStore.name, sound: scheduleStore.notificationSound, on: now()
+            name: personalizationStore.name, sound: scheduleStore.notificationSound, on: now(), calendar: calendar()
         )) ?? []
     }
     var deliveryIsPaused: Bool { enabledCount > 0 && dailyPlan.isEmpty }
@@ -245,12 +248,12 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         affirmations: [Affirmation]? = nil,
         sound: NotificationSound? = nil,
         after date: Date,
-        calendar: Calendar = .current
+        calendar: Calendar? = nil
     ) throws -> [NotificationReminder] {
         try planner.upcomingReminders(
             for: schedules, affirmations: affirmations ?? affirmationStore.affirmations,
             name: personalizationStore.name, sound: sound ?? scheduleStore.notificationSound,
-            after: date, calendar: calendar
+            after: date, calendar: calendar ?? self.calendar()
         )
     }
 
@@ -269,7 +272,11 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         await reconcileOnForeground()
     }
 
-    // Foreground and explicit retry use the same saved intent, without prompting.
+    func reconcileAfterTimeChange() async {
+        await reconcileOnForeground()
+    }
+
+    // Foreground, clock changes and explicit retry use saved intent without prompting.
     func reconcileOnForeground() async {
         guard !isUpdating else {
             reconciliationPending = true
@@ -313,7 +320,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         guard enabledCount > 0 else { return false }
         let schedules = scheduleStore.schedules
         let date = now()
-        let calendar = Calendar.current
+        let calendar = calendar()
         guard let previousPlan = try? upcomingReminders(for: schedules, affirmations: previous, after: date, calendar: calendar),
               let currentPlan = try? upcomingReminders(for: schedules, after: date, calendar: calendar) else {
             return true // Let reconciliation report planning errors and clear stale reminders.

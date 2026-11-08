@@ -5,7 +5,9 @@
 //  Created by Brett Fisher on 28/09/2026.
 //
 
+import Combine
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -19,6 +21,7 @@ struct ContentView: View {
     @State private var destination: TodayDestination?
     @State private var sheetDismissalID: UUID?
     @State private var refreshDate = Date.now
+    @State private var timeChangeID = UUID()
 
     init(
         affirmationStore: AffirmationStore,
@@ -78,6 +81,7 @@ struct ContentView: View {
                     sheetDismissalID: sheetDismissalID,
                     onOpenDestination: { destination = $0 }
                 )
+                .id(timeChangeID)
                 .themeAppearance(theme)
                 .environment(\.themeImage, themeStore.selectedImage(for: theme))
                 .environment(\.imageDimming, themeStore.backgroundChoice.imageDimming ?? 0)
@@ -102,6 +106,14 @@ struct ContentView: View {
                 Task { await notificationCoordinator.reconcileOnForeground() }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .NSSystemTimeZoneDidChange)
+            .receive(on: RunLoop.main)) { _ in
+            refreshAfterTimeChange()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)
+            .receive(on: RunLoop.main)) { _ in
+            refreshAfterTimeChange()
+        }
         .alert("Unable to Update Reminders", isPresented: Binding(
             get: { notificationCoordinator.errorMessage != nil },
             set: { if !$0 { notificationCoordinator.errorMessage = nil } }
@@ -123,6 +135,15 @@ struct ContentView: View {
                     + (startupPersistenceErrorMessage ?? "")
             )
         }
+    }
+
+    private func refreshAfterTimeChange() {
+        // Discard browsing deadlines calculated for the old local clock.
+        refreshDate = .now
+        timeChangeID = UUID()
+        // Foreground reconciliation handles events received while inactive.
+        guard scenePhase == .active else { return }
+        Task { await notificationCoordinator.reconcileAfterTimeChange() }
     }
 
     private var refreshMinute: Date {

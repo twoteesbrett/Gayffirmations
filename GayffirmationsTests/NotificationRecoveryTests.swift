@@ -200,6 +200,68 @@ struct NotificationRecoveryTests {
         #expect(coordinator.deliveryState == .active)
     }
 
+    @Test("Time-zone changes rebuild local delivery, including during a save",
+          .timeLimit(.minutes(1)), arguments: [false, true])
+    func timeZoneChange(duringSave: Bool) async throws {
+        let instant = try Date("2026-11-09T00:00:00Z", strategy: .iso8601)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Pacific/Auckland"))
+        let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
+        let schedule = AffirmationSchedule(
+            isEnabled: true, startTime: TimeOfDay(hour: 11, minute: 0),
+            endTime: TimeOfDay(hour: 13, minute: 0), notificationsPerDay: 1
+        )
+        let store = ScheduleStore(schedule: schedule)
+        let entries = [Affirmation(text: "First"), Affirmation(text: "Second")]
+        let coordinator = NotificationCoordinator(
+            affirmationStore: AffirmationStore(affirmations: entries),
+            scheduleStore: store, scheduler: scheduler, now: { instant }, calendar: { calendar }
+        )
+        await coordinator.reconcileOnLaunch()
+        let previous = scheduler.scheduledReminders
+        #expect(previous.first?.deliveryDate == (try Date("2026-11-09T23:00:00Z", strategy: .iso8601)))
+
+        let gate = NotificationSuspension()
+        defer { gate.resume() }
+        var save: Task<Void, Error>?
+        var expectedSchedule = schedule
+        if duringSave {
+            scheduler.replacementSuspension = gate
+            expectedSchedule.theme = .steel
+            let updated = expectedSchedule
+            save = Task { try await coordinator.saveSchedule(updated) }
+            await gate.waitUntilSuspended()
+        }
+        calendar.timeZone = try #require(TimeZone(identifier: "America/Los_Angeles"))
+        await coordinator.reconcileAfterTimeChange()
+        if duringSave {
+            // A burst of time events must produce only one follow-up rebuild.
+            await coordinator.reconcileAfterTimeChange()
+            gate.resume()
+            try await save?.value
+            await coordinator.waitForReconciliation()
+        }
+
+        let reminders = scheduler.scheduledReminders
+        #expect(reminders.count == NotificationReminder.pendingLimit)
+        #expect(reminders != previous)
+        #expect(reminders.first?.deliveryDate == (try Date("2026-11-09T20:00:00Z", strategy: .iso8601)))
+        #expect(reminders.allSatisfy {
+            $0.deliveryDate > instant && TimeOfDay(date: $0.deliveryDate, calendar: calendar) == TimeOfDay(hour: 12, minute: 0)
+        })
+        for reminder in reminders {
+            let context = TodayAffirmationResolver().context(
+                at: reminder.deliveryDate, schedules: store.schedules, affirmations: entries,
+                fallbackSelection: .all, name: "", calendar: calendar
+            )
+            #expect(context.affirmation?.text == reminder.affirmationText)
+        }
+        #expect(store.schedules == [expectedSchedule])
+        #expect(scheduler.replaceCallCount == (duringSave ? 3 : 2))
+        #expect(scheduler.authorizationRequestCount == 0)
+        #expect(coordinator.deliveryState == .active)
+    }
+
     @Test("Cancellation clears partial delivery and preserves saved intent", .timeLimit(.minutes(1)))
     func cancelledSave() async throws {
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)

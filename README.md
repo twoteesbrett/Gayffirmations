@@ -128,6 +128,12 @@ failures. Retry Reminder Delivery retries a failure without requesting permissio
 returning to the foreground also rebuilds reminders from saved settings. Foreground
 events during an update are coalesced into a follow-up reconciliation.
 
+While the app is active, system time-zone and significant clock changes refresh
+Today and rebuild reminders for the new local time. Changes during a save trigger
+a follow-up rebuild. If the app is suspended or terminated, queued reminders keep
+their previously calculated delivery instants until the app next opens or returns
+to the foreground.
+
 Disabling or deleting an active routine saves the reduced collection even when
 permission or delivery data is unavailable. Existing enabled routines and sound
 preferences can be edited while permission is off, without a prompt. Explicitly
