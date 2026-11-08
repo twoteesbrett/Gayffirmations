@@ -22,9 +22,11 @@ struct TodayInteractionView: View {
     @State private var swipeState = TodaySwipeState()
     @State private var imageInteraction = TodayImageInteractionState()
     @State private var imageViewportSize: CGSize = .zero
+    @State private var isInspectingImage = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.themeImage) private var themeImage
+    @Environment(\.imageDimming) private var imageDimming
     @Environment(\.appTheme) private var appTheme
     @Environment(\.scenePhase) private var scenePhase
 
@@ -43,9 +45,15 @@ struct TodayInteractionView: View {
             TodayCornerControls(
                 affirmation: affirmation,
                 isUpdating: isUpdating,
+                showsImageInspection: themeImage != nil,
+                isInspectingImage: isInspectingBackground,
                 onOpenDestination: openDestination,
                 onToggleFavorite: {
                     if let affirmation { toggleFavorite(affirmation) }
+                },
+                onToggleImageInspection: {
+                    isInspectingImage.toggle()
+                    controls.registerInteraction()
                 }
             )
             .opacity(controls.isVisible ? 1 : 0)
@@ -62,6 +70,8 @@ struct TodayInteractionView: View {
         .background {
             TodayBackground(swipeState: swipeState, imageInteraction: imageInteraction,
                             browsingForward: browsingForward)
+            // The minimum adjustment removes both the default overlay and user dimming.
+            .environment(\.imageDimming, isInspectingBackground ? -1 : imageDimming)
             .ignoresSafeArea()
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                 imageViewportSize = size
@@ -69,6 +79,7 @@ struct TodayInteractionView: View {
             }
         }
         .onChange(of: themeImage?.id, initial: true) { _, _ in
+            if themeImage == nil { isInspectingImage = false }
             imageInteraction.reset()
             updateImageGeometry()
         }
@@ -133,6 +144,8 @@ struct TodayInteractionView: View {
 
     private var foregroundColor: Color { themeImage?.textColor ?? appTheme.textColor }
 
+    private var isInspectingBackground: Bool { themeImage != nil && isInspectingImage }
+
     private func updateImageGeometry() {
         let imageSize = themeImage.flatMap { UIImage(named: $0.id)?.size } ?? .zero
         imageInteraction.updateGeometry(viewport: imageViewportSize, imageSize: imageSize,
@@ -167,6 +180,8 @@ struct TodayInteractionView: View {
             onCycle: cycleAffirmation,
             emptyContent: { emptyState }
         )
+        .opacity(isInspectingBackground ? 0 : 1)
+        .accessibilityHidden(isInspectingBackground)
     }
 
     private func currentAffirmation(at date: Date) -> Affirmation? {

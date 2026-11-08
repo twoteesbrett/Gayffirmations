@@ -4,8 +4,11 @@ import SwiftUI
 struct TodayCornerControls: View {
     let affirmation: Affirmation?
     let isUpdating: Bool
+    let showsImageInspection: Bool
+    let isInspectingImage: Bool
     let onOpenDestination: (TodayDestination) -> Void
     let onToggleFavorite: () -> Void
+    let onToggleImageInspection: () -> Void
 
     var body: some View {
         VStack {
@@ -21,6 +24,13 @@ struct TodayCornerControls: View {
             }
             Spacer()
             HStack {
+                if showsImageInspection {
+                    icon(
+                        isInspectingImage ? "eye.slash" : "eye",
+                        label: isInspectingImage ? "Show affirmation" : "Inspect background image",
+                        action: onToggleImageInspection
+                    )
+                }
                 Spacer()
                 icon("gearshape", label: "Settings") { onOpenDestination(.settings) }
             }
