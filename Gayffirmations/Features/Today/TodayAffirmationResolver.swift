@@ -28,14 +28,15 @@ struct TodayAffirmationResolver {
             )) ?? []
             let slotsBySchedule = Dictionary(grouping: occurrences, by: \.slot.scheduleID)
             for schedule in schedules {
-                guard let slots = slotsBySchedule[schedule.id], let first = slots.first,
+                guard let slots = slotsBySchedule[schedule.id], let first = slots.first, let last = slots.last,
                       let startTime = schedule.startTime.occurrence(in: day, calendar: calendar),
                       let endTime = schedule.endTime.occurrence(in: day, calendar: calendar) else { continue }
 
                 // A clock change can reorder a shifted boundary and a reminder.
                 let start = min(startTime, first.date)
-                // Keep the final minute in the window so a reminder rounded to the end can appear.
-                let end = endTime.addingTimeInterval(60)
+                // Clock jumps can shift reminders beyond the configured end. Keep
+                // their final minute visible, just as for a reminder rounded to the end.
+                let end = max(endTime, last.date).addingTimeInterval(60)
                 if date < start {
                     nextChange = min(nextChange, start)
                     continue

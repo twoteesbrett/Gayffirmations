@@ -175,7 +175,9 @@ give about 16 days of delivery before the queue runs out.
 Today shows the first planned affirmation at the start of a schedule’s daily
 window and advances as reminders come due. When windows overlap, the most recent
 start or reminder takes precedence, with ties going to the last schedule in saved
-order. Swiping browses the current source. Outside usable schedule windows,
+order. If a daylight-saving jump shifts reminders past a schedule’s configured
+end, Today keeps that schedule’s window open through the final reminder’s minute.
+Swiping browses the current source. Outside usable schedule windows,
 Today rotates through the default selection once per local calendar day.
 Tap the screen to reveal corner icons for Library (top left), Favourite (top right),
 and Settings (bottom right). Tap again to hide them, or leave

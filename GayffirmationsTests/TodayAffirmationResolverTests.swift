@@ -118,6 +118,55 @@ struct TodayAffirmationResolverTests {
         #expect(resolver.affirmation(at: shifted0330, schedule: schedule, affirmations: affirmations, calendar: calendar) == affirmations[2])
     }
 
+    @Test func shiftedRemindersExtendTheWindowAndBrowsingExpiry() throws {
+        var calendar = calendar
+        calendar.timeZone = try #require(TimeZone(identifier: "Pacific/Auckland"))
+        let schedule = AffirmationSchedule(
+            name: "Early morning", selection: .tag("Scheduled"), theme: .steel,
+            isEnabled: true, startTime: TimeOfDay(hour: 2, minute: 7),
+            endTime: TimeOfDay(hour: 3, minute: 7), notificationsPerDay: 2
+        )
+        let entries = [
+            Affirmation(text: "First", tags: ["Scheduled"]),
+            Affirmation(text: "Second", tags: ["Scheduled"])
+        ]
+        let fallback = Affirmation(text: "Fallback", tags: ["Fallback"])
+        let reminders = try NotificationPlanner().upcomingReminders(
+            for: [schedule], affirmations: entries + [fallback], name: "", sound: .none,
+            after: Date("2026-09-26T12:00:00Z", strategy: .iso8601), calendar: calendar
+        )
+        // The missing 2 a.m. hour shifts both reminders beyond the 3:07 end.
+        let first = try Date("2026-09-26T14:22:00Z", strategy: .iso8601)
+        let last = try Date("2026-09-26T14:52:00Z", strategy: .iso8601)
+        let end = last.addingTimeInterval(60)
+        #expect(reminders.prefix(2).map(\.deliveryDate) == [first, last])
+        func context(at date: Date) -> TodayAffirmationContext {
+            resolver.context(at: date, schedules: [schedule], affirmations: entries + [fallback],
+                             fallbackSelection: .tag("Fallback"), name: "", calendar: calendar)
+        }
+
+        #expect(context(at: first.addingTimeInterval(-1)).nextChange == first)
+        for reminder in reminders.prefix(2) {
+            let current = context(at: reminder.deliveryDate)
+            #expect(current.affirmation?.text == reminder.affirmationText)
+            #expect(current.scheduleName == schedule.name)
+            #expect(current.theme == .steel)
+        }
+        #expect(context(at: first).nextChange == last)
+        let finalContext = context(at: last)
+        #expect(finalContext.nextChange == end)
+        var browsing = TodayBrowsingState()
+        let next = browsing.cycle(by: 1, at: last, context: finalContext)
+        let browsed = try #require(next)
+        #expect(browsed != finalContext.affirmation)
+        #expect(browsing.affirmation(at: end.addingTimeInterval(-1), context: context(at: end.addingTimeInterval(-1))) == browsed)
+        #expect(context(at: end.addingTimeInterval(-1)).theme == .steel)
+        #expect(context(at: end).affirmation == fallback)
+        #expect(context(at: end).theme == nil)
+        #expect(context(at: end).scheduleName == nil)
+        #expect(browsing.affirmation(at: end, context: context(at: end)) == fallback)
+    }
+
     @Test func themeFollowsTheActiveSchedule() {
         let morning = AffirmationSchedule(
             isEnabled: true, startTime: TimeOfDay(hour: 8, minute: 0),
