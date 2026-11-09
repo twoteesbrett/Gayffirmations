@@ -43,7 +43,7 @@ final class AppDataResetCoordinator {
             affirmations: affirmationStore.defaultAffirmations,
             schedules: [scheduleStore.defaultSchedule],
             theme: themeStore.defaultTheme,
-            selection: .all,
+            selection: notificationCoordinator.fallbackSelectionStore.defaultSelection,
             preservingExistingData: !unreadableSections.isEmpty
         )
         affirmationStore.applyPersistedDefaults()

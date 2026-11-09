@@ -21,7 +21,7 @@ final class AppDependencies {
         )
         let themeStore = ThemeStore(
             repository: repository,
-            defaultTheme: .outAndAbout,
+            defaultTheme: .gayWonderland,
             backgroundRepository: repository
         )
 
@@ -32,7 +32,10 @@ final class AppDependencies {
             affirmationStore: affirmationStore,
             scheduleStore: scheduleStore,
             scheduler: LocalNotificationService(),
-            fallbackSelectionStore: AffirmationSelectionStore(repository: repository),
+            fallbackSelectionStore: AffirmationSelectionStore(
+                repository: repository,
+                defaultSelection: .tag(AffirmationTag.innerCynic.rawValue)
+            ),
             personalizationStore: PersonalizationStore(repository: repository)
         )
         self.notificationCoordinator = notificationCoordinator

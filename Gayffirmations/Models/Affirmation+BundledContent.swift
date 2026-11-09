@@ -49,7 +49,7 @@ nonisolated extension Affirmation {
         // MARK: - Food
 
         starter("B7E77000-0000-4000-8000-000000000001",
-                "I'm full.<br><small>The pantry can cope without me.</small>",
+                "I'm full.<br><small>The fridge can cope without me.</small>",
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000002",
@@ -57,11 +57,11 @@ nonisolated extension Affirmation {
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000004",
-                "That was good. More will make it worse.",
+                "<small>That was good.</small><br>More will make it worse.",
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000016",
-                "Delicious. Still not a reason for more.",
+                "<small>Delicious.</small><br>Not a reason for more.",
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000017",
@@ -69,11 +69,11 @@ nonisolated extension Affirmation {
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000018",
-                "I'm watching telly. My mouth doesn't need a job.",
+                "<small>I'm watching telly.</small><br>My mouth doesn't need a job.",
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000020",
-                "Yes, it's there. I don't have to eat it.",
+                "<small>Yes, it's there.</small><br>I don't have to eat it.",
                 [.food]),
 
         starter("B7E77000-0000-4000-8000-000000000021",

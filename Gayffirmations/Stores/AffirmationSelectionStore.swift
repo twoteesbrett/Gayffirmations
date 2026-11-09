@@ -8,23 +8,25 @@ final class AffirmationSelectionStore {
     private(set) var selection: AffirmationSelection
     private(set) var persistenceErrorMessage: String?
 
+    let defaultSelection: AffirmationSelection
     private let repository: (any AffirmationSelectionRepository)?
 
     init(selection: AffirmationSelection = .all) {
         self.selection = selection
+        defaultSelection = .all
         repository = nil
     }
 
-    init(repository: any AffirmationSelectionRepository) {
+    init(repository: any AffirmationSelectionRepository, defaultSelection: AffirmationSelection = .all) {
         self.repository = repository
-        selection = .all
+        self.defaultSelection = defaultSelection
+        selection = defaultSelection
 
         do {
             if let savedSelection = try repository.loadAffirmationSelection() {
                 selection = savedSelection
             } else {
-                // Existing installations keep using the full library.
-                try repository.saveAffirmationSelection(.all)
+                try repository.saveAffirmationSelection(defaultSelection)
             }
         } catch {
             persistenceErrorMessage = error.localizedDescription
@@ -32,7 +34,7 @@ final class AffirmationSelectionStore {
     }
 
     func applyPersistedDefaults() {
-        selection = .all
+        selection = defaultSelection
         persistenceErrorMessage = nil
     }
 

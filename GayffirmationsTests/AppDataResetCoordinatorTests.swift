@@ -160,11 +160,15 @@ struct AppDataResetCoordinatorTests {
         let defaults = [Affirmation(text: "Default")]
         let library = AffirmationStore(repository: repository, defaultAffirmations: defaults)
         let schedule = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
-        let theme = ThemeStore(repository: repository, defaultTheme: .outAndAbout)
+        let theme = ThemeStore(repository: repository, defaultTheme: .gayWonderland)
+        let cynic = AffirmationSelection.tag(AffirmationTag.innerCynic.rawValue)
+        let selection = AffirmationSelectionStore(repository: repository, defaultSelection: cynic)
+        #expect(theme.selectedTheme == .gayWonderland)
+        #expect(selection.selection == cynic)
         let coordinator = NotificationCoordinator(
             affirmationStore: library, scheduleStore: schedule,
             scheduler: NotificationSchedulerSpy(authorizationStatus: .authorized),
-            fallbackSelectionStore: AffirmationSelectionStore(repository: repository)
+            fallbackSelectionStore: selection
         )
         let resetCoordinator = AppDataResetCoordinator(
             affirmationStore: library,
@@ -178,10 +182,11 @@ struct AppDataResetCoordinatorTests {
         try await coordinator.setEnabled(true)
         try coordinator.setFallbackSelection(.favourites)
         try resetCoordinator.resetAll()
-        #expect(try repository.loadAffirmationSelection() == .all)
+        #expect(selection.selection == cynic)
+        #expect(try repository.loadAffirmationSelection() == cynic)
         #expect(try repository.loadAffirmations() == defaults)
         #expect(try repository.loadSchedule() == schedule.defaultSchedule)
-        #expect(try repository.loadTheme() == .outAndAbout)
+        #expect(try repository.loadTheme() == .gayWonderland)
     }
 
     @Test("Confirmed reset repairs a corrupt section and keeps its original bytes in a backup")
