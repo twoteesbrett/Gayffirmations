@@ -12,7 +12,7 @@ struct NotificationSoundPreviewTests {
             #expect(!Thread.isMainThread)
             return PreviewPlayerSpy()
         }
-        preview.play(.upliftingFlute) { _ in Issue.record("Unexpected preview error") }
+        preview.play(.horrorScream) { _ in Issue.record("Unexpected preview error") }
         await drain(queue)
         preview.stop()
         await drain(queue)
@@ -28,7 +28,7 @@ struct NotificationSoundPreviewTests {
             release.wait()
             return CancelledPreviewPlayer()
         }
-        preview.play(.magicMarimba) { _ in Issue.record("Dismissed preview reported an error") }
+        preview.play(.funnyYodel) { _ in Issue.record("Dismissed preview reported an error") }
         for await _ in started.stream { break }
         preview.stop()
         release.signal()
@@ -42,7 +42,7 @@ struct NotificationSoundPreviewTests {
         let preview = NotificationSoundPreview { _ in
             throw NotificationSchedulerTestError.failed
         }
-        preview.play(.choirHarpBless) { _ in
+        preview.play(.choirRingtone) { _ in
             MainActor.assertIsolated()
             errors.continuation.yield(())
         }

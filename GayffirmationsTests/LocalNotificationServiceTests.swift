@@ -62,11 +62,12 @@ struct LocalNotificationServiceTests {
     }
 
     @Test("Every custom sound maps to its exact bundled filename", arguments: [
-        (NotificationSound.upliftingFlute, "uplifting-flute.caf"),
-        (.magicMarimba, "magic-marimba.caf"),
+        (NotificationSound.podcastIntro, "bombinsound-podcast-music-intro-logo-version-ridingx27-617274.caf"),
         (.choirHarpBless, "choir-harp-bless.caf"),
-        (.relaxingHarpSweep, "relaxing-harp-sweep.caf"),
-        (.clearingTheThroat, "clearing-the-throat.caf")
+        (.clearingTheThroat, "clearing-the-throat.caf"),
+        (.choirRingtone, "freesound_community-choir-notification-ringtone-tone-e-major-95172.caf"),
+        (.funnyYodel, "samuel_copier_country-a-funny-yodel-401529.caf"),
+        (.horrorScream, "universfield-male-horror-scream-02-123079.caf")
     ])
     func customSound(mapping: (NotificationSound, String)) async throws {
         let center = NotificationCenterFake()

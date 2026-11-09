@@ -100,7 +100,7 @@ struct AppDataResetCoordinatorTests {
         #expect(preferences.object(forKey: "gayffirmations.recoveryBackups") == nil)
         // Load-error guards must also clear for edits in this same session.
         try library.add(text: "After recovery")
-        try schedules.setNotificationSound(.magicMarimba)
+        try schedules.setNotificationSound(.funnyYodel)
         try theme.select(.steel)
         try selection.select(.favourites)
         try name.setName("After recovery")
@@ -127,7 +127,7 @@ struct AppDataResetCoordinatorTests {
         try library.add(text: "Custom")
         try theme.select(.steel)
         try await coordinator.setEnabled(true)
-        try await coordinator.setSound(.choirHarpBless)
+        try await coordinator.setSound(.choirRingtone)
         try coordinator.setFallbackSelection(.tag("Work"))
         let originalLibrary = library.visibleAffirmations
         let originalSchedule = schedule.schedule

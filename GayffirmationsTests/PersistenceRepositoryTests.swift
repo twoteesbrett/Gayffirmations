@@ -148,7 +148,7 @@ struct PersistenceRepositoryTests {
             name: "Daily affirmations",
             startTime: TimeOfDay(hour: 8, minute: 30),
             endTime: TimeOfDay(hour: 19, minute: 15),
-            notificationsPerDay: 1, sound: .magicMarimba
+            notificationsPerDay: 1, sound: .systemDefault
         ))
         let scheduler = NotificationSchedulerSpy(authorizationStatus: .authorized)
         let coordinator = NotificationCoordinator(
