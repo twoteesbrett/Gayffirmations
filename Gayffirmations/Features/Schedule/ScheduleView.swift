@@ -38,7 +38,7 @@ struct ScheduleView: View {
                         }
                 }
                 Button("Add Schedule", systemImage: "plus") {
-                    editingSchedule = AffirmationSchedule()
+                    editingSchedule = AffirmationSchedule(isEnabled: true)
                 }
             } footer: {
                 Text("Each schedule has its own tags, theme, times, and daily rhythm. Swipe right to duplicate a schedule, or left to delete it.")
