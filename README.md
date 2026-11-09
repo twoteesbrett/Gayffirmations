@@ -4,12 +4,6 @@ Gayffirmations is an iOS affirmation app built as both a useful product and a wa
 learn Swift and SwiftUI. The first goal is reliable, easy-to-read functionality;
 visual polish will follow once the core behavior is working.
 
-This README covers app behaviour and development. [SOURCES.md](SOURCES.md)
-records bundled asset origins and preparation; [TODO.md](TODO.md) tracks
-remaining work and verification.
-Notification adapter coverage and outstanding device release checks are recorded in
-[DEVICE_VALIDATION.md](DEVICE_VALIDATION.md).
-
 ## Build validation
 
 With Xcode selected and an iOS simulator installed, run `bash scripts/validate.sh`.
@@ -229,8 +223,7 @@ Default has no in-app preview. Each planned reminder carries the selected sound
 to `UNNotificationSound`; None omits its sound. Display names, Settings summaries,
 and sound-row accessibility labels come from `NotificationSound.title`. Keep
 saved identifiers and CAF filenames stable when renaming sounds so existing
-selections continue to work. Audio preparation and file sizes are in
-[SOURCES.md](SOURCES.md#notification-sounds).
+selections continue to work. The five bundled sounds come from Mixkit.
 
 ## Themes and images
 
@@ -262,7 +255,7 @@ There is no separate timer or daily image rotation.
 
 To add images, bundle image assets and add entries to `AppTheme.images` with
 stable IDs, descriptive accessibility labels, focal points, and checked
-overlay and foreground settings. Record the originals in [SOURCES.md](SOURCES.md).
+overlay and foreground settings.
 Check portrait and landscape crops, long affirmations, accessibility text
 sizes, and toolbar contrast.
 
@@ -339,5 +332,3 @@ Build the app in small, complete slices. Each slice should have the minimum UI
 needed to use it, tested behavior where appropriate, and readable names. Once
 the first release works reliably, improve typography, colors, animation,
 haptics, dark mode, and accessibility.
-
-The active implementation checklist is in [TODO.md](TODO.md).

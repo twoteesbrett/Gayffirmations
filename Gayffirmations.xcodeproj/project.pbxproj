@@ -17,14 +17,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8B2819E4307AF58F002EB912 /* DEVICE_VALIDATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVICE_VALIDATION.md; sourceTree = "<group>"; };
-		8BAF7FAB307A2D31007C6728 /* REVIEW */ = {isa = PBXFileReference; lastKnownFileType = text; path = REVIEW; sourceTree = "<group>"; };
 		8BB2E9E2306B8B56000EC3C3 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		8BF464D1306F0E2200E708F5 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		8BF464D2306F0E2200E708F5 /* SOURCES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SOURCES.md; sourceTree = "<group>"; };
 		8BF98E80306A3C0800CA7342 /* Gayffirmations.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gayffirmations.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001306A3C0800CA7342 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		A1000002306A3C0800CA7342 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		A2000001306A3C0800CA7342 /* GayffirmationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GayffirmationsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -66,10 +62,6 @@
 				8BB2E9E2306B8B56000EC3C3 /* .gitignore */,
 				A1000001306A3C0800CA7342 /* README.md */,
 				8BF464D1306F0E2200E708F5 /* LICENSE */,
-				A1000002306A3C0800CA7342 /* TODO.md */,
-				8BF464D2306F0E2200E708F5 /* SOURCES.md */,
-				8BAF7FAB307A2D31007C6728 /* REVIEW */,
-				8B2819E4307AF58F002EB912 /* DEVICE_VALIDATION.md */,
 				BB2D8C5EDDA74766A00FF9BB /* Assets */,
 				8BF98E82306A3C0800CA7342 /* Gayffirmations */,
 				A2000002306A3C0800CA7342 /* GayffirmationsTests */,
@@ -397,6 +389,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K64NTYZ2JP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				MARKETING_VERSION = 1.0;
@@ -418,6 +411,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K64NTYZ2JP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				MARKETING_VERSION = 1.0;
