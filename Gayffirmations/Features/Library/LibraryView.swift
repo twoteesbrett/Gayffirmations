@@ -35,7 +35,7 @@ struct LibraryView: View {
                 }
 
                 Section {
-                    if store.affirmations.isEmpty {
+                    if store.visibleAffirmations.isEmpty {
                         ContentUnavailableView {
                             Label("No Affirmations", systemImage: "text.quote")
                         } description: {
@@ -50,7 +50,7 @@ struct LibraryView: View {
                         ContentUnavailableView {
                             Label("No Matching Affirmations", systemImage: "text.quote")
                         } description: {
-                            Text(sourceFilter.includesMine && !sourceFilter.includesBundled ? "Add your own affirmation or clear filters to see more entries." : sourceFilter.includesBundled && !sourceFilter.includesMine ? "Clear filters or use Restore Bundled Affirmations in Settings to see bundled messages." : filter.emptyMessage)
+                            Text(emptyFilterMessage)
                         } actions: {
                             Button("Show All Affirmations") {
                                 clearFilters()
@@ -221,12 +221,22 @@ struct LibraryView: View {
         return filter == .all ? sourceFilter.name : "\(sourceFilter.name) · \(filter.name)"
     }
 
+    private var emptyFilterMessage: String {
+        if sourceFilter.includesMine && !sourceFilter.includesBundled {
+            return "Add your own affirmation or clear filters to see more entries."
+        }
+        if sourceFilter.includesBundled && !sourceFilter.includesMine {
+            return "Clear filters or use Restore Bundled Affirmations in Settings to see bundled messages."
+        }
+        return filter.emptyMessage
+    }
+
     private var hasSelectedTags: Bool {
         !filter.selectedTags.isEmpty
     }
 
     private var filteredAffirmations: [Affirmation] {
-        let matches = filter.matchingAffirmations(in: store.affirmations)
+        let matches = filter.matchingAffirmations(in: store.visibleAffirmations)
         return sourceFilter.matchingAffirmations(in: matches)
     }
 
@@ -278,17 +288,21 @@ struct LibraryView: View {
     }
 
     private func affirmationLabel(_ affirmation: Affirmation) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            MessageText(source: MessageMarkup(affirmation.text).hasVisibleText
-                        ? (affirmation.resolved(name: notificationCoordinator.personalizationStore.name)?.text ?? affirmation.text)
-                        : "Empty affirmation")
+        let hasVisibleText = MessageMarkup(affirmation.text).hasVisibleText
+        let name = notificationCoordinator.personalizationStore.name
+        let displayText = hasVisibleText
+            ? (affirmation.resolved(name: name)?.text ?? affirmation.text)
+            : "Empty affirmation"
+
+        return VStack(alignment: .leading, spacing: 10) {
+            MessageText(source: displayText)
                 .font(.body)
                 .lineSpacing(3)
-            if !MessageMarkup(affirmation.text).hasVisibleText {
+            if !hasVisibleText {
                 Text("Edit this affirmation to add visible text")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            } else if affirmation.usesName && notificationCoordinator.personalizationStore.name.isEmpty {
+            } else if affirmation.usesName && name.isEmpty {
                 Text("Add a name in Settings to use this affirmation")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -303,8 +317,8 @@ struct LibraryView: View {
             .font(.caption)
             .foregroundStyle(.secondary)
         }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 
     private var errorIsPresented: Binding<Bool> {
@@ -326,6 +340,11 @@ struct LibraryView: View {
         }
     }
 
+    private func restoreAction(for affirmation: Affirmation) -> (() throws -> Void)? {
+        guard store.canRestoreOriginal(id: affirmation.id) else { return nil }
+        return { try store.restoreOriginal(id: affirmation.id) }
+    }
+
     @ViewBuilder
     private func editor(for destination: EditorDestination) -> some View {
         switch destination {
@@ -334,9 +353,11 @@ struct LibraryView: View {
                 try store.add(text: text, tags: tags)
             }
         case .edit(let affirmation):
-            AffirmationEditorView(affirmation: affirmation, availableTags: store.availableTags, onRestore: store.canRestoreOriginal(id: affirmation.id) ? {
-                try store.restoreOriginal(id: affirmation.id)
-            } : nil) { text, tags in
+            AffirmationEditorView(
+                affirmation: affirmation,
+                availableTags: store.availableTags,
+                onRestore: restoreAction(for: affirmation)
+            ) { text, tags in
                 try store.update(id: affirmation.id, text: text, tags: tags)
             }
         }

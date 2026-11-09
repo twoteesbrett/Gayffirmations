@@ -153,9 +153,9 @@ struct TodayInteractionView: View {
     }
 
     private var emptyState: some View {
-        let libraryIsEmpty = store.affirmations.isEmpty
+        let libraryIsEmpty = store.visibleAffirmations.isEmpty
         let needsName = personalizationStore.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && fallbackSelectionStore.selection.matchingAffirmations(in: store.affirmations)
+            && fallbackSelectionStore.selection.matchingAffirmations(in: store.visibleAffirmations)
                 .contains { $0.usesName && MessageMarkup($0.text).hasVisibleText }
         return ContentUnavailableView {
             Label(libraryIsEmpty ? "No Affirmations" : (needsName ? "Add a Name" : "No Matching Affirmations"), systemImage: "text.quote")
@@ -190,7 +190,7 @@ struct TodayInteractionView: View {
 
     private func context(at date: Date) -> TodayAffirmationContext {
         TodayAffirmationResolver().context(
-            at: date, schedules: scheduleStore.schedules, affirmations: store.affirmations,
+            at: date, schedules: scheduleStore.schedules, affirmations: store.visibleAffirmations,
             fallbackSelection: fallbackSelectionStore.selection, name: personalizationStore.name
         )
     }

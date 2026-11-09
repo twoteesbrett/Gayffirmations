@@ -15,7 +15,7 @@ struct AffirmationStoreTests {
         #expect(throws: NotificationCoordinatorError.updateInProgress) {
             try store.update(id: original.id, text: "Changed")
         }
-        #expect(store.affirmations == [original])
+        #expect(store.visibleAffirmations == [original])
         #expect(repository.saveCallCount == 0)
         #expect(observer.changeCount == 1)
     }
@@ -43,14 +43,14 @@ struct AffirmationStoreTests {
         let store = AffirmationStore(repository: repository, defaultAffirmations: [original])
         try store.restoreDefaults()
         let reloaded = AffirmationStore(repository: repository, defaultAffirmations: [original])
-        #expect(reloaded.affirmations.count == 2)
-        for entry in reloaded.affirmations {
+        #expect(reloaded.visibleAffirmations.count == 2)
+        for entry in reloaded.visibleAffirmations {
             try reloaded.update(id: entry.id, text: entry.text)
             try reloaded.update(id: entry.id, text: entry.text, tags: ["Calm"])
         }
         let saved = AffirmationStore(repository: repository, defaultAffirmations: [original])
-        #expect(saved.affirmations.allSatisfy { $0.tags == ["Calm"] && $0.text == original.text })
-        #expect(saved.affirmations.first { !$0.isBundled }?.isFavorite == true)
+        #expect(saved.visibleAffirmations.allSatisfy { $0.tags == ["Calm"] && $0.text == original.text })
+        #expect(saved.visibleAffirmations.first { !$0.isBundled }?.isFavorite == true)
         #expect(throws: AffirmationStoreError.duplicateText) {
             try reloaded.add(text: original.text)
         }
@@ -68,7 +68,7 @@ struct AffirmationStoreTests {
         let store = AffirmationStore(repository: repository, defaultAffirmations: [])
         #expect(throws: AffirmationStoreError.blankText) { try store.add(text: text) }
         #expect(throws: AffirmationStoreError.blankText) { try store.update(id: entry.id, text: text) }
-        #expect(store.affirmations == [entry])
+        #expect(store.visibleAffirmations == [entry])
         #expect(repository.affirmations == [entry])
         let literal = try store.add(text: "<small>unfinished")
         #expect(literal.text == "<small>unfinished")
@@ -83,14 +83,14 @@ struct AffirmationStoreTests {
 
         #expect(second.tags == ["Work"])
         #expect(store.availableTags == ["Calm", "Work"])
-        #expect(store.affirmations(tagged: "WORK") == [first, second])
-        #expect(store.affirmations(tagged: "Missing").isEmpty)
-        #expect(store.affirmations == [first, second, untagged])
+        #expect(store.visibleAffirmations(tagged: "WORK") == [first, second])
+        #expect(store.visibleAffirmations(tagged: "Missing").isEmpty)
+        #expect(store.visibleAffirmations == [first, second, untagged])
 
         try store.update(id: first.id, text: first.text, tags: [])
         try store.delete(id: second.id)
         #expect(store.availableTags.isEmpty)
-        #expect(store.affirmations(tagged: "Work").isEmpty)
+        #expect(store.visibleAffirmations(tagged: "Work").isEmpty)
     }
 
     @Test("Tags are trimmed and blanks and case-insensitive duplicates are removed")
@@ -112,14 +112,14 @@ struct AffirmationStoreTests {
 
         try store.update(id: original.id, text: original.text, tags: [" Calm ", "calm"])
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: [])
-        #expect(restarted.affirmations.first?.tags == ["Calm"])
-        #expect(restarted.affirmations.first?.isFavorite == true)
+        #expect(restarted.visibleAffirmations.first?.tags == ["Calm"])
+        #expect(restarted.visibleAffirmations.first?.isFavorite == true)
         #expect(observer.changeCount == 2)
 
         try store.update(id: original.id, text: "New text")
-        #expect(store.affirmations.first?.tags == ["Calm"])
+        #expect(store.visibleAffirmations.first?.tags == ["Calm"])
         try store.update(id: original.id, text: "New text", tags: [])
-        #expect(store.affirmations.first?.tags == [])
+        #expect(store.visibleAffirmations.first?.tags == [])
     }
 
     @Test("An affirmation can be added")
@@ -128,7 +128,7 @@ struct AffirmationStoreTests {
 
         let affirmation = try store.add(text: "  I can do this.  ")
 
-        #expect(store.affirmations == [affirmation])
+        #expect(store.visibleAffirmations == [affirmation])
         #expect(affirmation.text == "I can do this.")
     }
 
@@ -139,7 +139,7 @@ struct AffirmationStoreTests {
 
         try store.update(id: affirmation.id, text: "After")
 
-        #expect(store.affirmations.first?.text == "After")
+        #expect(store.visibleAffirmations.first?.text == "After")
     }
 
     @Test("An affirmation can be deleted")
@@ -149,7 +149,7 @@ struct AffirmationStoreTests {
 
         try store.delete(id: affirmation.id)
 
-        #expect(store.affirmations.isEmpty)
+        #expect(store.visibleAffirmations.isEmpty)
     }
 
     @Test("Bundled affirmations can be deleted and notify observers")
@@ -163,7 +163,7 @@ struct AffirmationStoreTests {
         store.attachChangeObserver(observer)
 
         try store.delete(id: bundled.id)
-        #expect(store.affirmations == [custom])
+        #expect(store.visibleAffirmations == [custom])
         #expect(repository.affirmations == [custom])
         #expect(observer.changeCount == 2)
     }
@@ -174,10 +174,10 @@ struct AffirmationStoreTests {
         let store = AffirmationStore(affirmations: [affirmation])
 
         try store.toggleFavorite(id: affirmation.id)
-        #expect(store.affirmations.first?.isFavorite == true)
+        #expect(store.visibleAffirmations.first?.isFavorite == true)
 
         try store.toggleFavorite(id: affirmation.id)
-        #expect(store.affirmations.first?.isFavorite == false)
+        #expect(store.visibleAffirmations.first?.isFavorite == false)
     }
 
     @Test("Blank affirmation text is rejected")
@@ -187,7 +187,7 @@ struct AffirmationStoreTests {
         #expect(throws: AffirmationStoreError.blankText) {
             try store.add(text: "  \n  ")
         }
-        #expect(store.affirmations.isEmpty)
+        #expect(store.visibleAffirmations.isEmpty)
     }
 
     @Test("Duplicate affirmation text is rejected regardless of case or whitespace")
@@ -199,7 +199,7 @@ struct AffirmationStoreTests {
             try store.add(text: "  i AM capable.  ")
         }
 
-        #expect(store.affirmations == [existingAffirmation])
+        #expect(store.visibleAffirmations == [existingAffirmation])
     }
 
     @Test("A blank edit leaves the original affirmation unchanged")
@@ -210,7 +210,7 @@ struct AffirmationStoreTests {
         #expect(throws: AffirmationStoreError.blankText) {
             try store.update(id: affirmation.id, text: "   ")
         }
-        #expect(store.affirmations.first?.text == "Keep me")
+        #expect(store.visibleAffirmations.first?.text == "Keep me")
     }
 
     @Test("An affirmation cannot be edited to duplicate another affirmation")
@@ -225,7 +225,7 @@ struct AffirmationStoreTests {
             try store.update(id: secondAffirmation.id, text: " first ")
         }
 
-        #expect(store.affirmations == [firstAffirmation, secondAffirmation])
+        #expect(store.visibleAffirmations == [firstAffirmation, secondAffirmation])
     }
 
     @Test("An unchanged affirmation is valid when editing")
@@ -235,7 +235,7 @@ struct AffirmationStoreTests {
 
         try store.update(id: affirmation.id, text: affirmation.text)
 
-        #expect(store.affirmations == [affirmation])
+        #expect(store.visibleAffirmations == [affirmation])
     }
 
     @Test("Saved affirmations are loaded when a store is created")
@@ -250,7 +250,7 @@ struct AffirmationStoreTests {
             defaultAffirmations: Affirmation.starterAffirmations
         )
 
-        #expect(store.affirmations == savedAffirmations)
+        #expect(store.visibleAffirmations == savedAffirmations)
         #expect(repository.loadCallCount == 1)
         #expect(repository.saveCallCount == 0)
     }
@@ -266,14 +266,14 @@ struct AffirmationStoreTests {
         custom = Affirmation(id: custom.id, text: "My rewrite", isFavorite: true, tags: ["Mine"])
         let repository = InMemoryAffirmationRepository(affirmations: old + [custom])
         let store = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
-        let updated = try #require(store.affirmations.first { $0.id == old[0].id })
+        let updated = try #require(store.visibleAffirmations.first { $0.id == old[0].id })
         #expect(updated.tags == old[0].tags)
         #expect(updated.isFavorite)
-        #expect(store.affirmations.last == custom)
-        #expect(store.affirmations == old + [custom])
-        #expect(repository.affirmations == store.affirmations)
+        #expect(store.visibleAffirmations.last == custom)
+        #expect(store.visibleAffirmations == old + [custom])
+        #expect(repository.affirmations == store.visibleAffirmations)
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
-        #expect(restarted.affirmations == store.affirmations)
+        #expect(restarted.visibleAffirmations == store.visibleAffirmations)
     }
 
     @Test("Default affirmations are saved on first launch")
@@ -285,7 +285,7 @@ struct AffirmationStoreTests {
             defaultAffirmations: Affirmation.starterAffirmations
         )
 
-        #expect(store.affirmations == Affirmation.starterAffirmations.filter(ContentAvailability.allowsAffirmation))
+        #expect(store.visibleAffirmations == Affirmation.starterAffirmations.filter(ContentAvailability.allowsAffirmation))
         #expect(repository.affirmations == Affirmation.starterAffirmations)
     }
 
@@ -306,7 +306,7 @@ struct AffirmationStoreTests {
             defaultAffirmations: []
         )
 
-        #expect(restartedStore.affirmations.first?.isFavorite == true)
+        #expect(restartedStore.visibleAffirmations.first?.isFavorite == true)
     }
 
     @Test("Restoring defaults preserves personal additions and favorites")
@@ -324,7 +324,7 @@ struct AffirmationStoreTests {
 
         var restored = defaults[0]
         restored.isFavorite = true
-        #expect(store.affirmations == [restored, custom])
+        #expect(store.visibleAffirmations == [restored, custom])
         #expect(repository.affirmations == [restored, custom])
     }
 
@@ -345,7 +345,7 @@ struct AffirmationStoreTests {
             defaultAffirmations: []
         )
 
-        #expect(restartedStore.affirmations.first?.text == "After")
+        #expect(restartedStore.visibleAffirmations.first?.text == "After")
     }
 
     @Test("A load failure prevents saved data from being overwritten")
@@ -355,13 +355,13 @@ struct AffirmationStoreTests {
             repository: repository,
             defaultAffirmations: [Affirmation(text: "Fallback")]
         )
-        let affirmation = store.affirmations[0]
+        let affirmation = store.visibleAffirmations[0]
 
         #expect(store.persistenceErrorMessage != nil)
         #expect(throws: PersistenceUnavailableError.self) {
             try store.toggleFavorite(id: affirmation.id)
         }
-        #expect(store.affirmations[0].isFavorite == false)
+        #expect(store.visibleAffirmations[0].isFavorite == false)
         #expect(repository.saveCallCount == 0)
     }
 }

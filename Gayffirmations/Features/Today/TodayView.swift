@@ -41,7 +41,7 @@ struct TodayView: View {
 
     var body: some View {
         let context = resolvedContext ?? TodayAffirmationResolver().context(
-            at: date, schedules: scheduleStore.schedules, affirmations: store.affirmations,
+            at: date, schedules: scheduleStore.schedules, affirmations: store.visibleAffirmations,
             fallbackSelection: fallbackSelectionStore.selection, name: personalizationStore.name
         )
         TodayInteractionView(

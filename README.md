@@ -40,6 +40,10 @@ behavior separately; a bundled manifest does not establish those answers.
 
 ## Store initialization
 
+`AffirmationStore.visibleAffirmations` exposes the collection used by screens and
+reminder planning. The repository retains the full saved collection, including
+temporarily hidden bundled entries.
+
 Theme and affirmation stores have separate initialization paths: constructors
 with a repository always load saved data, while `ThemeStore(selectedTheme:)` and
 `AffirmationStore(affirmations:)` create in-memory state for previews and tests.

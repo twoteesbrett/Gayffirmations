@@ -26,7 +26,8 @@ enum AffirmationStoreError: LocalizedError, Equatable {
 @Observable
 final class AffirmationStore {
     private var storedAffirmations: [Affirmation]
-    var affirmations: [Affirmation] {
+    /// Content available to the UI and reminder planner; hidden bundled entries remain stored.
+    var visibleAffirmations: [Affirmation] {
         storedAffirmations.filter(ContentAvailability.allowsAffirmation)
     }
     private(set) var persistenceErrorMessage: String?
@@ -45,11 +46,11 @@ final class AffirmationStore {
     let defaultAffirmations: [Affirmation]
 
     var availableTags: [String] {
-        TagChoices.available(affirmations.flatMap(\.tags))
+        TagChoices.available(visibleAffirmations.flatMap(\.tags))
     }
 
-    func affirmations(tagged tag: String) -> [Affirmation] {
-        AffirmationSelection.tag(tag).matchingAffirmations(in: affirmations)
+    func visibleAffirmations(tagged tag: String) -> [Affirmation] {
+        AffirmationSelection.tag(tag).matchingAffirmations(in: visibleAffirmations)
     }
 
     /// Creates an in-memory library for previews and isolated UI tests.
@@ -179,7 +180,7 @@ final class AffirmationStore {
         guard updatedAffirmations != storedAffirmations else { return }
         try changeObserver?.willChangeAffirmations()
         try repository?.saveAffirmations(updatedAffirmations)
-        let previousAffirmations = affirmations
+        let previousAffirmations = visibleAffirmations
         storedAffirmations = updatedAffirmations
         changeObserver?.didChangeAffirmations(from: previousAffirmations)
     }

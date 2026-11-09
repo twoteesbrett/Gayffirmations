@@ -29,11 +29,11 @@ struct PersistenceRepositoryTests {
         let raw = try JSONSerialization.data(withJSONObject: objects)
         fixture.userDefaults.set(raw, forKey: "gayffirmations.affirmations")
         let store = AffirmationStore(repository: fixture.repository, defaultAffirmations: current)
-        let personal = store.affirmations
+        let personal = store.visibleAffirmations
         #expect(personal.allSatisfy { !$0.isBundled })
         #expect(!store.canRestoreOriginal(id: starter.id))
         try store.restoreOriginal(id: starter.id)
-        #expect(store.affirmations == personal)
+        #expect(store.visibleAffirmations == personal)
         try store.restoreDefaults()
 
         let saved = try #require(try fixture.repository.loadAffirmations())
@@ -55,9 +55,9 @@ struct PersistenceRepositoryTests {
         #expect(try fixture.repository.loadAffirmations() == saved)
         for _ in 0..<2 {
             let restarted = AffirmationStore(repository: fixture.repository, defaultAffirmations: current)
-            #expect(restarted.affirmations == visible)
+            #expect(restarted.visibleAffirmations == visible)
             try restarted.restoreDefaults()
-            #expect(restarted.affirmations == visible)
+            #expect(restarted.visibleAffirmations == visible)
             #expect(try fixture.repository.loadAffirmations() == saved)
         }
     }
@@ -88,7 +88,7 @@ struct PersistenceRepositoryTests {
         #expect(scheduler.scheduledReminders.isEmpty)
         #expect(coordinator.errorMessage == NotificationCoordinatorError.permissionDenied.localizedDescription)
 
-        try library.update(id: library.affirmations[0].id, text: "Edited while denied")
+        try library.update(id: library.visibleAffirmations[0].id, text: "Edited while denied")
         await coordinator.waitForLibraryRefresh()
         #expect(try fixture.repository.loadSchedules() == schedules)
 
@@ -96,7 +96,7 @@ struct PersistenceRepositoryTests {
         let restartedStore = ScheduleStore(repository: fixture.repository, defaultSchedule: AffirmationSchedule())
         // A restart creates a fresh library and coordinator, not a second owner
         // for the still-live store from the previous session.
-        let restartedLibrary = AffirmationStore(affirmations: library.affirmations)
+        let restartedLibrary = AffirmationStore(affirmations: library.visibleAffirmations)
         let restarted = NotificationCoordinator(
             affirmationStore: restartedLibrary, scheduleStore: restartedStore, scheduler: scheduler
         )
@@ -259,7 +259,7 @@ struct PersistenceRepositoryTests {
         let selection = AffirmationSelectionStore(repository: repository)
         let reminders = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
 
-        #expect(library.affirmations.contains(saved[0]))
+        #expect(library.visibleAffirmations.contains(saved[0]))
         #expect(theme.selectedTheme == .steel)
         #expect(theme.backgroundChoice == steelBackground)
         #expect(selection.selection == .favourites)
@@ -272,7 +272,7 @@ struct PersistenceRepositoryTests {
         )
         let persisted = try #require(try repository.loadAffirmations())
         #expect(try restarted.loadAffirmations() == persisted)
-        #expect(library.affirmations == persisted.filter(ContentAvailability.allowsAffirmation))
+        #expect(library.visibleAffirmations == persisted.filter(ContentAvailability.allowsAffirmation))
         #expect(try restarted.loadTheme() == .steel)
         #expect(try restarted.loadAffirmationSelection() == .favourites)
 

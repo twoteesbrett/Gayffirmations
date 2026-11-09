@@ -64,7 +64,7 @@ struct ContentView: View {
             TimelineView(.periodic(from: refreshMinute, by: 60)) { timeline in
                 let context = TodayAffirmationResolver().context(
                     at: timeline.date, schedules: scheduleStore.schedules,
-                    affirmations: affirmationStore.affirmations,
+                    affirmations: affirmationStore.visibleAffirmations,
                     fallbackSelection: notificationCoordinator.fallbackSelectionStore.selection,
                     name: notificationCoordinator.personalizationStore.name
                 )

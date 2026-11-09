@@ -14,13 +14,13 @@ struct MessageMarkupTests {
         let bytes = defaults.data(forKey: "gayffirmations.affirmations")
         let store = AffirmationStore(repository: repository, defaultAffirmations: [])
         #expect(store.persistenceErrorMessage == nil)
-        #expect(store.affirmations == [blank, visible])
+        #expect(store.visibleAffirmations == [blank, visible])
         #expect(defaults.data(forKey: "gayffirmations.affirmations") == bytes)
 
         for enabled in [false, true] {
             let schedules = [AffirmationSchedule(isEnabled: enabled)]
             let context = TodayAffirmationResolver().context(
-                at: .now, schedules: schedules, affirmations: store.affirmations,
+                at: .now, schedules: schedules, affirmations: store.visibleAffirmations,
                 fallbackSelection: .all, name: ""
             )
             #expect(context.affirmation == visible)
@@ -33,10 +33,10 @@ struct MessageMarkupTests {
             #expect(emptyContext.browsingAffirmations.isEmpty)
         }
         let schedule = AffirmationSchedule(isEnabled: true)
-        let plan = try NotificationPlanner().plan(for: [schedule], affirmations: store.affirmations, name: "")
+        let plan = try NotificationPlanner().plan(for: [schedule], affirmations: store.visibleAffirmations, name: "")
         #expect(plan.count == schedule.notificationsPerDay)
         let requests = try NotificationPlanner().upcomingReminders(
-            for: [schedule], affirmations: store.affirmations, name: "", sound: .none,
+            for: [schedule], affirmations: store.visibleAffirmations, name: "", sound: .none,
             after: .now, calendar: .current
         )
         #expect(!requests.isEmpty)

@@ -31,7 +31,7 @@ struct SettingsView: View {
                     TimelineView(.everyMinute) { timeline in
                         let context = TodayAffirmationResolver().context(
                             at: timeline.date, schedules: scheduleStore.schedules,
-                            affirmations: affirmationStore.affirmations,
+                            affirmations: affirmationStore.visibleAffirmations,
                             fallbackSelection: notificationCoordinator.fallbackSelectionStore.selection,
                             name: notificationCoordinator.personalizationStore.name
                         )

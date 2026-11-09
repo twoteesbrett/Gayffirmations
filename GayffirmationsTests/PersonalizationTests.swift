@@ -32,7 +32,7 @@ struct PersonalizationTests {
         let added = try store.add(text: "Alex, you can do this.")
         #expect(added.resolved(name: "") == added)
         try store.update(id: added.id, text: "Alex, you belong here.")
-        #expect(store.affirmations.first?.resolved(name: "")?.text == "Alex, you belong here.")
+        #expect(store.visibleAffirmations.first?.resolved(name: "")?.text == "Alex, you belong here.")
     }
 
     @Test func namePersistenceMigrationAndReset() throws {

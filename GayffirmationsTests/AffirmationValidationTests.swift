@@ -53,8 +53,8 @@ struct AffirmationValidationTests {
         #expect(preferences.bool(forKey: "gayffirmations.initialAffirmationsSeeded") == seeded)
         let store = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
         #expect(store.persistenceErrorMessage != nil)
-        #expect(store.affirmations == Affirmation.starterAffirmations.filter(ContentAvailability.allowsAffirmation))
-        #expect(Set(store.affirmations.map(\.id)).count == store.affirmations.count)
+        #expect(store.visibleAffirmations == Affirmation.starterAffirmations.filter(ContentAvailability.allowsAffirmation))
+        #expect(Set(store.visibleAffirmations.map(\.id)).count == store.visibleAffirmations.count)
         #expect(throws: PersistenceUnavailableError.self) { try store.add(text: "Blocked") }
         #expect(throws: PersistenceUnavailableError.self) { try store.restoreDefaults() }
         #expect(preferences.data(forKey: "gayffirmations.affirmations") == raw)
@@ -78,7 +78,7 @@ struct AffirmationValidationTests {
         #expect(values["gayffirmations.affirmations"] as? Data == raw)
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: Affirmation.starterAffirmations)
         #expect(restarted.persistenceErrorMessage == nil)
-        #expect(restarted.affirmations == store.affirmations)
+        #expect(restarted.visibleAffirmations == store.visibleAffirmations)
         try store.add(text: "After recovery")
     }
 
@@ -90,7 +90,7 @@ struct AffirmationValidationTests {
         let repository = InvalidCollectionRepository(affirmations: invalid)
         let fallback = [Affirmation(text: "Fallback")]
         let store = AffirmationStore(repository: repository, defaultAffirmations: fallback)
-        #expect(store.affirmations == fallback)
+        #expect(store.visibleAffirmations == fallback)
         #expect(store.persistenceErrorMessage != nil)
         #expect(throws: PersistenceUnavailableError.self) { try store.restoreDefaults() }
         #expect(repository.affirmations == invalid)
@@ -111,7 +111,7 @@ struct AffirmationValidationTests {
         let repository = UserDefaultsRepository(userDefaults: preferences)
         let store = AffirmationStore(repository: repository, defaultAffirmations: [])
         #expect(store.persistenceErrorMessage == nil)
-        #expect(store.affirmations == saved)
+        #expect(store.visibleAffirmations == saved)
         #expect(preferences.data(forKey: "gayffirmations.affirmations") == raw)
 
         var legacy = try #require(JSONSerialization.jsonObject(with: raw) as? [[String: Any]])

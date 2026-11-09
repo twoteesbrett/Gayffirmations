@@ -27,8 +27,8 @@ struct AffirmationSelectionTests {
             fallbackSelectionStore: fallback
         )
 
-        #expect(library.affirmations == [personal])
-        #expect(fallback.selection.matchingAffirmations(in: library.affirmations) == [personal])
+        #expect(library.visibleAffirmations == [personal])
+        #expect(fallback.selection.matchingAffirmations(in: library.visibleAffirmations) == [personal])
         #expect(coordinator.fallbackAffirmations == [personal])
         let choices = TagChoices.available(library.availableTags + fallback.selection.selectedTags)
         #expect(choices == ["human"])
@@ -42,7 +42,7 @@ struct AffirmationSelectionTests {
         let reminder = try #require(scheduler.scheduledReminders.first)
         let context = TodayAffirmationResolver().context(
             at: reminder.deliveryDate, schedules: schedules.schedules,
-            affirmations: library.affirmations, fallbackSelection: fallback.selection, name: ""
+            affirmations: library.visibleAffirmations, fallbackSelection: fallback.selection, name: ""
         )
         #expect(context.affirmation == personal)
         // Availability only changes the visible collection; stored content is preserved.

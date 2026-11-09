@@ -278,7 +278,7 @@ struct NotificationCoordinatorTests {
 
         try library.update(id: entries[64].id, text: "Edited unused message")
         try library.update(id: entries[0].id, text: "<small>Message 1</small>")
-        #expect(library.affirmations.first { $0.id == entries[64].id }?.text == "Edited unused message")
+        #expect(library.visibleAffirmations.first { $0.id == entries[64].id }?.text == "Edited unused message")
         #expect(!coordinator.isUpdating)
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.removeCallCount == removals)
@@ -486,7 +486,7 @@ struct NotificationCoordinatorTests {
         try library.restoreDefaults()
         await coordinator.waitForLibraryRefresh()
         #expect(scheduler.scheduledReminders.allSatisfy { ["Default", "Added"].contains($0.affirmationText) })
-        #expect(library.affirmations.contains(added))
+        #expect(library.visibleAffirmations.contains(added))
         try library.delete(id: defaults[0].id)
         await coordinator.waitForLibraryRefresh()
         try library.delete(id: added.id)
@@ -525,7 +525,7 @@ struct NotificationCoordinatorTests {
         )
         try await coordinator.setEnabled(true)
         scheduler.replacementError = NotificationSchedulerTestError.failed
-        try library.update(id: library.affirmations[0].id, text: "Edited")
+        try library.update(id: library.visibleAffirmations[0].id, text: "Edited")
         await coordinator.waitForLibraryRefresh()
         #expect(coordinator.errorMessage != nil)
         #expect(schedule.schedule.isEnabled)
@@ -546,7 +546,7 @@ struct NotificationCoordinatorTests {
             affirmationStore: library, scheduleStore: schedule, scheduler: scheduler
         )
         try await coordinator.setEnabled(true)
-        try library.update(id: library.affirmations[0].id, text: "Edited")
+        try library.update(id: library.visibleAffirmations[0].id, text: "Edited")
         #expect(throws: NotificationCoordinatorError.updateInProgress) {
             try library.restoreDefaults()
         }
@@ -554,7 +554,7 @@ struct NotificationCoordinatorTests {
             try coordinator.resetSchedule()
         }
         #expect(throws: NotificationCoordinatorError.updateInProgress) {
-            try library.toggleFavorite(id: library.affirmations[0].id)
+            try library.toggleFavorite(id: library.visibleAffirmations[0].id)
         }
         #expect(throws: NotificationCoordinatorError.updateInProgress) {
             try coordinator.setFallbackSelection(.favourites)

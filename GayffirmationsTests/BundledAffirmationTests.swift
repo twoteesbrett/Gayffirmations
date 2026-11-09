@@ -14,11 +14,11 @@ struct BundledAffirmationTests {
         let store = AffirmationStore(repository: repository, defaultAffirmations: [original])
         repository.failSave = true
         #expect(throws: RestorationTestError.saveFailed) { try store.restoreDefaults() }
-        #expect(store.affirmations == [personal])
+        #expect(store.visibleAffirmations == [personal])
         #expect(repository.affirmations == [personal])
         repository.failSave = false
         try store.restoreDefaults()
-        let saved = store.affirmations
+        let saved = store.visibleAffirmations
         #expect(saved.count == 2)
         #expect(saved.first == original)
         let copy = try #require(saved.last)
@@ -28,7 +28,7 @@ struct BundledAffirmationTests {
         #expect(copy.isFavorite)
         #expect(copy.source == .user)
         try store.restoreDefaults()
-        #expect(store.affirmations == saved)
+        #expect(store.visibleAffirmations == saved)
         #expect(repository.affirmations == saved)
     }
 
@@ -39,25 +39,25 @@ struct BundledAffirmationTests {
         try store.update(id: entry.id, text: "Changed", tags: ["Mine"])
         try store.toggleFavorite(id: entry.id)
         let restarted = AffirmationStore(repository: repository, defaultAffirmations: [entry])
-        #expect(restarted.affirmations.first?.text == "Changed")
-        #expect(restarted.affirmations.first?.tags == ["Mine"])
+        #expect(restarted.visibleAffirmations.first?.text == "Changed")
+        #expect(restarted.visibleAffirmations.first?.tags == ["Mine"])
         try restarted.restoreOriginal(id: entry.id)
-        #expect(restarted.affirmations.first?.text == entry.text)
-        #expect(restarted.affirmations.first?.tags == entry.tags)
-        #expect(restarted.affirmations.first?.isFavorite == true)
+        #expect(restarted.visibleAffirmations.first?.text == entry.text)
+        #expect(restarted.visibleAffirmations.first?.tags == entry.tags)
+        #expect(restarted.visibleAffirmations.first?.isFavorite == true)
         try restarted.delete(id: entry.id)
         let deleted = AffirmationStore(repository: repository, defaultAffirmations: [entry])
-        #expect(deleted.affirmations.isEmpty)
+        #expect(deleted.visibleAffirmations.isEmpty)
         let personal = try deleted.add(text: "Personal")
         try deleted.restoreDefaults()
-        #expect(deleted.affirmations == [entry, personal])
+        #expect(deleted.visibleAffirmations == [entry, personal])
     }
 
     @Test func userMessagesRemainEditableAfterReload() throws {
         let store = AffirmationStore()
         let entry = try store.add(text: "My message")
         try store.update(id: entry.id, text: "My edited message")
-        let reloaded = try JSONDecoder().decode([Affirmation].self, from: JSONEncoder().encode(store.affirmations))
+        let reloaded = try JSONDecoder().decode([Affirmation].self, from: JSONEncoder().encode(store.visibleAffirmations))
         #expect(reloaded.first?.source == .user)
         #expect(reloaded.first?.text == "My edited message")
     }
@@ -105,9 +105,9 @@ struct BundledAffirmationTests {
         #expect(reloaded == migrated)
         let store = AffirmationStore(affirmations: [reloaded])
         try store.update(id: reloaded.id, text: reloaded.text, tags: ["Updated"])
-        #expect(store.affirmations.first?.tags == ["Updated"])
+        #expect(store.visibleAffirmations.first?.tags == ["Updated"])
         try store.delete(id: reloaded.id)
-        #expect(store.affirmations.isEmpty)
+        #expect(store.visibleAffirmations.isEmpty)
     }
 
     @Test func originalLegacyNameMessageRemainsBundled() throws {

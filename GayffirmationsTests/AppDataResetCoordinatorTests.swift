@@ -55,7 +55,7 @@ struct AppDataResetCoordinatorTests {
             #expect(throws: PersistenceUnavailableError.self) { try name.setName("Blocked") }
         }
         #expect(NSDictionary(dictionary: beforeLoad).isEqual(to: preferences.persistentDomain(forName: suite)!))
-        let originalLibrary = library.affirmations
+        let originalLibrary = library.visibleAffirmations
         let originalSchedules = schedules.schedules
         let originalTheme = theme.selectedTheme
         let originalSections = reset.unreadableSections
@@ -65,14 +65,14 @@ struct AppDataResetCoordinatorTests {
                                                  repository: failedRepository)
         #expect(throws: RecoveryEncodingError.failed) { try failedReset.resetAll() }
         #expect(NSDictionary(dictionary: beforeLoad).isEqual(to: preferences.persistentDomain(forName: suite)!))
-        #expect(library.affirmations == originalLibrary)
+        #expect(library.visibleAffirmations == originalLibrary)
         #expect(schedules.schedules == originalSchedules)
         #expect(theme.selectedTheme == originalTheme)
         #expect(reset.unreadableSections == originalSections)
         #expect(scheduler.removeCallCount == 0)
         try reset.resetAll()
         #expect(reset.unreadableSections.isEmpty)
-        #expect(library.affirmations == bundled)
+        #expect(library.visibleAffirmations == bundled)
         #expect(schedules.schedules == [schedules.defaultSchedule])
         #expect(schedules.notificationSound == .systemDefault)
         #expect(theme.selectedTheme == .outAndAbout)
@@ -88,7 +88,7 @@ struct AppDataResetCoordinatorTests {
         let reloadedLibrary = AffirmationStore(repository: repository, defaultAffirmations: bundled)
         let reloadedSchedules = ScheduleStore(repository: repository, defaultSchedule: AffirmationSchedule())
         let reloadedTheme = ThemeStore(repository: repository, defaultTheme: .outAndAbout, backgroundRepository: repository)
-        #expect(reloadedLibrary.affirmations == bundled)
+        #expect(reloadedLibrary.visibleAffirmations == bundled)
         #expect(reloadedLibrary.persistenceErrorMessage == nil)
         #expect(reloadedSchedules.schedules == [schedules.defaultSchedule])
         #expect(reloadedSchedules.persistenceErrorMessage == nil)
@@ -129,21 +129,21 @@ struct AppDataResetCoordinatorTests {
         try await coordinator.setEnabled(true)
         try await coordinator.setSound(.choirHarpBless)
         try coordinator.setFallbackSelection(.tag("Work"))
-        let originalLibrary = library.affirmations
+        let originalLibrary = library.visibleAffirmations
         let originalSchedule = schedule.schedule
         let originalReminders = scheduler.scheduledReminders
         repository.shouldFail = true
         #expect(throws: NotificationSchedulerTestError.self) {
             try resetCoordinator.resetAll()
         }
-        #expect(library.affirmations == originalLibrary)
+        #expect(library.visibleAffirmations == originalLibrary)
         #expect(schedule.schedule == originalSchedule)
         #expect(theme.selectedTheme == .steel)
         #expect(coordinator.fallbackSelectionStore.selection == .tag("Work"))
         #expect(scheduler.scheduledReminders == originalReminders)
         repository.shouldFail = false
         try resetCoordinator.resetAll()
-        #expect(library.affirmations == defaults)
+        #expect(library.visibleAffirmations == defaults)
         #expect(schedule.schedule == schedule.defaultSchedule)
         #expect(theme.selectedTheme == .outAndAbout)
         #expect(coordinator.fallbackSelectionStore.selection == .all)

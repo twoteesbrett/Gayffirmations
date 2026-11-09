@@ -24,6 +24,7 @@ enum NotificationDeliveryState: Equatable {
 
 @MainActor
 @Observable
+// Serializes reminder changes and related content edits so a save cannot race a rebuild.
 final class NotificationCoordinator: AffirmationChangeObserver {
     private(set) var isUpdating = false
     var errorMessage: String?
@@ -75,7 +76,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     }
     var dailyPlan: [ScheduledAffirmation] {
         (try? planner.plan(
-            for: scheduleStore.schedules, affirmations: affirmationStore.affirmations,
+            for: scheduleStore.schedules, affirmations: affirmationStore.visibleAffirmations,
             name: personalizationStore.name, sound: scheduleStore.notificationSound, on: now(), calendar: calendar()
         )) ?? []
     }
@@ -100,7 +101,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     }
 
     func matchingAffirmations(for schedule: AffirmationSchedule) -> [Affirmation] {
-        schedule.selection.matchingAffirmations(in: affirmationStore.affirmations)
+        schedule.selection.matchingAffirmations(in: affirmationStore.visibleAffirmations)
             .compactMap { $0.resolved(name: personalizationStore.name) }
     }
 
@@ -109,7 +110,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     }
 
     var fallbackAffirmations: [Affirmation] {
-        fallbackSelectionStore.selection.matchingAffirmations(in: affirmationStore.affirmations)
+        fallbackSelectionStore.selection.matchingAffirmations(in: affirmationStore.visibleAffirmations)
             .compactMap { $0.resolved(name: personalizationStore.name) }
     }
 
@@ -251,7 +252,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         calendar: Calendar? = nil
     ) throws -> [NotificationReminder] {
         try planner.upcomingReminders(
-            for: schedules, affirmations: affirmations ?? affirmationStore.affirmations,
+            for: schedules, affirmations: affirmations ?? affirmationStore.visibleAffirmations,
             name: personalizationStore.name, sound: sound ?? scheduleStore.notificationSound,
             after: date, calendar: calendar ?? self.calendar()
         )
@@ -269,15 +270,19 @@ final class NotificationCoordinator: AffirmationChangeObserver {
     }
 
     func reconcileOnLaunch() async {
-        await reconcileOnForeground()
+        await reconcileSavedIntent()
     }
 
     func reconcileAfterTimeChange() async {
-        await reconcileOnForeground()
+        await reconcileSavedIntent()
     }
 
-    // Foreground, clock changes and explicit retry use saved intent without prompting.
     func reconcileOnForeground() async {
+        await reconcileSavedIntent()
+    }
+
+    // Every lifecycle event and explicit retry uses saved intent without prompting.
+    private func reconcileSavedIntent() async {
         guard !isUpdating else {
             reconciliationPending = true
             return
@@ -312,7 +317,7 @@ final class NotificationCoordinator: AffirmationChangeObserver {
         guard reconciliationPending else { return }
         reconciliationPending = false
         reconciliationTask = Task { [weak self] in
-            await self?.reconcileOnForeground()
+            await self?.reconcileSavedIntent()
         }
     }
 
