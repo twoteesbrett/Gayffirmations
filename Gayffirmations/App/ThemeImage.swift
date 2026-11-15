@@ -8,6 +8,10 @@ struct ThemeImage: Identifiable {
     let accessibilityDescription: String
 
     let textColor: Color
+
+    var videoURL: URL? {
+        Bundle.main.url(forResource: id, withExtension: "mp4")
+    }
 }
 
 extension AppTheme {

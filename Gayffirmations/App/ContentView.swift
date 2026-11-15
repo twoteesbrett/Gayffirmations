@@ -83,6 +83,8 @@ struct ContentView: View {
                 )
                 .id(timeChangeID)
                 .themeAppearance(theme)
+                .environment(\.animatesThemeBackground,
+                             destination == nil && themeStore.animatesBackgrounds(for: theme))
                 .environment(\.themeImage, themeStore.selectedImage(for: theme))
                 .environment(\.imageDimming, themeStore.backgroundChoice.imageDimming ?? 0)
             }

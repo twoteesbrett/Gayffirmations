@@ -75,6 +75,16 @@ struct BackgroundAppearanceView: View {
                 ))
 
                 if store.backgroundChoice.usesImage {
+                    let theme = store.selectedTheme
+                    if theme.images.contains(where: { $0.videoURL != nil }) {
+                        Toggle("Animate backgrounds", isOn: Binding(
+                            get: { store.animatesBackgrounds(for: theme) },
+                            set: { enabled in
+                                updateBackground { try store.setAnimatesBackgrounds(enabled, for: theme) }
+                            }
+                        ))
+                    }
+
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Text("Image dimming")

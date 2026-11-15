@@ -82,6 +82,22 @@ final class ThemeStore {
         }
     }
 
+    func animatesBackgrounds(for theme: AppTheme) -> Bool {
+        backgroundChoice.animatedThemeIDs?.contains(theme.rawValue) == true
+    }
+
+    func setAnimatesBackgrounds(_ enabled: Bool, for theme: AppTheme) throws {
+        var choice = backgroundChoice
+        var themeIDs = choice.animatedThemeIDs ?? []
+        if enabled {
+            themeIDs.insert(theme.rawValue)
+        } else {
+            themeIDs.remove(theme.rawValue)
+        }
+        choice.animatedThemeIDs = themeIDs.isEmpty ? nil : themeIDs
+        try saveBackground(choice)
+    }
+
     func setUsesImage(_ enabled: Bool) throws {
         var choice = backgroundChoice
         choice.usesImage = enabled

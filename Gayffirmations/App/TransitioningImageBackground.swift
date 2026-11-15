@@ -27,6 +27,7 @@ struct TransitioningImageBackground: View {
     var imageZoom: CGFloat = 1
     var imageOffset: CGSize = .zero
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.animatesThemeBackground) private var animatesBackground
     @State private var displayedImage: ThemeImage?
     @State private var previousImage: ThemeImage?
     @State private var progress: CGFloat = 1
@@ -38,7 +39,8 @@ struct TransitioningImageBackground: View {
                     ImageBackground(image: previousImage)
                 }
                 if let visibleImage = displayedImage ?? image {
-                    ImageBackground(image: visibleImage, zoom: imageZoom, panOffset: imageOffset)
+                    ImageBackground(image: visibleImage, zoom: imageZoom, panOffset: imageOffset,
+                                    playsVideo: animatesBackground && !reduceMotion && visibleImage.id == image?.id)
                         .offset(x: reduceMotion ? 0 : (browsingForward ? 1 : -1)
                                 * geometry.size.width * (1 - progress))
                         .opacity(reduceMotion ? progress : 1)

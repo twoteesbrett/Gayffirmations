@@ -4,6 +4,7 @@ struct ThemeBackgroundChoice: Codable, Equatable {
     var usesImage = false
     var imageDimming: Double? = nil
     var outlinesText: Bool? = nil
+    var animatedThemeIDs: Set<String>? = nil
 
     static func snappedDimming(_ value: Double) -> Double {
         let clamped = min(1, max(-1, value))
@@ -20,5 +21,6 @@ struct ThemeBackgroundChoice: Codable, Equatable {
         case usesImage = "usesPhoto"
         case imageDimming
         case outlinesText
+        case animatedThemeIDs
     }
 }

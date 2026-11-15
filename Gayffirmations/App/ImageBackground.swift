@@ -17,6 +17,8 @@ struct ImageBackground: View {
     let image: ThemeImage
     var zoom: CGFloat = 1
     var panOffset: CGSize = .zero
+    var playsVideo = false
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.appTheme) private var theme
     @Environment(\.imageDimming) private var dimming
 
@@ -40,6 +42,13 @@ struct ImageBackground: View {
                         .saturation(theme == .steel ? 0 : 1)
                         .frame(width: width, height: height)
                         .offset(x: x, y: y)
+                    if playsVideo, scenePhase == .active, let url = image.videoURL {
+                        LoopingBackgroundVideo(url: url)
+                            .id(url)
+                            .frame(width: width, height: height)
+                            .offset(x: x, y: y)
+                            .allowsHitTesting(false)
+                    }
                     Color.black.opacity(ThemeBackgroundChoice.overlayOpacity(default: image.overlayOpacity, adjustment: dimming))
                         .frame(width: geometry.size.width, height: geometry.size.height)
                 }
