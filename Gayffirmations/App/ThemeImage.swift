@@ -91,10 +91,10 @@ extension AppTheme {
                            overlayOpacity: 0.48, accessibilityDescription: "A spiral of green apple peel wraps around a man beside a parakeet and a record player", textColor: .white),
                 ThemeImage(id: "gay-wonderland-iceberg-ironing", name: "Iceberg Ironing", focalPoint: UnitPoint(x: 0.36, y: 0.46),
                            overlayOpacity: 0.48, accessibilityDescription: "A man irons a shirt in an icy landscape while another reads inside a floating block of ice", textColor: .white),
-                ThemeImage(id: "gay-wonderland-indigo-zebra-carnival", name: "Indigo Zebra Carnival", focalPoint: UnitPoint(x: 0.33, y: 0.18),
-                           overlayOpacity: 0.48, accessibilityDescription: "A man rides a carousel zebra beneath a purple moon and a disco ball", textColor: .white),
-                ThemeImage(id: "gay-wonderland-lavender-banana", name: "Lavender Banana", focalPoint: UnitPoint(x: 0.55, y: 0.39),
-                           overlayOpacity: 0.48, accessibilityDescription: "A man reaches forward through a swirl of banana peel, floating dice, and clocks", textColor: .white),
+                ThemeImage(id: "gay-wonderland-indigo-carousel-musical-dreamscape", name: "Indigo Carousel Musical Dreamscape", focalPoint: UnitPoint(x: 0.43, y: 0.26),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man rides a carousel zebra beside a golden gramophone under an indigo sky", textColor: .white),
+                ThemeImage(id: "gay-wonderland-neon-pinball-vortex-adventure", name: "Neon Pinball Vortex Adventure", focalPoint: UnitPoint(x: 0.56, y: 0.37),
+                           overlayOpacity: 0.48, accessibilityDescription: "A man reaches forward through a purple pinball machine filled with neon lights", textColor: .white),
                 ThemeImage(id: "gay-wonderland-clouds-chrome-and-pearls", name: "Clouds, Chrome, and Pearls", focalPoint: UnitPoint(x: 0.47, y: 0.40),
                            overlayOpacity: 0.48, accessibilityDescription: "A man rests his cheek on his hand amid clouds, floating laundry, and chrome washing machines", textColor: .white)
             ]
